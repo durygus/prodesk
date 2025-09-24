@@ -56,12 +56,23 @@ installController.elastictest = function (req, res) {
 
 installController.mongotest = function (req, res) {
   const data = req.body
-  const dbPassword = encodeURIComponent(data.password)
-  let CONNECTION_URI =
-    'mongodb://' + data.username + ':' + dbPassword + '@' + data.host + ':' + data.port + '/' + data.database
+  const dbPassword = encodeURIComponent(data.password || '')
+  let CONNECTION_URI
+  
+  // Handle empty username/password case
+  if (!data.username || data.username.trim() === '') {
+    CONNECTION_URI = 'mongodb://' + data.host + ':' + data.port + '/' + data.database
+  } else {
+    CONNECTION_URI = 'mongodb://' + data.username + ':' + dbPassword + '@' + data.host + ':' + data.port + '/' + data.database
+  }
 
-  if (data.port === '---')
-    CONNECTION_URI = 'mongodb+srv://' + data.username + ':' + dbPassword + '@' + data.host + '/' + data.database
+  if (data.port === '---') {
+    if (!data.username || data.username.trim() === '') {
+      CONNECTION_URI = 'mongodb+srv://' + data.host + '/' + data.database
+    } else {
+      CONNECTION_URI = 'mongodb+srv://' + data.username + ':' + dbPassword + '@' + data.host + '/' + data.database
+    }
+  }
 
   const child = require('child_process').fork(path.join(__dirname, '../../src/install/mongotest'), {
     env: { FORK: 1, NODE_ENV: global.env, MONGOTESTURI: CONNECTION_URI }
@@ -155,9 +166,23 @@ installController.install = function (req, res) {
     fullname: data['account[fullname]']
   }
 
-  const dbPassword = encodeURIComponent(password)
-  let conuri = 'mongodb://' + username + ':' + dbPassword + '@' + host + ':' + port + '/' + database
-  if (port === '---') conuri = 'mongodb+srv://' + username + ':' + dbPassword + '@' + host + '/' + database
+  const dbPassword = encodeURIComponent(password || '')
+  let conuri
+  
+  // Handle empty username/password case
+  if (!username || username.trim() === '') {
+    conuri = 'mongodb://' + host + ':' + port + '/' + database
+  } else {
+    conuri = 'mongodb://' + username + ':' + dbPassword + '@' + host + ':' + port + '/' + database
+  }
+  
+  if (port === '---') {
+    if (!username || username.trim() === '') {
+      conuri = 'mongodb+srv://' + host + '/' + database
+    } else {
+      conuri = 'mongodb+srv://' + username + ':' + dbPassword + '@' + host + '/' + database
+    }
+  }
 
   async.waterfall(
     [
