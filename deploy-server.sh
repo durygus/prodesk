@@ -37,39 +37,43 @@ if ! ssh -o BatchMode=yes -o ConnectTimeout=10 $SERVER "echo 'SSH ключ ра�
 fi
 echo -e "${GREEN}✅ SSH ключ работает корректно${NC}"
 
-# Настраиваем sudo без пароля для текущего пользователя
-echo -e "${YELLOW}🔐 Настраиваем sudo без пароля...${NC}"
-ssh $SERVER "
-  # Добавляем пользователя в sudoers для выполнения команд без пароля
-  echo '\$(whoami) ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/\$(whoami)
-  sudo chmod 440 /etc/sudoers.d/\$(whoami)
-  echo 'Sudo настроен без пароля'
-"
+# Запрашиваем пароль sudo
+echo -e "${YELLOW}🔐 Введите пароль sudo для пользователя на сервере:${NC}"
+read -s SUDO_PASSWORD
+echo ""
+
+# Проверяем пароль sudo
+echo -e "${YELLOW}🔍 Проверяем пароль sudo...${NC}"
+if ! echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S echo 'Sudo пароль работает'" 2>/dev/null; then
+  echo -e "${RED}❌ Неверный пароль sudo${NC}"
+  exit 1
+fi
+echo -e "${GREEN}✅ Sudo пароль работает корректно${NC}"
 
 # Устанавливаем Docker на сервере
 echo -e "${YELLOW}🐳 Устанавливаем Docker на сервере...${NC}"
-ssh $SERVER "
+echo "$SUDO_PASSWORD" | ssh $SERVER "
   # Обновляем систему (без интерактивного режима)
-  sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
+  sudo -S DEBIAN_FRONTEND=noninteractive apt update && sudo -S DEBIAN_FRONTEND=noninteractive apt upgrade -y
   
   # Устанавливаем Docker
   curl -fsSL https://get.docker.com -o get-docker.sh
-  sudo sh get-docker.sh
-  sudo usermod -aG docker \$(whoami)
+  sudo -S sh get-docker.sh
+  sudo -S usermod -aG docker \$(whoami)
   
   # Устанавливаем Docker Compose
-  sudo curl -L \"https://github.com/docker/compose/releases/latest/download/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+  sudo -S curl -L \"https://github.com/docker/compose/releases/latest/download/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose
+  sudo -S chmod +x /usr/local/bin/docker-compose
   
   # Устанавливаем Git
-  sudo DEBIAN_FRONTEND=noninteractive apt install -y git
+  sudo -S DEBIAN_FRONTEND=noninteractive apt install -y git
   
   echo 'Docker установлен успешно'
 "
 
 # Создаем директорию на сервере
 echo -e "${YELLOW}📁 Создаем директорию на сервере...${NC}"
-ssh $SERVER "sudo mkdir -p $DEPLOY_PATH && sudo chown \$(whoami):\$(whoami) $DEPLOY_PATH"
+echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S mkdir -p $DEPLOY_PATH && sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH"
 
 # Копируем файлы проекта
 echo -e "${YELLOW}📦 Копируем файлы проекта...${NC}"
@@ -137,7 +141,7 @@ EOF"
 
 # Создаем systemd сервис для управления
 echo -e "${YELLOW}🔧 Создаем systemd сервис...${NC}"
-ssh $SERVER "sudo tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
+echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
 [Unit]
 Description=Herzen Core - Central Service for Ticket Management
 Requires=docker.service
@@ -156,7 +160,7 @@ WantedBy=multi-user.target
 EOF"
 
 # Перезагружаем systemd
-ssh $SERVER "sudo systemctl daemon-reload"
+echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S systemctl daemon-reload"
 
 echo -e "${GREEN}✅ Развертывание завершено!${NC}"
 echo -e "${YELLOW}📋 Следующие шаги:${NC}"
