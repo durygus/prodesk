@@ -75,9 +75,17 @@ echo "$SUDO_PASSWORD" | ssh $SERVER "
 echo -e "${YELLOW}📁 Создаем директорию на сервере...${NC}"
 ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH && echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH"
 
-# Копируем файлы проекта
-echo -e "${YELLOW}📦 Копируем файлы проекта...${NC}"
-rsync -avz --exclude 'node_modules' --exclude '.git' --exclude 'data' --exclude 'logs' ./ $SERVER:$DEPLOY_PATH/
+# Клонируем Git репозиторий на сервере
+echo -e "${YELLOW}📦 Клонируем Git репозиторий на сервере...${NC}"
+ssh $SERVER "
+  # Удаляем директорию если существует
+  rm -rf $DEPLOY_PATH
+  
+  # Клонируем репозиторий
+  git clone https://github.com/durygus/prodesk.git $DEPLOY_PATH
+  
+  echo 'Git репозиторий клонирован успешно'
+"
 
 # Создаем production docker-compose файл на сервере
 echo -e "${YELLOW}⚙️ Создаем production конфигурацию...${NC}"
