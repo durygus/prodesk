@@ -73,7 +73,7 @@ echo "$SUDO_PASSWORD" | ssh $SERVER "
 
 # Создаем директорию на сервере
 echo -e "${YELLOW}📁 Создаем директорию на сервере...${NC}"
-echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S mkdir -p $DEPLOY_PATH && sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH"
+ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH && echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH"
 
 # Копируем файлы проекта
 echo -e "${YELLOW}📦 Копируем файлы проекта...${NC}"
@@ -141,7 +141,7 @@ EOF"
 
 # Создаем systemd сервис для управления
 echo -e "${YELLOW}🔧 Создаем systemd сервис...${NC}"
-echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
+ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
 [Unit]
 Description=Herzen Core - Central Service for Ticket Management
 Requires=docker.service
@@ -160,25 +160,37 @@ WantedBy=multi-user.target
 EOF"
 
 # Перезагружаем systemd
-echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S systemctl daemon-reload"
+ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S systemctl daemon-reload"
 
-echo -e "${GREEN}✅ Развертывание завершено!${NC}"
-echo -e "${YELLOW}📋 Следующие шаги:${NC}"
-echo "1. Запустите сервис:"
-echo "   sudo systemctl start herzen"
-echo "   sudo systemctl enable herzen"
+# Запускаем Herzen Core автоматически
+echo -e "${YELLOW}🚀 Запускаем Herzen Core...${NC}"
+ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S systemctl start herzen && echo '$SUDO_PASSWORD' | sudo -S systemctl enable herzen"
+
+# Ждем запуска сервисов
+echo -e "${YELLOW}⏳ Ждем запуска сервисов (30 секунд)...${NC}"
+sleep 30
+
+# Проверяем статус
+echo -e "${YELLOW}🔍 Проверяем статус сервисов...${NC}"
+ssh $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml ps"
+
+echo -e "${GREEN}✅ Развертывание и запуск завершены!${NC}"
 echo ""
-echo "2. Проверьте статус:"
-echo "   sudo systemctl status herzen"
-echo "   docker-compose -f $DEPLOY_PATH/docker-compose.prod.yml ps"
+echo -e "${GREEN}🌐 Доступ к Herzen Core:${NC}"
+echo -e "${BLUE}   Web UI: http://$(echo $SERVER | cut -d'@' -f2)${NC}"
+echo -e "${BLUE}   Администратор: admin / admin${NC}"
 echo ""
-echo "3. Просмотрите логи:"
-echo "   docker-compose -f $DEPLOY_PATH/docker-compose.prod.yml logs -f"
+echo -e "${YELLOW}📋 Управление сервисом:${NC}"
+echo "• Проверить статус:"
+echo "  ssh $SERVER 'sudo systemctl status herzen'"
 echo ""
-echo "4. Откройте в браузере: http://your-server-ip"
+echo "• Просмотреть логи:"
+echo "  ssh $SERVER 'cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml logs -f'"
 echo ""
-echo "5. Для обновления кода:"
-echo "   cd $DEPLOY_PATH"
-echo "   git pull"
-echo "   docker-compose -f docker-compose.prod.yml build --no-cache"
-echo "   docker-compose -f docker-compose.prod.yml up -d"
+echo "• Перезапустить:"
+echo "  ssh $SERVER 'sudo systemctl restart herzen'"
+echo ""
+echo "• Обновить код:"
+echo "  ssh $SERVER 'cd $DEPLOY_PATH && git pull && docker-compose -f docker-compose.prod.yml up -d'"
+echo ""
+echo -e "${GREEN}🎉 Herzen Core успешно развернут и запущен!${NC}"
