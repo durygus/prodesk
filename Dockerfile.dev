@@ -28,7 +28,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Устанавливаем ВСЕ зависимости (включая dev)
-RUN npm ci && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 # Копируем исходный код
 COPY . .
