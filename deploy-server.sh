@@ -28,8 +28,8 @@ ssh -o ConnectTimeout=10 $SERVER "echo 'Подключение успешно'"
 # Устанавливаем Docker на сервере
 echo -e "${YELLOW}🐳 Устанавливаем Docker на сервере...${NC}"
 ssh $SERVER "
-  # Обновляем систему
-  sudo apt update && sudo apt upgrade -y
+  # Обновляем систему (без интерактивного режима)
+  sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
   
   # Устанавливаем Docker
   curl -fsSL https://get.docker.com -o get-docker.sh
@@ -41,7 +41,7 @@ ssh $SERVER "
   sudo chmod +x /usr/local/bin/docker-compose
   
   # Устанавливаем Git
-  sudo apt install -y git
+  sudo DEBIAN_FRONTEND=noninteractive apt install -y git
   
   echo 'Docker установлен успешно'
 "
