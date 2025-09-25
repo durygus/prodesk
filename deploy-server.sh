@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Скрипт развертывания Herzen на Ubuntu сервере
+# Скрипт развертывания Herzen Core на Ubuntu сервере
 # Использование: ./deploy-server.sh [server_user@server_ip] [deploy_path]
 
 set -e
@@ -17,7 +17,7 @@ SERVER=${1:-"user@your-server.com"}
 DEPLOY_PATH=${2:-"/opt/herzen"}
 APP_NAME="herzen"
 
-echo -e "${GREEN}🚀 Развертываем Herzen на Ubuntu сервере${NC}"
+echo -e "${GREEN}🚀 Развертываем Herzen Core на Ubuntu сервере${NC}"
 echo -e "${YELLOW}Сервер: $SERVER${NC}"
 echo -e "${YELLOW}Путь развертывания: $DEPLOY_PATH${NC}"
 
@@ -83,10 +83,10 @@ services:
     networks:
       - herzen-network
 
-  # Herzen приложение
-  herzen:
+  # Herzen Core приложение
+  herzen-core:
     build: .
-    container_name: herzen-app
+    container_name: herzen-core
     restart: unless-stopped
     depends_on:
       - mongo
@@ -118,7 +118,7 @@ EOF"
 echo -e "${YELLOW}🔧 Создаем systemd сервис...${NC}"
 ssh $SERVER "sudo tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
 [Unit]
-Description=Herzen Ticket Management System
+Description=Herzen Core - Central Service for Ticket Management
 Requires=docker.service
 After=docker.service
 

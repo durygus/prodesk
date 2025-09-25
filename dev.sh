@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Скрипт для разработки Herzen в Docker
+# Скрипт для разработки Herzen Core в Docker
 # Использование: ./dev.sh [start|stop|restart|logs|shell|clean]
 
 set -e
@@ -16,7 +16,7 @@ COMPOSE_FILE="docker-compose.dev.yml"
 
 case "${1:-start}" in
   start)
-    echo -e "${GREEN}🚀 Запускаем Herzen для разработки...${NC}"
+    echo -e "${GREEN}🚀 Запускаем Herzen Core для разработки...${NC}"
     docker-compose -f $COMPOSE_FILE up -d
     echo -e "${GREEN}✅ Сервисы запущены!${NC}"
     echo -e "${BLUE}📱 Приложение: http://localhost:8118${NC}"

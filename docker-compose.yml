@@ -28,10 +28,10 @@ services:
     networks:
       - herzen-network
 
-  # Herzen приложение
-  herzen:
+  # Herzen Core приложение
+  herzen-core:
     build: .
-    container_name: herzen-app
+    container_name: herzen-core
     restart: unless-stopped
     depends_on:
       - mongo

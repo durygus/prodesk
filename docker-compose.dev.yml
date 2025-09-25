@@ -28,12 +28,12 @@ services:
     networks:
       - herzen-dev
 
-  # Herzen приложение для разработки
-  herzen:
+  # Herzen Core приложение для разработки
+  herzen-core:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: herzen-app-dev
+    container_name: herzen-core-dev
     restart: unless-stopped
     depends_on:
       - mongo

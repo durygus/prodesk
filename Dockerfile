@@ -1,4 +1,4 @@
-# Dockerfile для Herzen (Trudesk)
+# Dockerfile для Herzen Core
 FROM node:18-alpine
 
 # Устанавливаем системные зависимости
