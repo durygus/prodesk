@@ -73,7 +73,14 @@ echo "$SUDO_PASSWORD" | ssh $SERVER "
 
 # Создаем директорию на сервере
 echo -e "${YELLOW}📁 Создаем директорию на сервере...${NC}"
-ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH && echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH"
+ssh $SERVER "
+  # Проверяем пароль sudo
+  echo '$SUDO_PASSWORD' | sudo -S echo 'Sudo работает' || exit 1
+  
+  echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH
+  echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH
+  echo 'Директория создана успешно'
+"
 
 # Клонируем Git репозиторий на сервере
 echo -e "${YELLOW}📦 Клонируем Git репозиторий на сервере...${NC}"
@@ -149,7 +156,8 @@ EOF"
 
 # Создаем systemd сервис для управления
 echo -e "${YELLOW}🔧 Создаем systemd сервис...${NC}"
-ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
+ssh $SERVER "
+  echo '$SUDO_PASSWORD' | sudo -S tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
 [Unit]
 Description=Herzen Core - Central Service for Ticket Management
 Requires=docker.service
@@ -168,11 +176,19 @@ WantedBy=multi-user.target
 EOF"
 
 # Перезагружаем systemd
-ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S systemctl daemon-reload"
+echo -e "${YELLOW}🔄 Перезагружаем systemd...${NC}"
+ssh $SERVER "
+  echo '$SUDO_PASSWORD' | sudo -S systemctl daemon-reload
+  echo 'Systemd перезагружен'
+"
 
 # Запускаем Herzen Core автоматически
 echo -e "${YELLOW}🚀 Запускаем Herzen Core...${NC}"
-ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S systemctl start herzen && echo '$SUDO_PASSWORD' | sudo -S systemctl enable herzen"
+ssh $SERVER "
+  echo '$SUDO_PASSWORD' | sudo -S systemctl start herzen
+  echo '$SUDO_PASSWORD' | sudo -S systemctl enable herzen
+  echo 'Herzen Core запущен'
+"
 
 # Ждем запуска сервисов
 echo -e "${YELLOW}⏳ Ждем запуска сервисов (30 секунд)...${NC}"
