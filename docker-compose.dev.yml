@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # MongoDB для разработки
+  mongo:
+    image: mongo:6.0
+    container_name: herzen-mongo-dev
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: herzen123
+      MONGO_INITDB_DATABASE: herzen
+    volumes:
+      - mongo_dev_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - herzen-dev
+
+  # Redis для разработки
+  redis:
+    image: redis:7-alpine
+    container_name: herzen-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - herzen-dev
+
+  # Herzen приложение для разработки
+  herzen:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: herzen-app-dev
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      NODE_ENV: development
+      PORT: 8118
+    ports:
+      - "8118:8118"
+    volumes:
+      # Монтируем исходный код для hot reload
+      - .:/app
+      - /app/node_modules
+      - herzen_dev_data:/app/data
+      - herzen_dev_logs:/app/logs
+      - herzen_dev_uploads:/app/public/uploads
+    networks:
+      - herzen-dev
+    command: >
+      sh -c "
+        npm run webpackdev &&
+        npm start
+      "
+
+volumes:
+  mongo_dev_data:
+  herzen_dev_data:
+  herzen_dev_logs:
+  herzen_dev_uploads:
+
+networks:
+  herzen-dev:
+    driver: bridge

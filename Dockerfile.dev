@@ -1,4 +1,4 @@
-# Dockerfile для Herzen (Trudesk)
+# Dockerfile для разработки с hot reload
 FROM node:18-alpine
 
 # Устанавливаем системные зависимости
@@ -27,8 +27,8 @@ WORKDIR /app
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm ci --only=production && npm cache clean --force
+# Устанавливаем ВСЕ зависимости (включая dev)
+RUN npm ci && npm cache clean --force
 
 # Копируем исходный код
 COPY . .
@@ -43,9 +43,9 @@ USER herzen
 # Открываем порт
 EXPOSE 8118
 
-# Создаем конфигурационный файл по умолчанию
+# Создаем конфигурационный файл для разработки
 RUN cat > config.yml << 'EOF'
-# Herzen Configuration
+# Herzen Development Configuration
 mongo:
   uri: mongodb://mongo:27017/herzen
 
@@ -54,7 +54,7 @@ server:
   host: 0.0.0.0
 
 session:
-  secret: herzen-secret-key-change-in-production
+  secret: herzen-dev-secret-key
 
 email:
   enabled: false
@@ -63,9 +63,9 @@ redis:
   enabled: false
 
 logging:
-  level: info
+  level: debug
   file: logs/herzen.log
 EOF
 
-# Команда запуска
-CMD ["node", "app.js"]
+# Команда запуска с hot reload
+CMD ["npm", "run", "webpackwatch"]
