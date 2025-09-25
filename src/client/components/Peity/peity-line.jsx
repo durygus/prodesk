@@ -7,10 +7,16 @@ import PropTypes from 'prop-types'
 export default function PeityLine ({ height, width, fill, stroke, values }) {
   const lineRef = useRef()
   useEffect(() => {
-    if (lineRef.current) {
+    if (lineRef.current && values && values.trim()) {
+      // Validate values to prevent NaN errors
+      const validValues = values.split(',').map(v => {
+        const num = parseFloat(v.trim())
+        return isNaN(num) ? 0 : num
+      }).join(',')
+      
       $(lineRef.current).peity('line', {
-        height,
-        width,
+        height: isNaN(height) ? 28 : height,
+        width: isNaN(width) ? 64 : width,
         fill,
         stroke
       })

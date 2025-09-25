@@ -3,9 +3,123 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1,user-scalable=no, width=device-width, height=device-height, viewport-fit=cover">
-     <meta http-equiv="Content-Security-Policy" content="default-src gap://ready file://* * 'self' data: blob: 'unsafe-inline' 'unsafe-eval' ws: wss:;"> 
-    <title></title>
+     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: gap://ready file://* ws: wss: http: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; style-src 'self' 'unsafe-inline' data: blob:; img-src 'self' data: blob: http: https:; font-src 'self' data: blob:; connect-src 'self' ws: wss: http: https:; object-src 'none'; base-uri 'self'; form-action 'self';"> 
+    <title>Trudesk Mobile</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
+    <!-- Override localStorage globally to prevent security errors -->
+    <script>
+      // Override localStorage globally to prevent "The operation is insecure" errors
+      (function() {
+        // Store original localStorage methods
+        var originalLocalStorage = {
+          getItem: localStorage.getItem.bind(localStorage),
+          setItem: localStorage.setItem.bind(localStorage),
+          removeItem: localStorage.removeItem.bind(localStorage),
+          clear: localStorage.clear.bind(localStorage)
+        };
+
+        // Create safe wrapper
+        var safeLocalStorage = {
+          getItem: function(key) {
+            try {
+              return originalLocalStorage.getItem(key);
+            } catch (e) {
+              console.warn('localStorage get error:', e.message);
+              return null;
+            }
+          },
+          setItem: function(key, value) {
+            try {
+              originalLocalStorage.setItem(key, value);
+              return true;
+            } catch (e) {
+              console.warn('localStorage set error:', e.message);
+              return false;
+            }
+          },
+          removeItem: function(key) {
+            try {
+              originalLocalStorage.removeItem(key);
+              return true;
+            } catch (e) {
+              console.warn('localStorage remove error:', e.message);
+              return false;
+            }
+          },
+          clear: function() {
+            try {
+              originalLocalStorage.clear();
+              return true;
+            } catch (e) {
+              console.warn('localStorage clear error:', e.message);
+              return false;
+            }
+          }
+        };
+
+        // Override localStorage methods
+        Object.defineProperty(window, 'localStorage', {
+          value: safeLocalStorage,
+          writable: false,
+          configurable: false
+        });
+
+        // Also override sessionStorage
+        var originalSessionStorage = {
+          getItem: sessionStorage.getItem.bind(sessionStorage),
+          setItem: sessionStorage.setItem.bind(sessionStorage),
+          removeItem: sessionStorage.removeItem.bind(sessionStorage),
+          clear: sessionStorage.clear.bind(sessionStorage)
+        };
+
+        var safeSessionStorage = {
+          getItem: function(key) {
+            try {
+              return originalSessionStorage.getItem(key);
+            } catch (e) {
+              console.warn('sessionStorage get error:', e.message);
+              return null;
+            }
+          },
+          setItem: function(key, value) {
+            try {
+              originalSessionStorage.setItem(key, value);
+              return true;
+            } catch (e) {
+              console.warn('sessionStorage set error:', e.message);
+              return false;
+            }
+          },
+          removeItem: function(key) {
+            try {
+              originalSessionStorage.removeItem(key);
+              return true;
+            } catch (e) {
+              console.warn('sessionStorage remove error:', e.message);
+              return false;
+            }
+          },
+          clear: function() {
+            try {
+              originalSessionStorage.clear();
+              return true;
+            } catch (e) {
+              console.warn('sessionStorage clear error:', e.message);
+              return false;
+            }
+          }
+        };
+
+        Object.defineProperty(window, 'sessionStorage', {
+          value: safeSessionStorage,
+          writable: false,
+          configurable: false
+        });
+
+        console.log('localStorage and sessionStorage overridden with safe implementation');
+      })();
+    </script>
 
     <!-- compiled css output -->
     <link href="css/ionic.app.css" rel="stylesheet">

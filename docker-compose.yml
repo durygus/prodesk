@@ -1,51 +1,60 @@
-version: '2.1'
+version: '3.8'
+
 services:
-  trudesk:
-    image: polonel/trudesk:1
-    restart: always
-    ports:
-      - "8118:8118"
-    dns:
-      - "1.1.1.1"
-      - "8.8.8.8"
-    environment:
-      NODE_ENV: production
-      TRUDESK_DOCKER: "true"
-      TD_MONGODB_SERVER: mongo
-      TD_MONGODB_DATABASE: trudesk
-      USE_XFORWARDIP: "true"
-    volumes:
-      - trudesk_uploads:/usr/src/trudesk/public/uploads
-      - trudesk_backups:/usr/src/trudesk/backups
+  # MongoDB база данных
   mongo:
-    image: mongo:5.0-focal
-    restart: always
+    image: mongo:6.0
+    container_name: herzen-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: herzen123
+      MONGO_INITDB_DATABASE: herzen
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
       - "27017:27017"
-    volumes:
-      - mongo:/var/lib/mongo
-      - mongo_data:/data/db:rw
-  elasticsearch:
-    image: elasticsearch:8.0.0
-    restart: always
-    environment:
-      - xpack.security.enabled=false
-      - xpack.security.http.ssl.enabled=false
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-    mem_limit: 1073741824
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
+    networks:
+      - herzen-network
+
+  # Redis (опционально)
+  redis:
+    image: redis:7-alpine
+    container_name: herzen-redis
+    restart: unless-stopped
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "6379:6379"
+    networks:
+      - herzen-network
+
+  # Herzen приложение
+  herzen:
+    build: .
+    container_name: herzen-app
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      NODE_ENV: production
+      PORT: 8118
+    ports:
+      - "80:8118"
     volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
+      - herzen_data:/app/data
+      - herzen_logs:/app/logs
+      - herzen_uploads:/app/public/uploads
+    networks:
+      - herzen-network
+
+
 volumes:
-  trudesk_uploads:
-  trudesk_backups:
-  mongo:
   mongo_data:
-  elasticsearch:
+  herzen_data:
+  herzen_logs:
+  herzen_uploads:
+
+networks:
+  herzen-network:
+    driver: bridge

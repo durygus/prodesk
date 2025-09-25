@@ -1,30 +1,70 @@
-#FROM golang:1.17-alpine AS gcsfuse
-#RUN apk add --no-cache git
-#ENV GOPATH /go
-#RUN go install github.com/googlecloudplatform/gcsfuse@latest
+# Dockerfile для Herzen (Trudesk)
+FROM node:18-alpine
 
-FROM node:16.14-alpine AS builder
+# Устанавливаем системные зависимости
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
 
-RUN mkdir -p /usr/src/trudesk
-WORKDIR /usr/src/trudesk
+# Создаем пользователя для приложения
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S herzen -u 1001
 
-COPY . /usr/src/trudesk
+# Устанавливаем рабочую директорию
+WORKDIR /app
 
-RUN apk add --no-cache --update bash make gcc g++ python3
-RUN yarn plugin import workspace-tools
-RUN yarn workspaces focus --all --production
-RUN cp -R node_modules prod_node_modules
-RUN yarn install
-RUN yarn build
-RUN rm -rf node_modules && mv prod_node_modules node_modules
-RUN rm -rf .yarn/cache
+# Копируем package.json и package-lock.json
+COPY package*.json ./
 
-FROM node:16.14-alpine
-WORKDIR /usr/src/trudesk
-RUN apk add --no-cache ca-certificates bash mongodb-tools && rm -rf /tmp/*
-COPY --from=builder /usr/src/trudesk .
-#COPY --from=gcsfuse /go/bin/gcsfuse /usr/local/bin
+# Устанавливаем зависимости
+RUN npm ci --only=production && npm cache clean --force
 
+# Копируем исходный код
+COPY . .
+
+# Создаем необходимые директории
+RUN mkdir -p data logs public/uploads
+
+# Устанавливаем права доступа
+RUN chown -R herzen:nodejs /app
+USER herzen
+
+# Открываем порт
 EXPOSE 8118
 
-CMD [ "/bin/bash", "/usr/src/trudesk/startup.sh" ]
+# Создаем конфигурационный файл по умолчанию
+RUN cat > config.yml << 'EOF'
+# Herzen Configuration
+mongo:
+  uri: mongodb://mongo:27017/herzen
+
+server:
+  port: 8118
+  host: 0.0.0.0
+
+session:
+  secret: herzen-secret-key-change-in-production
+
+email:
+  enabled: false
+
+redis:
+  enabled: false
+
+logging:
+  level: info
+  file: logs/herzen.log
+EOF
+
+# Команда запуска
+CMD ["node", "app.js"]

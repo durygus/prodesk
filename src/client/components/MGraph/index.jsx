@@ -13,9 +13,22 @@ export default function MGraph (props) {
   useEffect(() => {
     if (props.data && graphRef.current && props.data.length > 0) {
       graphRef.current.innerHTML = ''
+      
+      // Validate data to prevent NaN errors
+      const validData = props.data.filter(item => 
+        item && 
+        !isNaN(parseFloat(item[props.y_accessor])) && 
+        item[props.x_accessor]
+      )
+      
+      if (validData.length === 0) {
+        graphRef.current.innerHTML = '<div class="no-data-available-text">No Valid Data Available</div>'
+        return
+      }
+      
       graphParams = {
         full_width: props.fullWidth,
-        height: props.height,
+        height: isNaN(props.height) ? 200 : props.height,
         x_accessor: props.x_accessor,
         y_accessor: props.y_accessor,
         y_extended_ticks: props.y_extended_ticks,
@@ -27,7 +40,7 @@ export default function MGraph (props) {
       }
       if (props.area) graphParams.area = [1]
 
-      graphParams.data = MG.convert.date(props.data, 'date')
+      graphParams.data = MG.convert.date(validData, 'date')
       MG.data_graphic(graphParams)
     }
   }, [props.data])
