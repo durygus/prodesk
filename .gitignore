@@ -70,3 +70,9 @@ public/uploads/assets/upload/
 stats\.json
 dist/
 *.heapsnapshot
+
+# Herzen Core - данные включены в Git для синхронизации
+# data/mongo/ - MongoDB данные
+# data/app/ - данные приложения
+# logs/ - логи приложения
+# public/uploads/ - загруженные файлы

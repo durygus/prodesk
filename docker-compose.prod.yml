@@ -7,7 +7,7 @@ services:
     container_name: herzen-mongo
     restart: unless-stopped
     volumes:
-      - /opt/herzen/data/mongo:/data/db  # Bind mount для продакшена
+      - ./data/mongo:/data/db  # Та же структура что и в dev
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
       - "27017:27017"
@@ -30,9 +30,9 @@ services:
     ports:
       - "8118:8118"
     volumes:
-      - /opt/herzen/data/app:/app/data
-      - /opt/herzen/logs:/app/logs
-      - /opt/herzen/uploads:/app/public/uploads
+      - ./data/app:/app/data
+      - ./logs:/app/logs
+      - ./public/uploads:/app/public/uploads
     networks:
       - herzen-network
 

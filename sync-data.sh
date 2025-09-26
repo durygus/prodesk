@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Параметры
 SERVER=${SERVER:-"durygus@188.130.234.42"}
-SERVER_DATA_PATH="/opt/herzen/data"
+SERVER_PROJECT_PATH="/opt/herzen/core"
 LOCAL_DATA_PATH="./data"
 
 case "${1:-help}" in
@@ -22,15 +22,23 @@ case "${1:-help}" in
     echo -e "${GREEN}📤 Синхронизируем данные с локальной машины на сервер...${NC}"
     
     # Создаем директории на сервере
-    ssh $SERVER "sudo mkdir -p $SERVER_DATA_PATH/mongo $SERVER_DATA_PATH/app $SERVER_DATA_PATH/logs $SERVER_DATA_PATH/uploads"
+    ssh $SERVER "mkdir -p $SERVER_PROJECT_PATH/data/mongo $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads"
     
     # Синхронизируем MongoDB данные
     echo -e "${YELLOW}🗄️  Синхронизируем MongoDB...${NC}"
-    rsync -avz --delete $LOCAL_DATA_PATH/mongo/ $SERVER:$SERVER_DATA_PATH/mongo/
+    rsync -avz --delete $LOCAL_DATA_PATH/mongo/ $SERVER:$SERVER_PROJECT_PATH/data/mongo/
     
     # Синхронизируем данные приложения
     echo -e "${YELLOW}📱 Синхронизируем данные приложения...${NC}"
-    rsync -avz --delete $LOCAL_DATA_PATH/app/ $SERVER:$SERVER_DATA_PATH/app/ 2>/dev/null || true
+    rsync -avz --delete $LOCAL_DATA_PATH/app/ $SERVER:$SERVER_PROJECT_PATH/data/app/ 2>/dev/null || true
+    
+    # Синхронизируем логи
+    echo -e "${YELLOW}📋 Синхронизируем логи...${NC}"
+    rsync -avz --delete ./logs/ $SERVER:$SERVER_PROJECT_PATH/logs/ 2>/dev/null || true
+    
+    # Синхронизируем загрузки
+    echo -e "${YELLOW}📁 Синхронизируем загрузки...${NC}"
+    rsync -avz --delete ./public/uploads/ $SERVER:$SERVER_PROJECT_PATH/public/uploads/ 2>/dev/null || true
     
     echo -e "${GREEN}✅ Синхронизация завершена!${NC}"
     ;;
@@ -39,15 +47,23 @@ case "${1:-help}" in
     echo -e "${GREEN}📥 Синхронизируем данные с сервера на локальную машину...${NC}"
     
     # Создаем локальные директории
-    mkdir -p $LOCAL_DATA_PATH/mongo $LOCAL_DATA_PATH/app $LOCAL_DATA_PATH/logs $LOCAL_DATA_PATH/uploads
+    mkdir -p $LOCAL_DATA_PATH/mongo $LOCAL_DATA_PATH/app logs public/uploads
     
     # Синхронизируем MongoDB данные
     echo -e "${YELLOW}🗄️  Синхронизируем MongoDB...${NC}"
-    rsync -avz --delete $SERVER:$SERVER_DATA_PATH/mongo/ $LOCAL_DATA_PATH/mongo/
+    rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/data/mongo/ $LOCAL_DATA_PATH/mongo/
     
     # Синхронизируем данные приложения
     echo -e "${YELLOW}📱 Синхронизируем данные приложения...${NC}"
-    rsync -avz --delete $SERVER:$SERVER_DATA_PATH/app/ $LOCAL_DATA_PATH/app/ 2>/dev/null || true
+    rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/data/app/ $LOCAL_DATA_PATH/app/ 2>/dev/null || true
+    
+    # Синхронизируем логи
+    echo -e "${YELLOW}📋 Синхронизируем логи...${NC}"
+    rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/logs/ ./logs/ 2>/dev/null || true
+    
+    # Синхронизируем загрузки
+    echo -e "${YELLOW}📁 Синхронизируем загрузки...${NC}"
+    rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/public/uploads/ ./public/uploads/ 2>/dev/null || true
     
     echo -e "${GREEN}✅ Синхронизация завершена!${NC}"
     ;;
@@ -64,7 +80,7 @@ case "${1:-help}" in
     
     # Архивируем данные с сервера
     echo -e "${YELLOW}📦 Архивируем данные с сервера...${NC}"
-    ssh $SERVER "sudo tar -czf /tmp/server-data.tar.gz -C $SERVER_DATA_PATH ."
+    ssh $SERVER "tar -czf /tmp/server-data.tar.gz -C $SERVER_PROJECT_PATH data logs public/uploads"
     scp $SERVER:/tmp/server-data.tar.gz $BACKUP_DIR/server-data.tar.gz
     ssh $SERVER "rm /tmp/server-data.tar.gz"
     
@@ -91,7 +107,7 @@ case "${1:-help}" in
     if [ -f "$BACKUP_DIR/server-data.tar.gz" ]; then
       echo -e "${YELLOW}📦 Восстанавливаем данные на сервере...${NC}"
       scp $BACKUP_DIR/server-data.tar.gz $SERVER:/tmp/server-data.tar.gz
-      ssh $SERVER "sudo tar -xzf /tmp/server-data.tar.gz -C $SERVER_DATA_PATH && rm /tmp/server-data.tar.gz"
+      ssh $SERVER "tar -xzf /tmp/server-data.tar.gz -C $SERVER_PROJECT_PATH && rm /tmp/server-data.tar.gz"
     fi
     
     echo -e "${GREEN}✅ Восстановление завершено!${NC}"
