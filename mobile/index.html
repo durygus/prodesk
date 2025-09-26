@@ -9,15 +9,29 @@
 
     <!-- Override localStorage globally to prevent security errors -->
     <script>
+      // Define safari variable early for compatibility
+      window.safari = window.safari || {};
+      
       // Override localStorage globally to prevent "The operation is insecure" errors
       (function() {
-        // Store original localStorage methods
-        var originalLocalStorage = {
-          getItem: localStorage.getItem.bind(localStorage),
-          setItem: localStorage.setItem.bind(localStorage),
-          removeItem: localStorage.removeItem.bind(localStorage),
-          clear: localStorage.clear.bind(localStorage)
-        };
+        // Store original localStorage methods safely
+        var originalLocalStorage = {};
+        try {
+          originalLocalStorage = {
+            getItem: localStorage.getItem.bind(localStorage),
+            setItem: localStorage.setItem.bind(localStorage),
+            removeItem: localStorage.removeItem.bind(localStorage),
+            clear: localStorage.clear.bind(localStorage)
+          };
+        } catch (e) {
+          // If localStorage is not available, create dummy methods
+          originalLocalStorage = {
+            getItem: function() { return null; },
+            setItem: function() { return false; },
+            removeItem: function() { return false; },
+            clear: function() { return false; }
+          };
+        }
 
         // Create safe wrapper
         var safeLocalStorage = {
@@ -71,12 +85,23 @@
         }
 
         // Also override sessionStorage
-        var originalSessionStorage = {
-          getItem: sessionStorage.getItem.bind(sessionStorage),
-          setItem: sessionStorage.setItem.bind(sessionStorage),
-          removeItem: sessionStorage.removeItem.bind(sessionStorage),
-          clear: sessionStorage.clear.bind(sessionStorage)
-        };
+        var originalSessionStorage = {};
+        try {
+          originalSessionStorage = {
+            getItem: sessionStorage.getItem.bind(sessionStorage),
+            setItem: sessionStorage.setItem.bind(sessionStorage),
+            removeItem: sessionStorage.removeItem.bind(sessionStorage),
+            clear: sessionStorage.clear.bind(sessionStorage)
+          };
+        } catch (e) {
+          // If sessionStorage is not available, create dummy methods
+          originalSessionStorage = {
+            getItem: function() { return null; },
+            setItem: function() { return false; },
+            removeItem: function() { return false; },
+            clear: function() { return false; }
+          };
+        }
 
         var safeSessionStorage = {
           getItem: function(key) {
@@ -127,9 +152,6 @@
           window.sessionStorage = safeSessionStorage;
         }
 
-        // Define safari variable for compatibility
-        window.safari = window.safari || {};
-        
         console.log('localStorage and sessionStorage overridden with safe implementation');
       })();
     </script>
@@ -138,9 +160,9 @@
     <link href="css/ionic.app.css" rel="stylesheet">
     
     <!-- Preload fonts to prevent loading issues -->
-    <link rel="preload" href="/fonts/roboto/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/roboto/Roboto-Medium.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/roboto/Roboto-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/font/roboto/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/font/roboto/Roboto-Medium.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/font/roboto/Roboto-Bold.woff2" as="font" type="font/woff2" crossorigin>
     
     <!-- Prevent layout shift by hiding content until loaded -->
     <style>
