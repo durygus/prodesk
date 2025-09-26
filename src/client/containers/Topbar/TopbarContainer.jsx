@@ -55,6 +55,7 @@ class TopbarContainer extends React.Component {
 
     this.onSocketShowNotice = this.onSocketShowNotice.bind(this)
     this.onSocketClearNotice = this.onSocketClearNotice.bind(this)
+    this.toggleMobileMenu = this.toggleMobileMenu.bind(this)
   }
 
   componentDidMount () {
@@ -138,6 +139,13 @@ class TopbarContainer extends React.Component {
     e.preventDefault()
   }
 
+  toggleMobileMenu () {
+    const sidebar = document.getElementById('sidebar')
+    if (sidebar) {
+      sidebar.classList.toggle('mobile-open')
+    }
+  }
+
   render () {
     const { loadingViewData, viewdata, sessionUser } = this.props
     if (loadingViewData || !sessionUser) return <div />
@@ -148,6 +156,9 @@ class TopbarContainer extends React.Component {
           <div className='uk-width-1-1'>
             <div className='top-bar' data-topbar>
               <div className='title-area uk-float-left'>
+                <button className='mobile-menu-toggle' onClick={this.toggleMobileMenu}>
+                  <i className='material-icons'>menu</i>
+                </button>
                 <div className='logo'>
                   <img src={viewdata.get('logoImage')} alt='Logo' className={'site-logo'} />
                 </div>
