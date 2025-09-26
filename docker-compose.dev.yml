@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # MongoDB для разработки
   mongo:
-    image: mongo:6.0
+    image: mongo:4.4
     container_name: herzen-mongo-dev
     restart: unless-stopped
     environment:
@@ -18,16 +18,6 @@ services:
     networks:
       - herzen-dev
 
-  # Redis для разработки
-  redis:
-    image: redis:7-alpine
-    container_name: herzen-redis-dev
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    networks:
-      - herzen-dev
-
   # Herzen Core приложение для разработки
   herzen-core:
     build:
@@ -37,10 +27,14 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo
-      - redis
     environment:
       NODE_ENV: development
       PORT: 8118
+      TD_MONGODB_SERVER: mongo
+      TD_MONGODB_PORT: 27017
+      TD_MONGODB_DATABASE: herzen
+      TD_MONGODB_USERNAME: admin
+      TD_MONGODB_PASSWORD: herzen123
     ports:
       - "8118:8118"
     volumes:

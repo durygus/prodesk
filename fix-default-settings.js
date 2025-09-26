@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // Подключаемся к MongoDB
-mongoose.connect('mongodb://localhost:27017/trudesk', {
+mongoose.connect('mongodb://mongo:27017/trudesk', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });

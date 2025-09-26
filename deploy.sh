@@ -42,7 +42,7 @@ ssh $SERVER "cd $DEPLOY_PATH && cat > config.yml << 'EOF'
 # Herzen Configuration
 # Database
 mongo:
-  uri: mongodb://localhost:27017/herzen
+  uri: mongodb://mongo:27017/herzen
 
 # Server
 server:

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 // Подключаемся к MongoDB
-mongoose.connect('mongodb://localhost:27017/trudesk', {
+mongoose.connect('mongodb://mongo:27017/trudesk', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
