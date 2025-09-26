@@ -71,8 +71,8 @@ stats\.json
 dist/
 *.heapsnapshot
 
-# Herzen Core - данные включены в Git для синхронизации
-# data/mongo/ - MongoDB данные
+# Herzen Core - данные исключены из Git
+data/mongo/  # MongoDB данные (синхронизируются через sync-data.sh)
 # data/app/ - данные приложения
 # logs/ - логи приложения
 # public/uploads/ - загруженные файлы

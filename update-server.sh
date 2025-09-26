@@ -42,6 +42,11 @@ ssh $SERVER "
   git reset --hard HEAD 2>/dev/null || true
   git clean -fd 2>/dev/null || true
   
+  # Исключаем MongoDB данные из git (они создаются при установке)
+  echo 'Исключаем MongoDB данные из git...'
+  echo 'data/mongo/' >> .gitignore 2>/dev/null || true
+  git rm -r --cached data/mongo/ 2>/dev/null || true
+  
   # Получаем обновления
   echo 'Получаем обновления...'
   git fetch origin
