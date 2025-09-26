@@ -70,6 +70,7 @@
     width: 100vw;
     z-index: 99999999;
     background: #f6f6f6;
+    display: none;
 ">
   <div style="position: absolute; top: 50%; left: 0; width: 100%;text-align: center;font-size: 28px; font-weight: 300;"><a
           href="/mobile">View Mobile Site...</a></div>
@@ -139,9 +140,27 @@
 <audio id="clicksound" src="/sounds/click.ogg" class="uk-hidden"></audio>
 
 <script type="text/javascript">
-  if (screen.width <= 800) {
-    document.location = '/mobile';
-  }
+  // Проверяем мобильную версию только после полной загрузки страницы
+  window.addEventListener('load', function() {
+    if (screen.width <= 800) {
+      // Проверяем доступность мобильной версии
+      fetch('/mobile')
+        .then(function(response) {
+          if (response.ok) {
+            // Мобильная версия доступна - переходим
+            document.location = '/mobile';
+          } else {
+            // Мобильная версия недоступна - показываем overlay
+            document.getElementById('nomobile').style.display = 'block';
+          }
+        })
+        .catch(function(error) {
+          // Ошибка загрузки - показываем overlay
+          console.warn('Mobile version not available:', error);
+          document.getElementById('nomobile').style.display = 'block';
+        });
+    }
+  });
 </script>
 
 <script src="/js/trudesk.min.js"></script>
