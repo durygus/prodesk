@@ -40,20 +40,30 @@ ssh $SERVER "
   echo 'Останавливаем контейнеры...'
   docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
   
+  # Временно переименовываем MongoDB папку чтобы git её не трогал
+  echo 'Защищаем MongoDB данные от git...'
+  if [ -d 'data/mongo' ]; then
+    mv data/mongo data/mongo_backup_\$(date +%s) 2>/dev/null || true
+  fi
+  
   # Принудительно сбрасываем все локальные изменения
   echo 'Сбрасываем локальные изменения...'
   git reset --hard HEAD 2>/dev/null || true
   git clean -fd 2>/dev/null || true
   
-  # Исключаем MongoDB данные из git (они синхронизируются отдельно)
-  echo 'Исключаем MongoDB данные из git...'
-  echo 'data/mongo/' >> .gitignore 2>/dev/null || true
-  git rm -r --cached data/mongo/ 2>/dev/null || true
-  
-  # Получаем обновления (MongoDB данные остаются нетронутыми)
+  # Получаем обновления
   echo 'Получаем обновления...'
   git fetch origin
   git reset --hard origin/\$CURRENT_BRANCH
+  
+  # Восстанавливаем MongoDB данные
+  echo 'Восстанавливаем MongoDB данные...'
+  if [ -d 'data/mongo_backup_'* ]; then
+    mv data/mongo_backup_* data/mongo 2>/dev/null || true
+  fi
+  
+  # Исключаем MongoDB данные из git на будущее
+  echo 'data/mongo/' >> .gitignore 2>/dev/null || true
   
   echo 'Код обновлен успешно'
 "
