@@ -30,7 +30,14 @@ case "${1:-help}" in
     
     # Синхронизируем MongoDB данные
     echo -e "${YELLOW}🗄️  Синхронизируем MongoDB...${NC}"
+    
+    # Исправляем права доступа к файлам MongoDB на сервере (файлы принадлежат systemd-coredump)
+    ssh $SERVER "sudo chown -R durygus:durygus $SERVER_PROJECT_PATH/data/mongo/" 2>/dev/null || true
+    
     rsync -avz --delete $LOCAL_DATA_PATH/mongo/ $SERVER:$SERVER_PROJECT_PATH/data/mongo/
+    
+    # Возвращаем правильные права для MongoDB в Docker (UID 999 = systemd-coredump)
+    ssh $SERVER "sudo chown -R systemd-coredump:systemd-coredump $SERVER_PROJECT_PATH/data/mongo/" 2>/dev/null || true
     
     # Запускаем MongoDB обратно
     echo -e "${YELLOW}▶️  Запускаем MongoDB...${NC}"
@@ -67,7 +74,14 @@ case "${1:-help}" in
     
     # Синхронизируем MongoDB данные
     echo -e "${YELLOW}🗄️  Синхронизируем MongoDB...${NC}"
+    
+    # Исправляем права доступа к файлам MongoDB на сервере для чтения
+    ssh $SERVER "sudo chown -R durygus:durygus $SERVER_PROJECT_PATH/data/mongo/" 2>/dev/null || true
+    
     rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/data/mongo/ $LOCAL_DATA_PATH/mongo/
+    
+    # Возвращаем права для Docker
+    ssh $SERVER "sudo chown -R systemd-coredump:systemd-coredump $SERVER_PROJECT_PATH/data/mongo/" 2>/dev/null || true
     
     # Запускаем MongoDB на сервере обратно
     echo -e "${YELLOW}▶️  Запускаем MongoDB на сервере...${NC}"
