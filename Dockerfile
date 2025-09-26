@@ -30,6 +30,9 @@ COPY package*.json ./
 # Устанавливаем зависимости
 RUN npm install --only=production && npm cache clean --force
 
+# Устанавливаем sass как production зависимость (нужен для buildsass.js)
+RUN npm install sass --save
+
 # Копируем исходный код
 COPY . .
 
