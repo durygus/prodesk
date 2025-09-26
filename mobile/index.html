@@ -12,6 +12,11 @@
       // Define safari variable early for compatibility
       window.safari = window.safari || {};
       
+      // Override global variables that might cause errors
+      if (typeof safari === 'undefined') {
+        window.safari = {};
+      }
+      
       // Override localStorage globally to prevent "The operation is insecure" errors
       (function() {
         // Store original localStorage methods safely
@@ -152,6 +157,19 @@
           window.sessionStorage = safeSessionStorage;
         }
 
+        // Override any remaining storage access that might cause issues
+        try {
+          // Override any direct storage access
+          if (window.localStorage) {
+            window.localStorage = safeLocalStorage;
+          }
+          if (window.sessionStorage) {
+            window.sessionStorage = safeSessionStorage;
+          }
+        } catch (e) {
+          console.warn('Could not override storage:', e.message);
+        }
+        
         console.log('localStorage and sessionStorage overridden with safe implementation');
       })();
     </script>
@@ -159,10 +177,7 @@
     <!-- compiled css output -->
     <link href="css/ionic.app.css" rel="stylesheet">
     
-    <!-- Preload fonts to prevent loading issues -->
-    <link rel="preload" href="/font/roboto/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/font/roboto/Roboto-Medium.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/font/roboto/Roboto-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Fonts are loaded via CSS, no need to preload -->
     
     <!-- Prevent layout shift by hiding content until loaded -->
     <style>
@@ -209,6 +224,18 @@
     
     <!-- Show content after everything is loaded -->
     <script>
+      // Global error handler to catch any remaining errors
+      window.addEventListener('error', function(e) {
+        console.warn('Caught error:', e.message, e.filename, e.lineno);
+        // Don't prevent default to avoid breaking the app
+      });
+      
+      // Handle unhandled promise rejections
+      window.addEventListener('unhandledrejection', function(e) {
+        console.warn('Unhandled promise rejection:', e.reason);
+        e.preventDefault(); // Prevent the error from showing in console
+      });
+      
       window.addEventListener('load', function() {
         document.body.classList.add('loaded');
       });
