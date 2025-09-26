@@ -27,13 +27,10 @@ WORKDIR /app
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm install --only=production && npm cache clean --force
+# Устанавливаем ВСЕ зависимости сразу (включая sass)
+RUN npm install --only=production && npm install sass --save && npm cache clean --force
 
-# Устанавливаем sass как production зависимость (нужен для buildsass.js)
-RUN npm install sass --save
-
-# Копируем исходный код
+# Копируем исходный код (исключая data/)
 COPY . .
 
 # Создаем необходимые директории

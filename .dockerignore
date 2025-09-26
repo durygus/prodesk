@@ -1,0 +1,18 @@
+# Исключаем большие файлы из Docker контекста
+data/mongo/
+node_modules/
+.git/
+*.log
+logs/
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Исключаем dev файлы
+*.md
+.env*
+docker-compose*.yml
+Dockerfile.dev
+dev.sh
+update-server.sh
+deploy-server.sh
