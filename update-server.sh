@@ -33,9 +33,24 @@ ssh $SERVER "
   CURRENT_BRANCH=\$(git branch --show-current)
   echo \"Текущая ветка: \$CURRENT_BRANCH\"
   
+  # Останавливаем контейнеры для безопасного обновления
+  echo 'Останавливаем контейнеры...'
+  docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
+  
+  # Принудительно сбрасываем все локальные изменения
+  echo 'Сбрасываем локальные изменения...'
+  git reset --hard HEAD 2>/dev/null || true
+  git clean -fd 2>/dev/null || true
+  
+  # Удаляем проблемные MongoDB файлы из git tracking
+  echo 'Очищаем MongoDB файлы из git...'
+  git rm -r --cached data/mongo/ 2>/dev/null || true
+  echo 'data/mongo/' >> .gitignore 2>/dev/null || true
+  
   # Получаем обновления
+  echo 'Получаем обновления...'
   git fetch origin
-  git pull origin \$CURRENT_BRANCH
+  git reset --hard origin/\$CURRENT_BRANCH
   
   echo 'Код обновлен успешно'
 "
@@ -45,10 +60,21 @@ echo -e "${YELLOW}🔨 Пересобираем и перезапускаем к
 ssh $SERVER "
   cd $DEPLOY_PATH
   
+  # Проверяем место на диске
+  echo 'Проверяем место на диске...'
+  df -h / | tail -1
+  
+  # Очищаем Docker кэш для освобождения места
+  echo 'Очищаем Docker кэш...'
+  docker system prune -f 2>/dev/null || true
+  docker volume prune -f 2>/dev/null || true
+  
   # Пересобираем образы
-  docker-compose -f docker-compose.prod.yml build --no-cache
+  echo 'Пересобираем образы...'
+  docker-compose -f docker-compose.prod.yml build --no-cache herzen-core
   
   # Перезапускаем сервисы
+  echo 'Запускаем сервисы...'
   docker-compose -f docker-compose.prod.yml up -d
   
   echo 'Контейнеры перезапущены успешно'
@@ -57,6 +83,10 @@ ssh $SERVER "
 # Проверяем статус
 echo -e "${YELLOW}🔍 Проверяем статус сервисов...${NC}"
 ssh $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml ps"
+
+# Проверяем версию кода
+echo -e "${YELLOW}📋 Проверяем версию кода...${NC}"
+ssh $SERVER "cd $DEPLOY_PATH && git log --oneline -3"
 
 echo -e "${GREEN}✅ Обновление завершено!${NC}"
 echo -e "${BLUE}🌐 Web UI: http://$(echo $SERVER | cut -d'@' -f2)${NC}"
