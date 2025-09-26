@@ -42,6 +42,10 @@ ssh $SERVER "
   git reset --hard HEAD 2>/dev/null || true
   git clean -fd 2>/dev/null || true
   
+  # Исправляем права доступа к MongoDB файлам через Docker
+  echo 'Исправляем права доступа к MongoDB файлам...'
+  docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chown -R 1000:1000 /data' 2>/dev/null || true
+  
   # Удаляем проблемные MongoDB файлы из git tracking
   echo 'Очищаем MongoDB файлы из git...'
   git rm -r --cached data/mongo/ 2>/dev/null || true
@@ -51,6 +55,10 @@ ssh $SERVER "
   echo 'Получаем обновления...'
   git fetch origin
   git reset --hard origin/\$CURRENT_BRANCH
+  
+  # Возвращаем правильные права для MongoDB
+  echo 'Возвращаем права для MongoDB...'
+  docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chown -R 999:999 /data' 2>/dev/null || true
   
   echo 'Код обновлен успешно'
 "
