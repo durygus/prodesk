@@ -33,12 +33,12 @@ case "${1:-help}" in
     
     # Универсальное решение: используем временный Docker контейнер для управления правами
     echo -e "${BLUE}🔧 Очищаем папку MongoDB через Docker...${NC}"
-    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.*' 2>/dev/null || true"
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true; chown 1000:1000 /data; chmod 755 /data'"
     
     rsync -avz --delete $LOCAL_DATA_PATH/mongo/ $SERVER:$SERVER_PROJECT_PATH/data/mongo/
     
-    # Устанавливаем правильные права через Docker контейнер
-    echo -e "${BLUE}🔧 Устанавливаем права через Docker...${NC}"
+    # Устанавливаем правильные права для MongoDB через Docker контейнер
+    echo -e "${BLUE}🔧 Устанавливаем права MongoDB через Docker...${NC}"
     ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chown -R 999:999 /data'" 2>/dev/null || true
     
     # Запускаем MongoDB обратно
@@ -77,9 +77,9 @@ case "${1:-help}" in
     # Синхронизируем MongoDB данные
     echo -e "${YELLOW}🗄️  Синхронизируем MongoDB...${NC}"
     
-    # Универсальное решение: используем Docker для управления правами
-    echo -e "${BLUE}🔧 Устанавливаем права для чтения через Docker...${NC}"
-    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chmod -R 755 /data'" 2>/dev/null || true
+    # Универсальное решение: делаем файлы читаемыми через Docker
+    echo -e "${BLUE}🔧 Делаем файлы читаемыми через Docker...${NC}"
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chmod -R 644 /data/*; chmod 755 /data/*/'" 2>/dev/null || true
     
     # Создаём локальную папку если не существует
     mkdir -p $LOCAL_DATA_PATH/mongo/
