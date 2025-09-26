@@ -14,7 +14,7 @@
 
 var _ = require('lodash')
 var path = require('path')
-var sass = require('node-sass')
+var sass = require('sass')
 var settingUtil = require('../settings/settingsUtil')
 
 var buildsass = {}
@@ -47,9 +47,12 @@ function dynamicSass (entry, vars, success, error) {
     data: dataString
   })
 
-  sass.render(sassOptions, function (err, result) {
-    return err ? error(err) : success(result.css.toString())
-  })
+  try {
+    const result = sass.renderSync(sassOptions)
+    return success(result.css.toString())
+  } catch (err) {
+    return error(err)
+  }
 }
 
 function save (result) {

@@ -27,11 +27,14 @@ WORKDIR /app
 # Копируем package.json и package-lock.json
 COPY package*.json ./
 
-# Устанавливаем ВСЕ зависимости (включая dev)
-RUN npm install && npm cache clean --force
-
 # Копируем исходный код
 COPY . .
+
+# Устанавливаем ВСЕ зависимости (включая dev) после копирования кода
+RUN npm install && npm cache clean --force
+
+# Удаляем и переустанавливаем bcrypt для правильной архитектуры
+RUN npm uninstall bcrypt && npm install bcrypt
 
 # Создаем необходимые директории
 RUN mkdir -p data logs public/uploads
