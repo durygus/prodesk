@@ -38,9 +38,14 @@ angular
   ])
 
   .run(function ($ionicPlatform, $rootScope, $location, $localStorage, $state, $http) {
-    if ($localStorage.accessToken) {
-      $http.defaults.headers.common.accesstoken = $localStorage.accessToken
-    } else {
+    try {
+      if ($localStorage && $localStorage.accessToken) {
+        $http.defaults.headers.common.accesstoken = $localStorage.accessToken
+      } else {
+        $http.defaults.headers.common.accesstoken = ''
+      }
+    } catch (e) {
+      console.warn('localStorage access error:', e.message);
       $http.defaults.headers.common.accesstoken = ''
     }
 
@@ -1269,7 +1274,7 @@ angular
               if (response.data.success === false) {
                 showError(response.data.error)
               } else if (response.data.accessToken !== undefined) {
-                $localStorage.server = ''
+                $localStorage.server = $scope.auth.server || window.location.host
                 $localStorage.username = $scope.auth.username
                 $localStorage.accessToken = response.data.accessToken
                 $localStorage.loggedInUser = response.data.user
