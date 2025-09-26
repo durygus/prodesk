@@ -59,11 +59,16 @@
         };
 
         // Override localStorage methods
-        Object.defineProperty(window, 'localStorage', {
-          value: safeLocalStorage,
-          writable: false,
-          configurable: false
-        });
+        try {
+          Object.defineProperty(window, 'localStorage', {
+            value: safeLocalStorage,
+            writable: false,
+            configurable: false
+          });
+        } catch (e) {
+          // Fallback for browsers that don't support Object.defineProperty
+          window.localStorage = safeLocalStorage;
+        }
 
         // Also override sessionStorage
         var originalSessionStorage = {
@@ -111,18 +116,37 @@
           }
         };
 
-        Object.defineProperty(window, 'sessionStorage', {
-          value: safeSessionStorage,
-          writable: false,
-          configurable: false
-        });
+        try {
+          Object.defineProperty(window, 'sessionStorage', {
+            value: safeSessionStorage,
+            writable: false,
+            configurable: false
+          });
+        } catch (e) {
+          // Fallback for browsers that don't support Object.defineProperty
+          window.sessionStorage = safeSessionStorage;
+        }
 
+        // Define safari variable for compatibility
+        window.safari = window.safari || {};
+        
         console.log('localStorage and sessionStorage overridden with safe implementation');
       })();
     </script>
 
     <!-- compiled css output -->
     <link href="css/ionic.app.css" rel="stylesheet">
+    
+    <!-- Preload fonts to prevent loading issues -->
+    <link rel="preload" href="/fonts/roboto/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto/Roboto-Medium.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto/Roboto-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    
+    <!-- Prevent layout shift by hiding content until loaded -->
+    <style>
+      body { visibility: hidden; }
+      body.loaded { visibility: visible; }
+    </style>
 
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
@@ -160,6 +184,13 @@
 
     <!-- your app's js -->
     <script src="js/dist/td.app.min.js"></script>
+    
+    <!-- Show content after everything is loaded -->
+    <script>
+      window.addEventListener('load', function() {
+        document.body.classList.add('loaded');
+      });
+    </script>
   </head>
   <body ng-app="trudesk">
     <div class="mobile-container">
