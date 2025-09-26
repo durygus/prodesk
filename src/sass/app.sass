@@ -16,10 +16,24 @@
 @import "functions"
 @import "_settings"
 
-@import url(//fonts.googleapis.com/css?family=Open+Sans:400,700,800,300,600)
-@import url(//fonts.googleapis.com/css?family=Roboto:400,300,500,700)
-@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700)
-@import url(//fonts.googleapis.com/css?family=Ubuntu+Mono:400,700)
+// Use local fonts instead of Google Fonts to avoid network issues
+@font-face
+  font-family: 'Roboto'
+  src: url('/font/roboto/Roboto-Regular.woff2') format('woff2'), url('/font/roboto/Roboto-Regular.woff') format('woff')
+  font-weight: 400
+  font-style: normal
+
+@font-face
+  font-family: 'Roboto'
+  src: url('/font/roboto/Roboto-Medium.woff2') format('woff2'), url('/font/roboto/Roboto-Medium.woff') format('woff')
+  font-weight: 500
+  font-style: normal
+
+@font-face
+  font-family: 'Roboto'
+  src: url('/font/roboto/Roboto-Bold.woff2') format('woff2'), url('/font/roboto/Roboto-Bold.woff') format('woff')
+  font-weight: 700
+  font-style: normal
 
 @import url(//fonts.googleapis.com/icon?family=Material+Icons)
 

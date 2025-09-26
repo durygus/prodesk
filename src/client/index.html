@@ -9,6 +9,24 @@
   <link rel="stylesheet" href="/css/normalize.min.css"/>
   <link rel="stylesheet" href="/css/plugins.min.css"/>
   <link rel="stylesheet" href="/css/app.min.css"/>
+  
+  <!-- Prevent layout shift and flashing -->
+  <style>
+    body { visibility: hidden; }
+    body.loaded { visibility: visible; }
+    
+    /* Prevent font flash */
+    .wrapper, #topbar, #sidebar {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    body.loaded .wrapper,
+    body.loaded #topbar,
+    body.loaded #sidebar {
+      opacity: 1;
+    }
+  </style>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/vendor.js"></script>
@@ -130,6 +148,23 @@
 <!-- Mobile redirect removed - using responsive design instead -->
 
 <script src="/js/trudesk.min.js"></script>
+
+<!-- Show content after everything is loaded -->
+<script>
+  window.addEventListener('load', function() {
+    // Small delay to ensure all resources are loaded
+    setTimeout(function() {
+      document.body.classList.add('loaded');
+    }, 100);
+  });
+  
+  // Fallback in case load event doesn't fire
+  setTimeout(function() {
+    if (!document.body.classList.contains('loaded')) {
+      document.body.classList.add('loaded');
+    }
+  }, 2000);
+</script>
 
 </body>
 
