@@ -31,8 +31,6 @@ services:
       TD_MONGODB_SERVER: mongo
       TD_MONGODB_PORT: 27017
       TD_MONGODB_DATABASE: herzen
-      TD_MONGODB_USERNAME: admin
-      TD_MONGODB_PASSWORD: herzen123
     ports:
       - "8118:8118"
     volumes:
