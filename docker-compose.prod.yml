@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # MongoDB база данных
+  mongo:
+    image: mongo:4.4
+    container_name: herzen-mongo
+    restart: unless-stopped
+    volumes:
+      - /opt/herzen/data/mongo:/data/db  # Bind mount для продакшена
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - herzen-network
+
+  # Herzen Core приложение
+  herzen-core:
+    build: .
+    container_name: herzen-core
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      NODE_ENV: production
+      PORT: 8118
+      TD_MONGODB_SERVER: mongo
+      TD_MONGODB_PORT: 27017
+      TD_MONGODB_DATABASE: herzen
+    ports:
+      - "8118:8118"
+    volumes:
+      - /opt/herzen/data/app:/app/data
+      - /opt/herzen/logs:/app/logs
+      - /opt/herzen/uploads:/app/public/uploads
+    networks:
+      - herzen-network
+
+networks:
+  herzen-network:
+    driver: bridge
