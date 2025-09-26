@@ -219,6 +219,208 @@
     <script src="lib/angular-moment/angular-moment.min.js" charset="utf-8"></script>
     <script src="lib/angular-img-http-src/index.js" charset="utf-8"></script>
 
+    <!-- Safe localStorage service override -->
+    <script>
+      // Override ngStorage module to make it safer
+      angular.module('ngStorage').provider('$localStorage', function() {
+        var storageKeyPrefix = 'ngStorage-';
+        
+        this.setKeyPrefix = function (prefix) {
+          if (typeof prefix !== 'string') {
+            throw new TypeError('[ngStorage] - Provider.setKeyPrefix() expects a String.');
+          }
+          storageKeyPrefix = prefix;
+        };
+
+        var serializer = angular.toJson;
+        var deserializer = angular.fromJson;
+
+        this.setSerializer = function (s) {
+          if (typeof s !== 'function') {
+            throw new TypeError('[ngStorage] - Provider.setSerializer expects a function.');
+          }
+          serializer = s;
+        };
+
+        this.setDeserializer = function (d) {
+          if (typeof d !== 'function') {
+            throw new TypeError('[ngStorage] - Provider.setDeserializer expects a function.');
+          }
+          deserializer = d;
+        };
+
+        this.get = function (key) {
+          try {
+            return deserializer(localStorage.getItem(storageKeyPrefix + key));
+          } catch (e) {
+            console.warn('localStorage get error:', e.message);
+            return null;
+          }
+        };
+
+        this.set = function (key, value) {
+          try {
+            return localStorage.setItem(storageKeyPrefix + key, serializer(value));
+          } catch (e) {
+            console.warn('localStorage set error:', e.message);
+            return false;
+          }
+        };
+
+        this.$get = ['$rootScope', '$window', function($rootScope, $window) {
+          var $storage = {};
+          var webStorage = $window.localStorage;
+          var supported = true;
+
+          // Check if localStorage is available
+          try {
+            if (!webStorage || typeof webStorage.setItem !== 'function' || typeof webStorage.getItem !== 'function') {
+              supported = false;
+            }
+            // Test write/read
+            var testKey = '__test__';
+            webStorage.setItem(testKey, 'test');
+            webStorage.removeItem(testKey);
+          } catch (e) {
+            supported = false;
+          }
+
+          function safeDecode(value) {
+            try {
+              return angular.fromJson(value);
+            } catch (e) {
+              return value;
+            }
+          }
+
+          function safeEncode(value) {
+            try {
+              return angular.toJson(value);
+            } catch (e) {
+              return String(value);
+            }
+          }
+
+          if (supported) {
+            for (var key in webStorage) {
+              if (webStorage.hasOwnProperty(key) && storageKeyPrefix === key.slice(0, storageKeyPrefix.length)) {
+                try {
+                  $storage[key.slice(storageKeyPrefix.length)] = safeDecode(webStorage.getItem(key));
+                } catch (e) {
+                  console.warn('Error loading storage key:', key, e.message);
+                }
+              }
+            }
+          }
+
+          $storage.$default = function(items) {
+            for (var k in items) {
+              if (angular.isDefined(items[k]) && angular.isUndefined($storage[k])) {
+                $storage[k] = angular.copy(items[k]);
+              }
+            }
+            return $storage;
+          };
+
+          $storage.$reset = function(items) {
+            for (var k in $storage) {
+              if (k[0] !== '$') {
+                delete $storage[k];
+              }
+            }
+            return $storage.$default(items);
+          };
+
+          $storage.$sync = function () {
+            if (!supported) return;
+            
+            for (var key in $storage) {
+              if (key[0] === '$') continue;
+              
+              try {
+                if (angular.isUndefined($storage[key])) {
+                  webStorage.removeItem(storageKeyPrefix + key);
+                } else {
+                  webStorage.setItem(storageKeyPrefix + key, safeEncode($storage[key]));
+                }
+              } catch (e) {
+                console.warn('Error syncing storage key:', key, e.message);
+              }
+            }
+          };
+
+          $storage.$apply = function() {
+            var temp$storage;
+
+            if (!supported) return;
+            
+            _watchTimeoutId = null;
+
+            try {
+              if ((temp$storage = webStorage.getItem(storageKeyPrefix))) {
+                temp$storage = safeDecode(temp$storage);
+
+                for (var key in temp$storage) {
+                  if (angular.isDefined(temp$storage[key]) && $storage[key] !== temp$storage[key]) {
+                    $storage[key] = temp$storage[key];
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('Error applying storage changes:', e.message);
+            }
+          };
+
+          var _watchTimeoutId;
+
+          function _watchStorage() {
+            if (!supported) return;
+            
+            var temp$storage;
+            try {
+              if ((temp$storage = webStorage.getItem(storageKeyPrefix))) {
+                temp$storage = safeDecode(temp$storage);
+                for (var key in temp$storage) {
+                  if (angular.isDefined(temp$storage[key]) && $storage[key] !== temp$storage[key]) {
+                    $storage[key] = temp$storage[key];
+                    $rootScope.$broadcast('ngStorage-changed', key);
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('Error watching storage:', e.message);
+            }
+            _watchTimeoutId = setTimeout(_watchStorage, 100);
+          }
+
+          _watchStorage();
+
+          $rootScope.$watch(function() {
+            _watchTimeoutId || (_watchTimeoutId = setTimeout(function() {
+              if (angular.isObject($storage)) {
+                try {
+                  if (supported) {
+                    webStorage.setItem(storageKeyPrefix, safeEncode($storage));
+                    $storage.$sync();
+                  }
+                } catch (e) {
+                  console.warn('Error updating storage:', e.message);
+                }
+              }
+              _watchTimeoutId = null;
+            }, 100));
+          });
+
+          // If the browser doesn't support localStorage, use memory storage
+          if (!supported) {
+            console.warn('localStorage not supported, using memory storage');
+          }
+
+          return $storage;
+        }];
+      });
+    </script>
+
     <!-- your app's js -->
     <script src="js/dist/td.app.min.js"></script>
     
