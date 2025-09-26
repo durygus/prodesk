@@ -24,9 +24,21 @@ case "${1:-help}" in
     # Создаем директории на сервере
     ssh $SERVER "mkdir -p $SERVER_PROJECT_PATH/data/mongo $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads"
     
+    # Останавливаем MongoDB для безопасной синхронизации
+    echo -e "${YELLOW}⏸️  Останавливаем MongoDB для безопасной синхронизации...${NC}"
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker stop herzen-mongo" 2>/dev/null || true
+    
     # Синхронизируем MongoDB данные
     echo -e "${YELLOW}🗄️  Синхронизируем MongoDB...${NC}"
     rsync -avz --delete $LOCAL_DATA_PATH/mongo/ $SERVER:$SERVER_PROJECT_PATH/data/mongo/
+    
+    # Запускаем MongoDB обратно
+    echo -e "${YELLOW}▶️  Запускаем MongoDB...${NC}"
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker start herzen-mongo"
+    
+    # Ждем запуска MongoDB
+    echo -e "${YELLOW}⏳ Ждем запуска MongoDB (10 секунд)...${NC}"
+    sleep 10
     
     # Синхронизируем данные приложения
     echo -e "${YELLOW}📱 Синхронизируем данные приложения...${NC}"
@@ -49,19 +61,31 @@ case "${1:-help}" in
     # Создаем локальные директории
     mkdir -p $LOCAL_DATA_PATH/mongo $LOCAL_DATA_PATH/app logs public/uploads
     
+    # Останавливаем MongoDB на сервере для безопасного чтения
+    echo -e "${YELLOW}⏸️  Останавливаем MongoDB на сервере для безопасного чтения...${NC}"
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker stop herzen-mongo" 2>/dev/null || true
+    
     # Синхронизируем MongoDB данные
     echo -e "${YELLOW}🗄️  Синхронизируем MongoDB...${NC}"
     rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/data/mongo/ $LOCAL_DATA_PATH/mongo/
     
-    # Синхронизируем данные приложения
+    # Запускаем MongoDB на сервере обратно
+    echo -e "${YELLOW}▶️  Запускаем MongoDB на сервере...${NC}"
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker start herzen-mongo"
+    
+    # Ждем запуска MongoDB
+    echo -e "${YELLOW}⏳ Ждем запуска MongoDB (10 секунд)...${NC}"
+    sleep 10
+    
+    # Синхронизируем данные приложения (безопасно)
     echo -e "${YELLOW}📱 Синхронизируем данные приложения...${NC}"
     rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/data/app/ $LOCAL_DATA_PATH/app/ 2>/dev/null || true
     
-    # Синхронизируем логи
+    # Синхронизируем логи (безопасно)
     echo -e "${YELLOW}📋 Синхронизируем логи...${NC}"
     rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/logs/ ./logs/ 2>/dev/null || true
     
-    # Синхронизируем загрузки
+    # Синхронизируем загрузки (безопасно)
     echo -e "${YELLOW}📁 Синхронизируем загрузки...${NC}"
     rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/public/uploads/ ./public/uploads/ 2>/dev/null || true
     
