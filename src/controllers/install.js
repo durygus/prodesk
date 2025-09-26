@@ -532,6 +532,16 @@ installController.install = function (req, res) {
 }
 
 installController.restart = function (req, res) {
+  // В Docker окружении используем process.exit() для полного перезапуска контейнера
+  if (process.env.TRUDESK_DOCKER) {
+    res.json({ success: true, message: 'Restarting server...' })
+    setTimeout(() => {
+      process.exit(0) // Docker автоматически перезапустит контейнер
+    }, 1000)
+    return
+  }
+
+  // Обычная логика с PM2 для не-Docker окружения
   const pm2 = require('pm2')
   pm2.connect(function (err) {
     if (err) {
