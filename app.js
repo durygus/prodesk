@@ -243,7 +243,7 @@ function dbCallback (err, db) {
     s.getSettingByName('installed', function (err, installed) {
       if (err) return start()
 
-      if (!installed) {
+      if (!installed || !installed.value) {
         return launchInstallServer()
       } else {
         return launchServer(db)

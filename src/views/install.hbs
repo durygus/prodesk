@@ -457,8 +457,16 @@
                 }
             });
 
-            var mongoConnection = undefined;
-            var elasticConnection = undefined;
+            var mongoConnection = {{#if isDocker}}{
+                host: 'mongo',
+                port: '27017',
+                username: '',
+                password: '',
+                database: 'herzen'
+            }{{else}}undefined{{/if}};
+            var elasticConnection = {{#if isDocker}}{
+                enable: false
+            }{{else}}undefined{{/if}};
             var adminAccount = undefined;
 
             $('a#btn-skip-elastic').click(function(e) {
