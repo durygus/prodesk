@@ -37,6 +37,10 @@ ssh $SERVER "
   echo 'Останавливаем контейнеры...'
   docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
   
+  # Принудительно очищаем MongoDB папку через Docker (избегаем проблем с правами)
+  echo 'Очищаем MongoDB папку через Docker...'
+  docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true' 2>/dev/null || true
+  
   # Принудительно сбрасываем все локальные изменения
   echo 'Сбрасываем локальные изменения...'
   git reset --hard HEAD 2>/dev/null || true
@@ -76,6 +80,10 @@ ssh $SERVER "
   # Перезапускаем сервисы
   echo 'Запускаем сервисы...'
   docker-compose -f docker-compose.prod.yml up -d
+  
+  # Ждем запуска контейнеров
+  echo 'Ждем запуска контейнеров (10 секунд)...'
+  sleep 10
   
   echo 'Контейнеры перезапущены успешно'
 "
