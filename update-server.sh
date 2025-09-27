@@ -26,7 +26,7 @@ ssh -o ConnectTimeout=10 $SERVER "echo 'Подключение успешно'"
 
 # Обновляем код на сервере
 echo -e "${YELLOW}📦 Обновляем код на сервере...${NC}"
-ssh $SERVER "
+ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "
   cd $DEPLOY_PATH
   
   # Сохраняем текущую ветку
@@ -61,7 +61,7 @@ ssh $SERVER "
 
 # Пересобираем и перезапускаем контейнеры
 echo -e "${YELLOW}🔨 Пересобираем и перезапускаем контейнеры...${NC}"
-ssh $SERVER "
+ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "
   cd $DEPLOY_PATH
   
   # Проверяем место на диске
@@ -79,9 +79,13 @@ ssh $SERVER "
   
   # Перезапускаем сервисы
   echo 'Запускаем сервисы...'
-  timeout 60 docker-compose -f docker-compose.prod.yml up -d || echo 'Таймаут запуска, но продолжаем...'
+  docker-compose -f docker-compose.prod.yml up -d --remove-orphans
   
-  echo 'Контейнеры запущены'
+  # Ждем запуска контейнеров
+  echo 'Ждем запуска контейнеров (10 секунд)...'
+  sleep 10
+  
+  echo 'Контейнеры перезапущены успешно'
 "
 
 # Ждем немного и проверяем статус
@@ -90,11 +94,11 @@ sleep 15
 
 # Проверяем статус
 echo -e "${YELLOW}🔍 Проверяем статус сервисов...${NC}"
-ssh $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml ps"
+ssh -o BatchMode=yes -o ConnectTimeout=10 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml ps"
 
 # Проверяем версию кода
 echo -e "${YELLOW}📋 Проверяем версию кода...${NC}"
-ssh $SERVER "cd $DEPLOY_PATH && git log --oneline -3"
+ssh -o BatchMode=yes -o ConnectTimeout=10 $SERVER "cd $DEPLOY_PATH && git log --oneline -3"
 
 echo -e "${GREEN}✅ Обновление завершено!${NC}"
 echo -e "${BLUE}🌐 Web UI: http://$(echo $SERVER | cut -d'@' -f2)${NC}"
