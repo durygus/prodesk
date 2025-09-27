@@ -3,7 +3,7 @@
 # Скрипт быстрого обновления Herzen Core на сервере
 # Использование: ./update-server.sh [server_user@server_ip] [deploy_path]
 
-set -e
+# set -e  # Отключено для предотвращения завершения при ошибках SSH
 
 # Защита от множественного запуска
 LOCKFILE="/tmp/update-server-$$.lock"
@@ -39,14 +39,20 @@ echo -e "${YELLOW}📦 Обновляем код на сервере...${NC}"
 
 # Останавливаем сервисы и очищаем конфликты
 echo -e "${BLUE}🛑 Останавливаем сервисы...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml down 2>/dev/null || true"
+if ! ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml down 2>/dev/null || true"; then
+    echo -e "${YELLOW}⚠️ Предупреждение: не удалось остановить сервисы${NC}"
+fi
 
 echo -e "${BLUE}🧹 Очищаем конфликтующие процессы...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "pkill -f 'docker-compose.*build.*herzen-core' 2>/dev/null || true"
+if ! ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "pkill -f 'docker-compose.*build.*herzen-core' 2>/dev/null || true"; then
+    echo -e "${YELLOW}⚠️ Предупреждение: не удалось очистить процессы${NC}"
+fi
 
 # Очищаем MongoDB данные
 echo -e "${BLUE}🗄️ Очищаем MongoDB данные...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true' 2>/dev/null || true"
+if ! ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true' 2>/dev/null || true"; then
+    echo -e "${YELLOW}⚠️ Предупреждение: не удалось очистить MongoDB данные${NC}"
+fi
 
 # Обновляем код
 echo -e "${BLUE}📥 Обновляем код...${NC}"
