@@ -39,24 +39,24 @@ echo -e "${YELLOW}📦 Обновляем код на сервере...${NC}"
 
 # Останавливаем сервисы и очищаем конфликты
 echo -e "${BLUE}🛑 Останавливаем сервисы...${NC}"
-if ! ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml down 2>/dev/null || true"; then
+if ! ssh -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml down 2>/dev/null || true"; then
     echo -e "${YELLOW}⚠️ Предупреждение: не удалось остановить сервисы${NC}"
 fi
 
 echo -e "${BLUE}🧹 Очищаем конфликтующие процессы...${NC}"
-if ! ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "pkill -f 'docker-compose.*build.*herzen-core' 2>/dev/null || true"; then
+if ! ssh -o ConnectTimeout=15 $SERVER "pkill -f 'docker-compose.*build.*herzen-core' 2>/dev/null || true"; then
     echo -e "${YELLOW}⚠️ Предупреждение: не удалось очистить процессы${NC}"
 fi
 
 # Очищаем MongoDB данные
 echo -e "${BLUE}🗄️ Очищаем MongoDB данные...${NC}"
-if ! ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true' 2>/dev/null || true"; then
+if ! ssh -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true' 2>/dev/null || true"; then
     echo -e "${YELLOW}⚠️ Предупреждение: не удалось очистить MongoDB данные${NC}"
 fi
 
 # Обновляем код
 echo -e "${BLUE}📥 Обновляем код...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "
+ssh -o ConnectTimeout=30 $SERVER "
   cd $DEPLOY_PATH
   CURRENT_BRANCH=\$(git branch --show-current)
   echo \"Текущая ветка: \$CURRENT_BRANCH\"
@@ -77,15 +77,15 @@ echo -e "${BLUE}💾 Проверяем место на диске...${NC}"
 ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && df -h / | tail -1"
 
 echo -e "${BLUE}🧹 Очищаем Docker кэш...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "cd $DEPLOY_PATH && docker system prune -f 2>/dev/null || true && docker volume prune -f 2>/dev/null || true"
+ssh -o ConnectTimeout=30 $SERVER "cd $DEPLOY_PATH && docker system prune -f 2>/dev/null || true && docker volume prune -f 2>/dev/null || true"
 
 # Пересобираем образы
 echo -e "${BLUE}🔨 Пересобираем образы...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=300 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml build --no-cache herzen-core"
+ssh -o ConnectTimeout=300 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml build --no-cache herzen-core"
 
 # Запускаем сервисы
 echo -e "${BLUE}🚀 Запускаем сервисы...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=60 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml up -d --remove-orphans"
+ssh -o ConnectTimeout=60 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml up -d --remove-orphans"
 
 # Ждем немного и проверяем статус
 echo -e "${YELLOW}⏳ Ждем запуска контейнеров (15 секунд)...${NC}"
@@ -93,11 +93,11 @@ sleep 15
 
 # Проверяем статус
 echo -e "${YELLOW}🔍 Проверяем статус сервисов...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=10 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml ps"
+ssh -o ConnectTimeout=10 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml ps"
 
 # Проверяем версию кода
 echo -e "${YELLOW}📋 Проверяем версию кода...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=10 $SERVER "cd $DEPLOY_PATH && git log --oneline -3"
+ssh -o ConnectTimeout=10 $SERVER "cd $DEPLOY_PATH && git log --oneline -3"
 
 echo -e "${GREEN}✅ Обновление завершено!${NC}"
 echo -e "${BLUE}🌐 Web UI: http://$(echo $SERVER | cut -d'@' -f2)${NC}"
