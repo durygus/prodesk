@@ -36,72 +36,50 @@ ssh -o ConnectTimeout=10 $SERVER "echo 'Подключение успешно'"
 
 # Обновляем код на сервере
 echo -e "${YELLOW}📦 Обновляем код на сервере...${NC}"
+
+# Останавливаем сервисы и очищаем конфликты
+echo -e "${BLUE}🛑 Останавливаем сервисы...${NC}"
+ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml down 2>/dev/null || true"
+
+echo -e "${BLUE}🧹 Очищаем конфликтующие процессы...${NC}"
+ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "pkill -f 'docker-compose.*build.*herzen-core' 2>/dev/null || true"
+
+# Очищаем MongoDB данные
+echo -e "${BLUE}🗄️ Очищаем MongoDB данные...${NC}"
+ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true' 2>/dev/null || true"
+
+# Обновляем код
+echo -e "${BLUE}📥 Обновляем код...${NC}"
 ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "
   cd $DEPLOY_PATH
-  
-  # Сохраняем текущую ветку
   CURRENT_BRANCH=\$(git branch --show-current)
   echo \"Текущая ветка: \$CURRENT_BRANCH\"
-  
-  # Останавливаем контейнеры для безопасного обновления
-  echo 'Останавливаем контейнеры...'
-  docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
-  
-  # Убиваем все процессы docker-compose build для этого проекта
-  echo 'Останавливаем конфликтующие процессы сборки...'
-  pkill -f 'docker-compose.*build.*herzen-core' 2>/dev/null || true
-  sleep 2
-  
-  # Принудительно очищаем MongoDB папку через Docker (избегаем проблем с правами)
-  echo 'Очищаем MongoDB папку через Docker...'
-  docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true' 2>/dev/null || true
-  
-  # Принудительно сбрасываем все локальные изменения
-  echo 'Сбрасываем локальные изменения...'
   git reset --hard HEAD 2>/dev/null || true
   git clean -fd 2>/dev/null || true
-  
-  # Исключаем MongoDB данные из git (они создаются при установке)
-  echo 'Исключаем MongoDB данные из git...'
   echo 'data/mongo/' >> .gitignore 2>/dev/null || true
   git rm -r --cached data/mongo/ 2>/dev/null || true
-  
-  # Получаем обновления
-  echo 'Получаем обновления...'
   git fetch origin
   git reset --hard origin/\$CURRENT_BRANCH
-  
   echo 'Код обновлен успешно'
 "
 
 # Пересобираем и перезапускаем контейнеры
 echo -e "${YELLOW}🔨 Пересобираем и перезапускаем контейнеры...${NC}"
-ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "
-  cd $DEPLOY_PATH
-  
-  # Проверяем место на диске
-  echo 'Проверяем место на диске...'
-  df -h / | tail -1
-  
-  # Очищаем Docker кэш для освобождения места
-  echo 'Очищаем Docker кэш...'
-  docker system prune -f 2>/dev/null || true
-  docker volume prune -f 2>/dev/null || true
-  
-  # Пересобираем образы
-  echo 'Пересобираем образы...'
-  docker-compose -f docker-compose.prod.yml build --no-cache herzen-core
-  
-  # Перезапускаем сервисы
-  echo 'Запускаем сервисы...'
-  docker-compose -f docker-compose.prod.yml up -d --remove-orphans
-  
-  # Ждем запуска контейнеров
-  echo 'Ждем запуска контейнеров (10 секунд)...'
-  sleep 10
-  
-  echo 'Контейнеры перезапущены успешно'
-"
+
+# Проверяем место на диске и очищаем кэш
+echo -e "${BLUE}💾 Проверяем место на диске...${NC}"
+ssh -o BatchMode=yes -o ConnectTimeout=15 $SERVER "cd $DEPLOY_PATH && df -h / | tail -1"
+
+echo -e "${BLUE}🧹 Очищаем Docker кэш...${NC}"
+ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "cd $DEPLOY_PATH && docker system prune -f 2>/dev/null || true && docker volume prune -f 2>/dev/null || true"
+
+# Пересобираем образы
+echo -e "${BLUE}🔨 Пересобираем образы...${NC}"
+ssh -o BatchMode=yes -o ConnectTimeout=300 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml build --no-cache herzen-core"
+
+# Запускаем сервисы
+echo -e "${BLUE}🚀 Запускаем сервисы...${NC}"
+ssh -o BatchMode=yes -o ConnectTimeout=60 $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml up -d --remove-orphans"
 
 # Ждем немного и проверяем статус
 echo -e "${YELLOW}⏳ Ждем запуска контейнеров (15 секунд)...${NC}"
