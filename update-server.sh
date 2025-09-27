@@ -5,6 +5,16 @@
 
 set -e
 
+# Защита от множественного запуска
+LOCKFILE="/tmp/update-server-$$.lock"
+if ! mkdir "$LOCKFILE" 2>/dev/null; then
+    echo "❌ Скрипт уже запущен! Дождитесь завершения или удалите $LOCKFILE"
+    exit 1
+fi
+
+# Очистка при выходе
+trap 'rm -rf "$LOCKFILE"' EXIT
+
 # Цвета для вывода
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -36,6 +46,11 @@ ssh -o BatchMode=yes -o ConnectTimeout=30 $SERVER "
   # Останавливаем контейнеры для безопасного обновления
   echo 'Останавливаем контейнеры...'
   docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
+  
+  # Убиваем все процессы docker-compose build для этого проекта
+  echo 'Останавливаем конфликтующие процессы сборки...'
+  pkill -f 'docker-compose.*build.*herzen-core' 2>/dev/null || true
+  sleep 2
   
   # Принудительно очищаем MongoDB папку через Docker (избегаем проблем с правами)
   echo 'Очищаем MongoDB папку через Docker...'
