@@ -87,6 +87,15 @@ let port = nconf.get('port') || 8118
 
     app.use('/assets', express.static(path.join(__dirname, '../public/uploads/assets')))
 
+    // Special handling for Service Worker
+    app.get('/sw.js', function(req, res) {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.sendFile(path.join(__dirname, '../public/sw.js'));
+    });
+
     app.use(express.static(path.join(__dirname, '../public')))
     app.use(favicon(path.join(__dirname, '../public/img/favicon.ico')))
     app.use(bodyParser.urlencoded({ extended: false }))

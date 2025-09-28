@@ -26,12 +26,33 @@
     <!-- Prevent layout shift -->
     <style>
         /* Prevent layout shift while CSS loads */
-        body { visibility: hidden; }
-        body.loaded { visibility: visible; }
+        body { 
+            visibility: hidden; 
+            overflow: hidden;
+        }
+        body.loaded { 
+            visibility: visible; 
+            overflow: auto;
+        }
         
         /* Ensure critical elements are hidden until loaded */
-        .responsive-wrapper { opacity: 0; transition: opacity 0.3s ease; }
-        .responsive-wrapper.loaded { opacity: 1; }
+        .responsive-wrapper { 
+            opacity: 0; 
+            transition: opacity 0.3s ease;
+            min-height: 100vh;
+        }
+        .responsive-wrapper.loaded { 
+            opacity: 1; 
+        }
+        
+        /* Prevent Modernizr from causing layout shift */
+        .modernizr-test {
+            position: fixed !important;
+            top: -9999px !important;
+            left: -9999px !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
     </style>
     
     <!-- PWA Meta Tags -->
@@ -51,7 +72,7 @@
         // Generate PWA Manifest as Data URL
         const pwaManifest = {
             "name": "{{data.common.siteTitle}}",
-            "short_name": "{{data.common.siteTitle}}",
+            "short_name": "Herzen Core",
             "description": "Herzen Core - Help Desk System",
             "start_url": "/",
             "display": "standalone",
@@ -61,16 +82,22 @@
             "scope": "/",
             "icons": [
                 {
-                    "src": "{{data.common.favicon}}",
-                    "sizes": "192x192",
-                    "type": "image/png",
-                    "purpose": "any maskable"
+                    "src": "/favicon.ico",
+                    "sizes": "16x16 32x32 48x48",
+                    "type": "image/x-icon",
+                    "purpose": "any"
                 },
                 {
-                    "src": "{{data.common.favicon}}",
+                    "src": "/favicon.ico",
+                    "sizes": "192x192",
+                    "type": "image/x-icon",
+                    "purpose": "any"
+                },
+                {
+                    "src": "/favicon.ico",
                     "sizes": "512x512", 
-                    "type": "image/png",
-                    "purpose": "any maskable"
+                    "type": "image/x-icon",
+                    "purpose": "any"
                 }
             ],
             "categories": ["productivity", "business"],
@@ -232,27 +259,44 @@
     
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
+        console.log('PWA: Service Worker supported, attempting registration...');
+        
         window.addEventListener('load', function() {
+            console.log('PWA: Page loaded, registering Service Worker...');
+            
             // Register Service Worker from server file
-            navigator.serviceWorker.register('/sw.js')
-                .then(function(registration) {
-                    console.log('PWA Service Worker registered:', registration);
-                    
-                    // Check for updates
-                    registration.addEventListener('updatefound', function() {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', function() {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('PWA Service Worker updated');
-                                // Optionally show update notification
-                            }
-                        });
+            navigator.serviceWorker.register('/sw.js', {
+                scope: '/'
+            })
+            .then(function(registration) {
+                console.log('PWA Service Worker registered successfully:', registration);
+                console.log('PWA Scope:', registration.scope);
+                console.log('PWA Active Worker:', registration.active);
+                
+                // Check for updates
+                registration.addEventListener('updatefound', function() {
+                    console.log('PWA: Update found, installing new Service Worker...');
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', function() {
+                        console.log('PWA: New Service Worker state:', newWorker.state);
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('PWA Service Worker updated successfully');
+                            // Optionally show update notification
+                        }
                     });
-                })
-                .catch(function(error) {
-                    console.log('PWA Service Worker registration failed:', error);
                 });
+            })
+            .catch(function(error) {
+                console.error('PWA Service Worker registration failed:', error);
+                console.error('PWA Error details:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                });
+            });
         });
+    } else {
+        console.log('PWA: Service Worker not supported in this browser');
     }
 
 // PWA Install Prompt
