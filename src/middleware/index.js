@@ -129,10 +129,7 @@ module.exports = function (app, db, callback) {
           })
         })
 
-        // Mobile - Redirect to main responsive interface
-        app.use('/mobile', (req, res, next) => {
-          return res.redirect('/')
-        })
+        // Mobile redirect removed - using responsive design instead
 
         app.use('/assets', express.static(path.join(__dirname, '../../public/uploads/assets')))
         app.use('/uploads/users', express.static(path.join(__dirname, '../../public/uploads/users')))

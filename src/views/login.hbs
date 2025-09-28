@@ -2,6 +2,9 @@
 <html>
 <head>
     <title>{{{siteTitle}}} &middot; {{{title}}}</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="/css/plugins.min.css">
     <link rel="stylesheet" href="/css/app.min.css">
     <style type="text/css">
@@ -278,9 +281,7 @@
         });
 
         $(document).ready(function() {
-            if (screen.width <= 800) {
-                document.location = '/mobile';
-            }
+            // Mobile redirect removed - using responsive design instead
 
             setTimeout(function() {
                 $('#login-username').focus();
@@ -288,5 +289,13 @@
         });
     });
 </script>
+
+<script>
+// Fix for safari undefined error
+if (typeof safari === 'undefined') {
+    window.safari = false;
+}
+</script>
+
 </body>
 </html>
