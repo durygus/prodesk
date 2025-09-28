@@ -72,10 +72,9 @@ dist/
 *.heapsnapshot
 
 # Herzen Core - данные исключены из Git
-data/mongo/  # MongoDB данные (синхронизируются через sync-data.sh)
-# data/app/ - данные приложения
-# logs/ - логи приложения
-# public/uploads/ - загруженные файлы
+data/  # Все данные (MongoDB, приложение, логи)
+logs/  # Логи приложения
+public/uploads/  # Загруженные файлы (кроме defaults)
 
 # Скомпилированные JS файлы (создаются сборщиком)
 public/js/*.js
