@@ -20,12 +20,12 @@ const sizes = [
     { size: 512, name: 'icon-512.png' }
 ];
 
-// Путь к исходному SVG
-const inputPath = path.join(__dirname, 'public', 'icons', 'herzen-logo.svg');
+// Путь к исходному PNG логотипу с herzen.biz
+const inputPath = path.join(__dirname, 'public', 'icons', 'herzen-favicon.png');
 
 async function generateIcons() {
     try {
-        console.log('🎨 Генерируем PWA иконки из логотипа Герценовского университета...');
+        console.log('🎨 Генерируем PWA иконки из логотипа herzen.biz...');
         
         // Проверяем, что исходный файл существует
         if (!fs.existsSync(inputPath)) {
