@@ -12,6 +12,28 @@
     <link rel="preload" href="/css/plugins.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="/css/app.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+        <link rel="stylesheet" href="/css/normalize.min.css">
+        <link rel="stylesheet" href="/css/plugins.min.css">
+        <link rel="stylesheet" href="/css/app.min.css">
+    </noscript>
+    
+    <!-- Preload critical JavaScript -->
+    <link rel="preload" href="/js/vendor.js" as="script">
+    <link rel="preload" href="/js/trudesk.min.js" as="script">
+    
+    <!-- Prevent layout shift -->
+    <style>
+        /* Prevent layout shift while CSS loads */
+        body { visibility: hidden; }
+        body.loaded { visibility: visible; }
+        
+        /* Ensure critical elements are hidden until loaded */
+        .responsive-wrapper { opacity: 0; transition: opacity 0.3s ease; }
+        .responsive-wrapper.loaded { opacity: 1; }
+    </style>
+    
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#29b6f6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -192,32 +214,46 @@
 {{/block}}
 <!-- Mobile redirect removed - using responsive design instead -->
 
-<!-- PWA Service Worker and Install Logic -->
-<script>
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        // Register Service Worker from server file
-        navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-                console.log('PWA Service Worker registered:', registration);
-                
-                // Check for updates
-                registration.addEventListener('updatefound', function() {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', function() {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            console.log('PWA Service Worker updated');
-                            // Optionally show update notification
-                        }
-                    });
-                });
-            })
-            .catch(function(error) {
-                console.log('PWA Service Worker registration failed:', error);
-            });
+    <!-- PWA Service Worker and Install Logic -->
+    <script>
+    // Prevent layout shift - show content when ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for CSS to load
+        function waitForCSS() {
+            if (document.readyState === 'complete') {
+                document.body.classList.add('loaded');
+                document.querySelector('.responsive-wrapper')?.classList.add('loaded');
+            } else {
+                setTimeout(waitForCSS, 10);
+            }
+        }
+        waitForCSS();
     });
-}
+    
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            // Register Service Worker from server file
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('PWA Service Worker registered:', registration);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('PWA Service Worker updated');
+                                // Optionally show update notification
+                            }
+                        });
+                    });
+                })
+                .catch(function(error) {
+                    console.log('PWA Service Worker registration failed:', error);
+                });
+        });
+    }
 
 // PWA Install Prompt
 let deferredPrompt;
