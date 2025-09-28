@@ -1,0 +1,10 @@
+mongo:
+  host: mongo
+  port: '27017'
+  username: ''
+  password: ''
+  database: herzen
+tokens:
+  secret: 0b5e0e5a6bdba1e51cc3b22b11059feaa286e436ca63faaed90ea15fd60fccf76deea6f1
+  expires: 900
+elasticsearch: {}
