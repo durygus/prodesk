@@ -4,7 +4,6 @@ import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
   
   // Настройка входных точек
   build: {
@@ -20,7 +19,10 @@ export default defineConfig({
         'app': resolve(__dirname, 'src/public/js/app.js'),
         
         // Vendor библиотеки (основные)
-        'vendor': resolve(__dirname, 'src/public/js/vendor-entry.js')
+        'vendor': resolve(__dirname, 'src/public/js/vendor-entry.js'),
+        
+        // Глобальные переменные для legacy кода
+        'globals': resolve(__dirname, 'src/globals.js')
       },
       output: {
         dir: 'public/js',
@@ -142,5 +144,25 @@ export default defineConfig({
       'mobx',
       'mobx-react'
     ]
-  }
+  },
+  
+  // Настройка для legacy библиотек
+  define: {
+    global: 'globalThis',
+  },
+  
+  // Плагины для работы с legacy кодом
+  plugins: [
+    react(),
+    {
+      name: 'legacy-globals',
+      config() {
+        return {
+          define: {
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+          }
+        }
+      }
+    }
+  ]
 })

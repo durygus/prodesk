@@ -2209,3 +2209,13 @@ define([
 
   return helpers
 })
+
+// ES6 export для Vite
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = define(['jquery', 'underscore', 'lodash'], function($, _, lodash) {
+    // Повторяем логику AMD модуля для CommonJS
+    const helpers = {}
+    // ... здесь должна быть вся логика helpers
+    return helpers
+  })
+}
