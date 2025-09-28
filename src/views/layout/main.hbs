@@ -6,6 +6,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{data.common.csrfToken}}" />
     <link rel="icon" href="{{data.common.favicon}}" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#29b6f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="{{data.common.siteTitle}}" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="192x192" href="{{data.common.favicon}}" />
+    <link rel="icon" type="image/png" sizes="192x192" href="{{data.common.favicon}}" />
+    <link rel="icon" type="image/png" sizes="512x512" href="{{data.common.favicon}}" />
+    
+    <!-- Inline PWA Manifest -->
+    <script>
+        // Generate PWA Manifest as Data URL
+        const pwaManifest = {
+            "name": "{{data.common.siteTitle}}",
+            "short_name": "{{data.common.siteTitle}}",
+            "description": "Herzen Core - Help Desk System",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#29b6f6",
+            "orientation": "portrait-primary",
+            "scope": "/",
+            "icons": [
+                {
+                    "src": "{{data.common.favicon}}",
+                    "sizes": "192x192",
+                    "type": "image/png",
+                    "purpose": "any maskable"
+                },
+                {
+                    "src": "{{data.common.favicon}}",
+                    "sizes": "512x512", 
+                    "type": "image/png",
+                    "purpose": "any maskable"
+                }
+            ],
+            "categories": ["productivity", "business"],
+            "lang": "ru",
+            "dir": "ltr"
+        };
+        
+        // Create manifest as data URL
+        const manifestBlob = new Blob([JSON.stringify(pwaManifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        
+        // Add manifest link to head
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestURL;
+        document.head.appendChild(link);
+    </script>
     <link rel="stylesheet" href="/css/normalize.min.css"/>
 
     {{#block 'css'}}
@@ -131,6 +186,155 @@
 
 {{/block}}
 <!-- Mobile redirect removed - using responsive design instead -->
+
+<!-- PWA Service Worker and Install Logic -->
+<script>
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        // Create Service Worker as Data URL
+        const swCode = `
+            const CACHE_NAME = 'herzen-core-v1';
+            const urlsToCache = [
+                '/',
+                '/css/normalize.min.css',
+                '/css/plugins.min.css', 
+                '/css/app.min.css',
+                '/js/vendor.js',
+                '/js/trudesk.min.js',
+                '/socket.io/socket.io.js'
+            ];
+
+            // Install event - cache resources
+            self.addEventListener('install', function(event) {
+                event.waitUntil(
+                    caches.open(CACHE_NAME)
+                        .then(function(cache) {
+                            return cache.addAll(urlsToCache);
+                        })
+                );
+                self.skipWaiting();
+            });
+
+            // Fetch event - serve from cache when offline
+            self.addEventListener('fetch', function(event) {
+                event.respondWith(
+                    caches.match(event.request)
+                        .then(function(response) {
+                            // Return cached version or fetch from network
+                            return response || fetch(event.request);
+                        }
+                    )
+                );
+            });
+
+            // Activate event - clean up old caches
+            self.addEventListener('activate', function(event) {
+                event.waitUntil(
+                    caches.keys().then(function(cacheNames) {
+                        return Promise.all(
+                            cacheNames.map(function(cacheName) {
+                                if (cacheName !== CACHE_NAME) {
+                                    return caches.delete(cacheName);
+                                }
+                            })
+                        );
+                    })
+                );
+                self.clients.claim();
+            });
+        `;
+        
+        // Create Service Worker as Blob URL
+        const swBlob = new Blob([swCode], {type: 'application/javascript'});
+        const swURL = URL.createObjectURL(swBlob);
+        
+        // Register Service Worker
+        navigator.serviceWorker.register(swURL)
+            .then(function(registration) {
+                console.log('PWA Service Worker registered:', registration);
+            })
+            .catch(function(error) {
+                console.log('PWA Service Worker registration failed:', error);
+            });
+    });
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+let installButton;
+
+// Create install button for PWA
+function createInstallButton() {
+    if (installButton) return;
+    
+    installButton = document.createElement('button');
+    installButton.innerHTML = '📱 Установить приложение';
+    installButton.style.cssText = \`
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #29b6f6;
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        display: none;
+    \`;
+    
+    installButton.addEventListener('click', function() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('PWA installation accepted');
+                } else {
+                    console.log('PWA installation dismissed');
+                }
+                deferredPrompt = null;
+                installButton.style.display = 'none';
+            });
+        }
+    });
+    
+    document.body.appendChild(installButton);
+}
+
+// Listen for beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', function(e) {
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    
+    // Show install button on mobile devices
+    if (window.innerWidth <= 768) {
+        createInstallButton();
+        installButton.style.display = 'block';
+    }
+});
+
+// Listen for app installed event
+window.addEventListener('appinstalled', function(evt) {
+    console.log('PWA was installed');
+    if (installButton) {
+        installButton.style.display = 'none';
+    }
+});
+
+// Check if app is running in standalone mode
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    console.log('PWA is running in standalone mode');
+    // Hide install button if already installed
+    if (installButton) {
+        installButton.style.display = 'none';
+    }
+}
+</script>
 
 <script src="/js/trudesk.min.js"></script>
 
