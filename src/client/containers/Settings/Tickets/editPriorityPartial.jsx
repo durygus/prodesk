@@ -15,7 +15,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 import ColorSelector from 'components/ColorSelector'
 import Button from 'components/Button'

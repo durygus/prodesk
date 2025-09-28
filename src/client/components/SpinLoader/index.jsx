@@ -16,7 +16,7 @@ import React, { createRef } from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 class SpinLoader extends React.Component {
   constructor (props) {

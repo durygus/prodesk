@@ -18,7 +18,7 @@ import { observer } from 'mobx-react'
 
 import EasyMDE from 'components/EasyMDE'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import 'jquery_custom'
 import helpers from 'lib/helpers'
 

@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
-import d3 from 'd3'
-import MG from 'metricsgraphics'
+// d3 доступен глобально через window.d3
+// MG доступен глобально через window.MG
 
 const noDataDiv = <div className='no-data-available-text'>No Data Available</div>
 
@@ -40,8 +40,8 @@ export default function MGraph (props) {
       }
       if (props.area) graphParams.area = [1]
 
-      graphParams.data = MG.convert.date(validData, 'date')
-      MG.data_graphic(graphParams)
+      graphParams.data = window.MG.convert.date(validData, 'date')
+      window.MG.data_graphic(graphParams)
     }
   }, [props.data])
 

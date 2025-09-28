@@ -26,7 +26,7 @@ import BaseModal from 'containers/Modals/BaseModal'
 import helpers from 'lib/helpers'
 import Button from 'components/Button'
 import MultiSelect from 'components/MultiSelect'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import SpinLoader from 'components/SpinLoader'
 
 @observer

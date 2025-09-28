@@ -15,8 +15,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import $ from 'jquery'
-import UIKit from 'uikit'
+// $ доступен глобально через window.$
+// UIKit доступен глобально через window.UIkit
 
 import { hideModal, clearModal } from 'actions/common'
 
@@ -32,7 +32,7 @@ class BaseModal extends React.Component {
   componentDidMount () {
     this.setState(
       {
-        modal: UIKit.modal(this.modal, this.props.options)
+        modal: window.UIkit.modal(this.modal, this.props.options)
       },
       () => {
         this.state.modal.show()

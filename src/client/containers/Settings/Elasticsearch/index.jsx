@@ -26,7 +26,7 @@ import EnableSwitch from 'components/Settings/EnableSwitch'
 import Log from '../../../logger'
 import axios from 'axios'
 import helpers from 'lib/helpers'
-import UIKit from 'uikit'
+// UIKit доступен глобально через window.UIkit
 
 @observer
 class ElasticsearchSettingsContainer extends React.Component {
@@ -182,7 +182,7 @@ class ElasticsearchSettingsContainer extends React.Component {
 
   rebuildIndex () {
     const self = this
-    UIKit.modal.confirm(
+    window.UIkit.modal.confirm(
       'Are you sure you want to rebuild the index?',
       function () {
         self.esStatus = 'Rebuilding...'

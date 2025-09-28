@@ -28,7 +28,7 @@ import Button from 'components/Button'
 import SingleSelect from 'components/SingleSelect'
 import MultiSelect from 'components/MultiSelect'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import helpers from 'lib/helpers'
 
 @observer

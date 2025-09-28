@@ -15,8 +15,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import $ from 'jquery'
-import UIkit from 'uikit'
+// $ доступен глобально через window.$
+// UIKit доступен глобально через window.window.UIkit
 import helpers from 'lib/helpers'
 
 class UploadButtonWithX extends React.Component {
@@ -47,7 +47,7 @@ class UploadButtonWithX extends React.Component {
       }
     }
 
-    UIkit.uploadSelect($uploadSelect, uploadLogoSettings)
+    window.window.UIkit.uploadSelect($uploadSelect, uploadLogoSettings)
   }
 
   render () {

@@ -17,12 +17,12 @@ import PropTypes from 'prop-types'
 
 import Log from '../../logger'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import toMarkdown from 'tomarkdown'
-import Easymde from 'easymde'
+// toMarkdown доступен глобально через window.toMarkdown
+// EasyMDE доступен глобально через window.EasyMDE
 
 import 'inlineAttachment'
 import 'inputInlineAttachment'
@@ -38,7 +38,7 @@ class EasyMDE extends React.Component {
   }
 
   componentDidMount () {
-    this.easymde = new Easymde({
+    this.easymde = new window.EasyMDE({
       element: this.element,
       forceSync: true,
       minHeight: this.props.height,
@@ -112,7 +112,7 @@ class EasyMDE extends React.Component {
   static getDerivedStateFromProps (nextProps, state) {
     if (typeof nextProps.defaultValue !== 'undefined') {
       if (!state.loaded && nextProps.defaultValue !== state.value)
-        return { value: toMarkdown(nextProps.defaultValue).replace(/\\n/gi, '\n'), loaded: true }
+        return { value: window.toMarkdown(nextProps.defaultValue).replace(/\\n/gi, '\n'), loaded: true }
     }
 
     return null
@@ -145,7 +145,7 @@ class EasyMDE extends React.Component {
 
   setEditorText (value) {
     this.setState({
-      value: toMarkdown(value)
+      value: window.toMarkdown(value)
     })
   }
 
@@ -153,58 +153,58 @@ class EasyMDE extends React.Component {
     return [
       {
         name: 'bold',
-        action: Easymde.toggleBold,
+        action: window.EasyMDE.toggleBold,
         className: 'material-icons mi-bold no-ajaxy',
         title: 'Bold'
       },
       {
         name: 'italic',
-        action: Easymde.toggleItalic,
+        action: window.EasyMDE.toggleItalic,
         className: 'material-icons mi-italic no-ajaxy',
         title: 'Italic'
       },
       {
         name: 'Title',
-        action: Easymde.toggleHeadingSmaller,
+        action: window.EasyMDE.toggleHeadingSmaller,
         className: 'material-icons mi-title no-ajaxy',
         title: 'Title'
       },
       '|',
       {
         name: 'Code',
-        action: Easymde.toggleCodeBlock,
+        action: window.EasyMDE.toggleCodeBlock,
         className: 'material-icons mi-code no-ajaxy',
         title: 'Code'
       },
       {
         name: 'Quote',
-        action: Easymde.toggleBlockquote,
+        action: window.EasyMDE.toggleBlockquote,
         className: 'material-icons mi-quote no-ajaxy',
         title: 'Quote'
       },
       {
         name: 'Generic List',
-        action: Easymde.toggleUnorderedList,
+        action: window.EasyMDE.toggleUnorderedList,
         className: 'material-icons mi-list no-ajaxy',
         title: 'Generic List'
       },
       {
         name: 'Numbered List',
-        action: Easymde.toggleOrderedList,
+        action: window.EasyMDE.toggleOrderedList,
         className: 'material-icons mi-numlist no-ajaxy',
         title: 'Numbered List'
       },
       '|',
       {
         name: 'Create Link',
-        action: Easymde.drawLink,
+        action: window.EasyMDE.drawLink,
         className: 'material-icons mi-link no-ajaxy',
         title: 'Create Link'
       },
       '|',
       {
         name: 'Toggle Preview',
-        action: Easymde.togglePreview,
+        action: window.EasyMDE.togglePreview,
         className: 'material-icons mi-preview no-disable no-mobile no-ajaxy',
         title: 'Toggle Preview'
       }

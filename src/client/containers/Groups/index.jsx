@@ -29,7 +29,7 @@ import TableRow from 'components/Table/TableRow'
 import TableCell from 'components/Table/TableCell'
 import ButtonGroup from 'components/ButtonGroup'
 
-import UIKit from 'uikit'
+// UIKit доступен глобально через window.UIkit
 import helpers from 'lib/helpers'
 
 class GroupsContainer extends React.Component {
@@ -46,7 +46,7 @@ class GroupsContainer extends React.Component {
   }
 
   onDeleteGroupClick (_id) {
-    UIKit.modal.confirm(
+    window.UIkit.modal.confirm(
       `<h2>Are you sure?</h2>
         <p style="font-size: 15px;">
             <span class="uk-text-danger" style="font-size: 15px;">This is a permanent action.</span> 

@@ -22,7 +22,7 @@ import BaseModal from './BaseModal'
 import Button from 'components/Button'
 import ColorSelector from 'components/ColorSelector'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import helpers from 'lib/helpers'
 import EnableSwitch from 'components/Settings/EnableSwitch'
 

@@ -1,7 +1,7 @@
 import React, { createRef } from 'react'
 import PropTypes from 'prop-types'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import 'qrcode'
 
 class QRCode extends React.Component {

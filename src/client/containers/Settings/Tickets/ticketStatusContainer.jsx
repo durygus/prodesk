@@ -20,7 +20,7 @@ import { showModal, hideModal } from 'actions/common'
 import SplitSettingsPanel from 'components/Settings/SplitSettingsPanel'
 import Button from 'components/Button'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import axios from 'axios'
 import helpers from 'lib/helpers'
 import TicketStatusBody from 'containers/Settings/Tickets/ticketStatusBody'

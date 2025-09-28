@@ -16,7 +16,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 import IsArray from 'lodash/isArray'
-import $ from 'jquery'
+// window.$ доступен глобально через window.window.$
 
 import Helpers from 'modules/helpers'
 
@@ -38,14 +38,14 @@ class Submenu extends Component {
 
   buildFloatingMenu (navId) {
     if (this.props.children) {
-      let $sideBarToRight = $('.sidebar-to-right')
+      let $sideBarToRight = window.$('.sidebar-to-right')
       $sideBarToRight.find('#side-nav-sub-' + navId).remove()
-      let ul = $('<ul id="side-nav-sub-' + this.props.id + '" class="side-nav-sub side-nav-floating"></ul>')
+      let ul = window.$('<ul id="side-nav-sub-' + this.props.id + '" class="side-nav-sub side-nav-floating"></ul>')
       let li = null
       if (!IsArray(this.props.children)) {
         if (this.props.children.type.name === 'NavSeperator') return
 
-        li = $(
+        li = window.$(
           '<li class="' +
             (this.props.children.props.active ? ' active ' : '') +
             '"><a href="' +
@@ -61,7 +61,7 @@ class Submenu extends Component {
           if (this.props.children[i].type.name === 'NavSeperator') ul.append('<hr />')
           else {
             if (this.props.children[i].props.hasSeperator) ul.append('<hr />')
-            li = $(
+            li = window.$(
               '<li class="' +
                 (this.props.children[i].props.active ? ' active ' : '') +
                 '"><a href="' +
@@ -80,7 +80,7 @@ class Submenu extends Component {
       Helpers.UI.setupSidebarTether()
 
       //Ajaxify new floating menu links
-      $('body').ajaxify()
+      window.$('body').ajaxify()
     }
   }
 

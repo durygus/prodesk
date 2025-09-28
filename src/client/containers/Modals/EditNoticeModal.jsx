@@ -26,7 +26,7 @@ import { HexColorPicker, HexColorInput } from 'react-colorful'
 import { PopoverColorPicker } from 'components/PopoverColorPicker'
 import MultiSelect from 'components/MultiSelect'
 import Button from 'components/Button'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 @observer
 class EditNoticeModal extends React.Component {

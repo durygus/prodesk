@@ -19,7 +19,7 @@ import sanitizeHtml from 'sanitize-html'
 
 import { unloadSearchResults } from 'actions/search'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import helpers from 'lib/helpers'
 
 class SearchResults extends React.Component {

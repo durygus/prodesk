@@ -24,7 +24,7 @@ import { createTicket, fetchTicketTypes, getTagsWithPage } from 'actions/tickets
 import { fetchGroups } from 'actions/groups'
 import { fetchAccountsCreateTicket } from 'actions/accounts'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import helpers from 'lib/helpers'
 
 import BaseModal from 'containers/Modals/BaseModal'

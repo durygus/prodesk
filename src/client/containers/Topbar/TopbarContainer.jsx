@@ -32,7 +32,7 @@ import ConversationsDropdownPartial from 'containers/Topbar/conversationsDropdow
 import OnlineUserListPartial from 'containers/Topbar/onlineUserList'
 
 import helpers from 'lib/helpers'
-import Cookies from 'jscookie'
+// window.Cookies доступен глобально через window.window.Cookies
 import { NOTIFICATIONS_UPDATE, USERS_UPDATE, NOTICE_UI_SHOW, NOTICE_UI_CLEAR } from 'serverSocket/socketEventConsts'
 
 @observer
@@ -84,12 +84,12 @@ class TopbarContainer extends React.Component {
   }
 
   shouldShowBanner () {
-    const hasSeen = Cookies.get('trudesk_info_banner_closed') === 'true'
+    const hasSeen = window.Cookies.get('trudesk_info_banner_closed') === 'true'
     if (hasSeen) this.showInfoBanner = false
   }
 
   closeInfo () {
-    Cookies.set('trudesk_info_banner_closed', 'true')
+    window.Cookies.set('trudesk_info_banner_closed', 'true')
     this.showInfoBanner = false
   }
 
@@ -98,7 +98,7 @@ class TopbarContainer extends React.Component {
     this.props.showNotice(notice)
 
     if (cookieName) {
-      const showNoticeWindow = Cookies.get(cookieName) !== 'false'
+      const showNoticeWindow = window.Cookies.get(cookieName) !== 'false'
       if (showNoticeWindow)
         this.props.showModal('NOTICE_ALERT', {
           modalTag: 'NOTICE_ALERT',

@@ -17,9 +17,9 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import Log from '../../../logger'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import axios from 'axios'
-import UIKit from 'uikit'
+// UIKit доступен глобально через window.UIkit
 import helpers from 'lib/helpers'
 
 import { updateSetting } from 'actions/settings'
@@ -85,7 +85,7 @@ class TicketsSettings extends React.Component {
   componentDidMount () {
     this.getTicketTags(null, 0)
     const $tagPagination = $('#tagPagination')
-    this.tagsPagination = UIKit.pagination($tagPagination, {
+    this.tagsPagination = window.UIkit.pagination($tagPagination, {
       items: this.props.tagsSettings.totalCount ? this.props.tagsSettings.totalCount : 0,
       itemsOnPage: 16
     })
@@ -211,7 +211,7 @@ class TicketsSettings extends React.Component {
   }
 
   onRemoveTagClicked (e, tag) {
-    UIKit.modal.confirm(
+    window.UIkit.modal.confirm(
       `Really delete tag <strong>${tag.get()}</strong><br />
         <i style="font-size: 13px; color: #e53935">This will remove the tag from all associated tickets.</i>`,
       () => {

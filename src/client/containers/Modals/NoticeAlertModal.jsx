@@ -22,7 +22,7 @@ import Button from 'components/Button'
 import BaseModal from 'containers/Modals/BaseModal'
 
 import helpers from 'lib/helpers'
-import Cookies from 'jscookie'
+// window.Cookies доступен глобально через window.window.Cookies
 
 class NoticeAlertModal extends React.Component {
   onConfirmClick (e) {
@@ -31,7 +31,7 @@ class NoticeAlertModal extends React.Component {
     // Set Cookie
     const expiresDate = new Date()
     expiresDate.setDate(expiresDate.getDate() + 1)
-    Cookies.set(this.props.noticeCookieName, 'false', { expires: expiresDate })
+    window.Cookies.set(this.props.noticeCookieName, 'false', { expires: expiresDate })
     this.props.hideModal('NOTICE_ALERT')
   }
 

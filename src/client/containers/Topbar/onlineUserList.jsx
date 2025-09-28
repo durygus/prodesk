@@ -24,7 +24,7 @@ import { startConversation } from 'lib2/chat'
 
 import OffCanvas from 'components/OffCanvas'
 
-import UIkit from 'uikit'
+// UIKit доступен глобально через window.window.UIkit
 
 @observer
 class OnlineUserListPartial extends React.Component {
@@ -56,7 +56,7 @@ class OnlineUserListPartial extends React.Component {
 
   onUserClicked (e, _id) {
     e.preventDefault()
-    UIkit.offcanvas.hide()
+    window.window.UIkit.offcanvas.hide()
 
     startConversation(this.props.sessionUser._id, _id).then(conversation => {
       this.props.socket.emit(MESSAGES_SPAWN_CHAT_WINDOW, { convoId: conversation._id })

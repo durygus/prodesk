@@ -16,7 +16,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import Log from '../../../logger'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 import helpers from 'lib/helpers'
 import { fetchSettings } from 'actions/settings'

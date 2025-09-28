@@ -31,8 +31,8 @@ import Grid from 'components/Grid'
 import GridItem from 'components/Grid/GridItem'
 
 import { startConversation } from 'lib2/chat'
-import UIKit from 'uikit'
-import $ from 'jquery'
+// UIKit доступен глобально через window.UIkit
+// $ доступен глобально через window.$
 import helpers from 'lib/helpers'
 
 @observer
@@ -225,7 +225,7 @@ class MessagesContainer extends React.Component {
       }
       const convoId = $li.attr('data-conversation-id')
       if (action.toLowerCase() === 'delete') {
-        UIKit.modal.confirm(
+        window.UIkit.modal.confirm(
           'Are you sure you want to delete this conversation?',
           function () {
             // Confirm

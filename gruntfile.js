@@ -126,8 +126,10 @@ module.exports = function (grunt) {
 
     shell: {
       webpackWatch: 'npm run webpackwatch',
-      webpackDev: 'npm run webpackdev',
-      webpackDist: 'npm run webpackdist'
+      webpackDev: 'npm run webpackdev', 
+      webpackDist: 'npm run webpackdist',
+      viteBuild: 'vite build',
+      viteDev: 'vite'
     }
   })
 

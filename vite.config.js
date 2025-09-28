@@ -8,27 +8,18 @@ export default defineConfig({
   // Настройка входных точек
   build: {
     rollupOptions: {
-      input: {
-        // Главное React приложение
-        'trudesk.min': resolve(__dirname, 'src/client/app.jsx'),
-        
-        // Модульная система
-        'truRequire': resolve(__dirname, 'src/public/js/truRequire.js'),
-        
-        // Основной JS файл
-        'app': resolve(__dirname, 'src/public/js/app.js'),
-        
-        // Vendor библиотеки (основные)
-        'vendor': resolve(__dirname, 'src/public/js/vendor-entry.js'),
-        
-        // Глобальные переменные для legacy кода
-        'globals': resolve(__dirname, 'src/globals.js')
-      },
+      input: resolve(__dirname, 'src/client/app.jsx'),
       output: {
         dir: 'public/js',
-        entryFileNames: '[name].js',
-        chunkFileNames: '[name].js',
-        assetFileNames: '[name].[ext]'
+        entryFileNames: 'trudesk.min.js',
+        chunkFileNames: 'chunk-[name]-[hash].js',
+        assetFileNames: '[name].[ext]',
+        // Полностью отключаем разделение на чанки
+        manualChunks: undefined,
+        // Встраиваем динамические импорты в основной файл
+        inlineDynamicImports: true,
+        // Используем IIFE формат для совместимости с браузером
+        format: 'iife'
       }
     },
     
@@ -38,7 +29,10 @@ export default defineConfig({
     target: 'es2015',
     
     // Отключаем CSS code splitting для совместимости
-    cssCodeSplit: false
+    cssCodeSplit: false,
+    
+    // Увеличиваем лимит размера чанка чтобы избежать разделения
+    chunkSizeWarningLimit: 2000
   },
   
   // Настройка разрешения модулей

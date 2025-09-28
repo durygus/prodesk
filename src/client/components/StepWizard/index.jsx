@@ -4,12 +4,12 @@ import { union } from 'lodash'
 import { connect } from 'react-redux'
 import clsx from 'clsx'
 
-import velocity from 'velocity'
+// window.Velocity доступен глобально через window.Velocity
 import helpers from 'lib/helpers'
 import 'jquery_steps'
 import 'jquery_actual'
-import $ from 'jquery'
-import UIKit from 'uikit'
+// $ доступен глобально через window.$
+// UIKit доступен глобально через window.UIkit
 
 class StepWizard extends React.Component {
   constructor (props) {
@@ -160,8 +160,8 @@ class StepWizard extends React.Component {
       }
     }
 
-    UIKit.uploadSelect(wizard.find('#upload-select'), settings)
-    UIKit.uploadDrop(wizard.find('#upload-drop'), settings)
+    window.UIkit.uploadSelect(wizard.find('#upload-select'), settings)
+    window.UIkit.uploadDrop(wizard.find('#upload-drop'), settings)
   }
 
   show = () => {
@@ -186,7 +186,7 @@ class StepWizard extends React.Component {
       .actual('outerHeight')
     $(thisWizard)
       .children('.content')
-      .velocity({ height: thisHeight }, { duration: 140, easing: [0.215, 0.61, 0.355, 1] })
+      .window.Velocity({ height: thisHeight }, { duration: 140, easing: [0.215, 0.61, 0.355, 1] })
   }
 
   disableUIElements = () => {

@@ -15,7 +15,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 class TitlePagination extends React.Component {
   componentDidMount () {}

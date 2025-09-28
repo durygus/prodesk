@@ -14,7 +14,7 @@ import { setSessionUser } from 'actions/common'
 
 import axios from 'axios'
 import anime from 'animejs'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import 'autogrow'
 import helpers from 'lib/helpers'
 

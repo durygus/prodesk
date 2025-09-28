@@ -28,8 +28,8 @@ import Log from '../../../logger'
 
 import { BACKUP_RESTORE_SHOW_OVERLAY, BACKUP_RESTORE_COMPLETE } from 'serverSocket/socketEventConsts'
 
-import $ from 'jquery'
-import UIKit from 'uikit'
+// $ доступен глобально через window.$
+// UIKit доступен глобально через window.UIkit
 import axios from 'axios'
 import helpers from 'lib/helpers'
 
@@ -57,7 +57,7 @@ class BackupRestoreSettingsContainer extends React.Component {
     if (!this.deletedTicketsPagination) {
       const $deletedTicketPagination = $('.deletedTicketPagination')
       if ($deletedTicketPagination.length > 0) {
-        this.deletedTicketsPagination = UIKit.pagination($deletedTicketPagination, {
+        this.deletedTicketsPagination = window.UIkit.pagination($deletedTicketPagination, {
           items: this.props.settings.deletedTicketsCount,
           itemsOnPage: 15
         })
@@ -134,7 +134,7 @@ class BackupRestoreSettingsContainer extends React.Component {
       }
     }
 
-    UIKit.uploadSelect($uploadSelect, settings)
+    window.UIkit.uploadSelect($uploadSelect, settings)
   }
 
   onBackupNowClicked (e) {
@@ -146,7 +146,7 @@ class BackupRestoreSettingsContainer extends React.Component {
     if (!backup) return
 
     const filename = backup.get('filename')
-    UIKit.modal.confirm(
+    window.UIkit.modal.confirm(
       `<h2>Are you sure?</h2>
         <p style="font-size: 15px;">
             <span class="uk-text-danger" style="font-size: 15px;">This is a permanent action.</span> 
@@ -182,7 +182,7 @@ class BackupRestoreSettingsContainer extends React.Component {
   }
 
   onDeleteBackupClicked (e, backup) {
-    UIKit.modal.confirm(
+    window.UIkit.modal.confirm(
       `<h2 class="text-light">Are you sure?</h2>
         <p style="font-size: 14px;">This action is permanent and will destroy the backup file: 
             <strong>${backup.get('filename')}</strong>

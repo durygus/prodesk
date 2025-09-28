@@ -25,7 +25,7 @@ import PageContent from 'components/PageContent'
 import helpers from 'lib/helpers'
 import Avatar from 'components/Avatar/Avatar'
 import Button from 'components/Button'
-import UIKit from 'uikit'
+// UIKit доступен глобально через window.UIkit
 import Table from 'components/Table'
 import TableRow from 'components/Table/TableRow'
 import TableCell from 'components/Table/TableCell'
@@ -67,7 +67,7 @@ class TeamsContainer extends React.Component {
   }
 
   onDeleteTeamClick (_id) {
-    UIKit.modal.confirm(
+    window.UIkit.modal.confirm(
       `<h2>Are you sure?</h2>
         <p style="font-size: 15px;">
             <span class="uk-text-danger" style="font-size: 15px;">This is a permanent action.</span> 

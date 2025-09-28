@@ -16,8 +16,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import some from 'lodash/some'
-import $ from 'jquery'
-import velocity from 'velocity'
+// $ доступен глобально через window.$
+// window.Velocity доступен глобально через window.Velocity
 
 import BaseModal from './BaseModal'
 import Button from 'components/Button'
@@ -47,7 +47,7 @@ class AddPriorityToTypeModal extends React.Component {
     api.tickets
       .addPriorityToType({ typeId: type.get('_id'), priority: priority.get('_id') })
       .then(() => {
-        velocity(
+        window.Velocity(
           $addButton,
           { opacity: 0 },
           {
@@ -58,7 +58,7 @@ class AddPriorityToTypeModal extends React.Component {
           }
         )
         if ($check.length > 0) {
-          velocity(
+          window.Velocity(
             $check,
             { opacity: 1 },
             {

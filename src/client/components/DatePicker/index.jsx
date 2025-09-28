@@ -15,7 +15,7 @@ import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import helpers from 'lib/helpers'
 
 class DatePicker extends React.Component {

@@ -1,5 +1,5 @@
 // Herzen Core PWA Service Worker
-const CACHE_NAME = 'herzen-core-v1';
+const CACHE_NAME = 'herzen-core-v2-vite';
 const urlsToCache = [
     '/',
     '/css/normalize.min.css',

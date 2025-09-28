@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 export default function useTrudeskReady (callback) {
   useEffect(() => {

@@ -24,7 +24,7 @@ import ButtonGroup from 'components/ButtonGroup'
 import Button from 'components/Button'
 import PageContent from 'components/PageContent'
 
-import UIKit from 'uikit'
+// UIKit доступен глобально через window.UIkit
 import helpers from 'lib/helpers'
 
 class DepartmentsContainer extends React.Component {
@@ -41,7 +41,7 @@ class DepartmentsContainer extends React.Component {
   }
 
   onDeleteDepartmentClick (_id) {
-    UIKit.modal.confirm(
+    window.UIkit.modal.confirm(
       `<h2>Are you sure?</h2>
         <p style="font-size: 15px;">
             <span class="uk-text-danger" style="font-size: 15px;">This is a permanent action.</span> 

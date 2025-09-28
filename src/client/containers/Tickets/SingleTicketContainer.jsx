@@ -57,8 +57,8 @@ import TruTabWrapper from 'components/TruTabs/TruTabWrapper'
 import axios from 'axios'
 import helpers from 'lib/helpers'
 import Log from '../../logger'
-import UIkit from 'uikit'
-import moment from 'moment'
+// UIKit доступен глобально через window.window.UIkit
+// window.moment доступен глобально через window.window.moment
 import SpinLoader from 'components/SpinLoader'
 
 const fetchTicket = parent => {
@@ -80,7 +80,7 @@ const fetchTicket = parent => {
 }
 
 const showPriorityConfirm = () => {
-  UIkit.modal.confirm(
+  window.window.UIkit.modal.confirm(
     'Selected Priority does not exist for this ticket type. Priority has reset to the default for this type.' +
       '<br><br><strong>Please select a new priority</strong>',
     () => {},
@@ -486,7 +486,7 @@ class SingleTicketContainer extends React.Component {
                                 value={this.ticket.dueDate}
                                 small={true}
                                 onChange={e => {
-                                  const dueDate = moment(e.target.value, helpers.getShortDateFormat())
+                                  const dueDate = window.moment(e.target.value, helpers.getShortDateFormat())
                                     .utc()
                                     .toISOString()
 

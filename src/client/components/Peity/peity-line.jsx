@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import 'peity'
 import PropTypes from 'prop-types'
 

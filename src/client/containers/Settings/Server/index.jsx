@@ -26,7 +26,7 @@ import Log from '../../../logger'
 import EnableSwitch from 'components/Settings/EnableSwitch'
 import { observer } from 'mobx-react'
 import { makeObservable, observable } from 'mobx'
-import UIKit from 'uikit'
+// UIKit доступен глобально через window.UIkit
 
 @observer
 class ServerSettingsController extends React.Component {
@@ -92,7 +92,7 @@ class ServerSettingsController extends React.Component {
     const val = e.target.checked
 
     if (val === true) {
-      UIKit.modal.confirm(
+      window.UIkit.modal.confirm(
         `<h2>Are you sure?</h2>
         <p style="font-size: 15px;">
             <span class="uk-text-danger" style="font-size: 15px;">This will force logout every user and prevent non-administrators from logging in.</span> 

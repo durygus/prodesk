@@ -19,7 +19,7 @@ import { createTicketType } from 'actions/tickets'
 import BaseModal from './BaseModal'
 import Button from 'components/Button'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import helpers from 'lib/helpers'
 
 class CreateTicketTypeModal extends React.Component {

@@ -278,7 +278,7 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
         self.click(function (e) {
           var userId = self.attr('data-chatUser')
           socket.emit('spawnChatWindow', userId)
-          UIKit.offcanvas.hide()
+          window.UIkit.offcanvas.hide()
           e.preventDefault()
         })
       })

@@ -25,7 +25,7 @@ import { createDepartment } from 'actions/departments'
 import BaseModal from 'containers/Modals/BaseModal'
 
 import helpers from 'lib/helpers'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import Button from 'components/Button'
 import MultiSelect from 'components/MultiSelect'
 

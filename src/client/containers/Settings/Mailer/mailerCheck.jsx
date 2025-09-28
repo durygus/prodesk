@@ -23,7 +23,7 @@ import SettingItem from 'components/Settings/SettingItem'
 import EnableSwitch from 'components/Settings/EnableSwitch'
 import SingleSelect from 'components/SingleSelect'
 
-import UIKit from 'uikit'
+// UIKit доступен глобально через window.UIkit
 import axios from 'axios'
 import helpers from 'lib/helpers'
 
@@ -146,7 +146,7 @@ class Mailer_MailerCheck extends React.Component {
         noSnackbar: true
       })
       .then(() => {
-        UIKit.modal.confirm(
+        window.UIkit.modal.confirm(
           'Setting will take affect after server restart. <br /><br />Would you like to restart the server now?',
           () => {
             axios.get('/api/v1/admin/restart').catch(error => {

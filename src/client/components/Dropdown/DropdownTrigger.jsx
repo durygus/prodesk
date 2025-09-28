@@ -15,7 +15,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import UIkit from 'uikit'
+// UIKit доступен глобально через window.window.UIkit
 
 class DropdownTrigger extends React.Component {
   constructor (props) {
@@ -24,7 +24,7 @@ class DropdownTrigger extends React.Component {
 
   componentDidMount () {
     if (this.drop) {
-      UIkit.dropdown(this.drop, {
+      window.window.UIkit.dropdown(this.drop, {
         mode: this.props.mode,
         pos: this.props.pos,
         offset: this.props.offset

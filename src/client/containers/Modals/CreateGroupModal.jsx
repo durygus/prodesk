@@ -26,7 +26,7 @@ import MultiSelect from 'components/MultiSelect'
 import Button from 'components/Button'
 
 import helpers from 'lib/helpers'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 @observer
 class CreateGroupModal extends React.Component {

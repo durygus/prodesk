@@ -25,7 +25,7 @@ import SingleSelect from 'components/SingleSelect'
 import SplitSettingsPanel from 'components/Settings/SplitSettingsPanel'
 import PermissionBody from './permissionBody'
 
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 class PermissionsSettingsContainer extends React.Component {
   componentDidMount () {

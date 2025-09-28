@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import useTrudeskReady from 'lib2/useTrudeskReady'
 
-import CountUpJS from 'countup'
+// window.CountUp доступен глобально через window.CountUp
 
 export default function CountUp (props) {
   const textRef = useRef()
@@ -11,7 +11,7 @@ export default function CountUp (props) {
   // useTrudeskReady(() => {
   //   if (textRef.current) {
   //     textRef.current.innerText = '--'
-  //     animation = new CountUpJS(textRef.current, props.startNumber, props.endNumber, 0, props.duration)
+  //     animation = new window.CountUp(textRef.current, props.startNumber, props.endNumber, 0, props.duration)
   //     setTimeout(() => {
   //       animation.start()
   //     }, 500)
@@ -21,7 +21,7 @@ export default function CountUp (props) {
   useEffect(() => {
     if (textRef.current) {
       textRef.current.innerText = '--'
-      animation = new CountUpJS(textRef.current, props.startNumber, props.endNumber, 0, props.duration)
+      animation = new window.CountUp(textRef.current, props.startNumber, props.endNumber, 0, props.duration)
       animation.start()
     }
   }, [props.startNumber, props.endNumber])

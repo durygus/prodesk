@@ -15,8 +15,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import $ from 'jquery'
-import UIkit from 'uikit'
+// $ доступен глобально через window.$
+// UIKit доступен глобально через window.window.UIkit
 
 class Menu extends React.Component {
   constructor (props) {
@@ -26,7 +26,7 @@ class Menu extends React.Component {
   componentDidMount () {
     if (this.props.draggable) {
       const menu = $(this.menu)
-      this.menuSortable = UIkit.sortable(menu, {
+      this.menuSortable = window.window.UIkit.sortable(menu, {
         handleClass: 'drag-handle'
       })
 
@@ -37,7 +37,7 @@ class Menu extends React.Component {
   componentDidUpdate () {
     if (this.props.draggable && !this.menuSortable) {
       const menu = $(this.menu)
-      this.menuSortable = UIkit.sortable(menu, {
+      this.menuSortable = window.window.UIkit.sortable(menu, {
         handleClass: 'drag-handle'
       })
 

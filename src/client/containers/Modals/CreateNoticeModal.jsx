@@ -10,7 +10,7 @@ import { makeObservable, observable } from 'mobx'
 import { createNotice } from 'actions/notices'
 
 import helpers from 'lib/helpers'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 
 @observer
 class CreateNoticeModal extends React.Component {

@@ -51,7 +51,7 @@ define('pages/messages', [
         }
         const convoId = $li.attr('data-conversation-id')
         if (action.toLowerCase() === 'delete') {
-          UIKit.modal.confirm(
+          window.UIkit.modal.confirm(
             'Are you sure you want to delete this conversation?',
             function () {
               // Confirm
@@ -190,7 +190,7 @@ define('pages/messages', [
 
             $messagesWrapper.prepend(html)
 
-            UIKit.$html.trigger('changed.uk.dom')
+            window.UIkit.$html.trigger('changed.uk.dom')
             $messageScroller.scrollTop(height, true)
 
             $nextPage = $nextPage + 1
@@ -332,7 +332,7 @@ define('pages/messages', [
           }
         }
 
-        UIKit.$html.trigger('changed.uk.dom')
+        window.UIkit.$html.trigger('changed.uk.dom')
         helpers.scrollToBottom($messageScroller)
       })
 

@@ -26,7 +26,7 @@ import MultiSelect from 'components/MultiSelect'
 import Button from 'components/Button'
 
 import helpers from 'lib/helpers'
-import $ from 'jquery'
+// $ доступен глобально через window.$
 import SpinLoader from 'components/SpinLoader'
 
 @observer
