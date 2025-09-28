@@ -192,67 +192,21 @@
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-        // Create Service Worker as Data URL
-        const swCode = `
-            const CACHE_NAME = 'herzen-core-v1';
-            const urlsToCache = [
-                '/',
-                '/css/normalize.min.css',
-                '/css/plugins.min.css', 
-                '/css/app.min.css',
-                '/js/vendor.js',
-                '/js/trudesk.min.js',
-                '/socket.io/socket.io.js'
-            ];
-
-            // Install event - cache resources
-            self.addEventListener('install', function(event) {
-                event.waitUntil(
-                    caches.open(CACHE_NAME)
-                        .then(function(cache) {
-                            return cache.addAll(urlsToCache);
-                        })
-                );
-                self.skipWaiting();
-            });
-
-            // Fetch event - serve from cache when offline
-            self.addEventListener('fetch', function(event) {
-                event.respondWith(
-                    caches.match(event.request)
-                        .then(function(response) {
-                            // Return cached version or fetch from network
-                            return response || fetch(event.request);
-                        }
-                    )
-                );
-            });
-
-            // Activate event - clean up old caches
-            self.addEventListener('activate', function(event) {
-                event.waitUntil(
-                    caches.keys().then(function(cacheNames) {
-                        return Promise.all(
-                            cacheNames.map(function(cacheName) {
-                                if (cacheName !== CACHE_NAME) {
-                                    return caches.delete(cacheName);
-                                }
-                            })
-                        );
-                    })
-                );
-                self.clients.claim();
-            });
-        `;
-        
-        // Create Service Worker as Blob URL
-        const swBlob = new Blob([swCode], {type: 'application/javascript'});
-        const swURL = URL.createObjectURL(swBlob);
-        
-        // Register Service Worker
-        navigator.serviceWorker.register(swURL)
+        // Register Service Worker from server file
+        navigator.serviceWorker.register('/sw.js')
             .then(function(registration) {
                 console.log('PWA Service Worker registered:', registration);
+                
+                // Check for updates
+                registration.addEventListener('updatefound', function() {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', function() {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('PWA Service Worker updated');
+                            // Optionally show update notification
+                        }
+                    });
+                });
             })
             .catch(function(error) {
                 console.log('PWA Service Worker registration failed:', error);
