@@ -7,6 +7,11 @@
     <meta name="csrf-token" content="{{data.common.csrfToken}}" />
     <link rel="icon" href="{{data.common.favicon}}" />
     
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="/css/normalize.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/css/plugins.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/css/app.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#29b6f6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -224,7 +229,7 @@ function createInstallButton() {
     
     installButton = document.createElement('button');
     installButton.innerHTML = '📱 Установить приложение';
-    installButton.style.cssText = \`
+    installButton.style.cssText = `
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -238,7 +243,7 @@ function createInstallButton() {
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         z-index: 1000;
         display: none;
-    \`;
+    `;
     
     installButton.addEventListener('click', function() {
         if (deferredPrompt) {

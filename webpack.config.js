@@ -7,6 +7,7 @@ const CompressionPlugin = require('compression-webpack-plugin')
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   target: 'web',
+  devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'cheap-module-source-map',
   entry: {
     vendor: [
       'jquery',
