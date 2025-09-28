@@ -48,7 +48,9 @@
         /* Prevent Modernizr from causing layout shift */
         .modernizr-test,
         [class*="modernizr"],
-        [id*="modernizr"] {
+        [id*="modernizr"],
+        [class*="test"],
+        [id*="test"] {
             position: fixed !important;
             top: -9999px !important;
             left: -9999px !important;
@@ -59,14 +61,25 @@
             margin: 0 !important;
             padding: 0 !important;
             border: none !important;
+            overflow: hidden !important;
         }
         
         /* Prevent any test elements from affecting layout */
         [style*="position:absolute"],
-        [style*="visibility:hidden"] {
+        [style*="visibility:hidden"],
+        [style*="position: fixed"] {
             position: fixed !important;
             top: -9999px !important;
             left: -9999px !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        
+        /* Hide any elements that might cause layout shift */
+        input[type="hidden"],
+        input[style*="display: none"],
+        div[style*="display: none"] {
+            display: none !important;
         }
     </style>
     
@@ -290,6 +303,31 @@
 
     <!-- PWA Service Worker and Install Logic -->
     <script>
+    // Prevent layout shift - intercept Modernizr and other test elements
+    (function() {
+        // Override createElement to intercept test elements
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+            const element = originalCreateElement.call(this, tagName);
+            
+            // If it's a test element, hide it immediately
+            if (tagName === 'input' || tagName === 'div' || tagName === 'span') {
+                element.style.cssText = 'position: fixed !important; top: -9999px !important; left: -9999px !important; visibility: hidden !important; width: 0 !important; height: 0 !important;';
+            }
+            
+            return element;
+        };
+        
+        // Override appendChild to hide test elements
+        const originalAppendChild = Node.prototype.appendChild;
+        Node.prototype.appendChild = function(child) {
+            if (child && (child.className && (child.className.includes('modernizr') || child.className.includes('test')))) {
+                child.style.cssText = 'position: fixed !important; top: -9999px !important; left: -9999px !important; visibility: hidden !important; width: 0 !important; height: 0 !important;';
+            }
+            return originalAppendChild.call(this, child);
+        };
+    })();
+    
     // Prevent layout shift - show content when ready
     document.addEventListener('DOMContentLoaded', function() {
         // Wait for CSS and all resources to load
@@ -432,7 +470,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
     if (installButton) {
         installButton.style.display = 'none';
     }
-}
+    }
 </script>
 
 <script src="/js/trudesk.min.js"></script>

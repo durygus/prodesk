@@ -147,6 +147,7 @@ module.exports = {
   optimization: {
     chunkIds: 'total-size',
     moduleIds: 'size',
+    minimize: process.env.NODE_ENV === 'production',
     minimizer: [
       new TerserPlugin({
         parallel: true,
@@ -200,5 +201,9 @@ module.exports = {
     hints: 'warning',
     maxEntrypointSize: 400000,
     maxAssetSize: 1000000
+  },
+  stats: {
+    errorDetails: true,
+    warnings: false
   }
 }
