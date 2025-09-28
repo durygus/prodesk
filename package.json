@@ -8,7 +8,10 @@
   "bin": "./app.js",
   "scripts": {
     "start": "node ./app",
-    "build": "grunt build",
+    "build": "grunt buildcss && vite build",
+    "build:old": "grunt build",
+    "dev": "vite",
+    "preview": "vite preview",
     "test": "mocha --recursive",
     "lint": "standard | snazzy",
     "format": "prettier-standard \"./*.js\" \"src/*.js\" \"src/**/*.js\" \"src/**/*.jsx\" \"!src/public/js/vendor/**/*.js\" \"!src/public/js/plugins/**/*.js\"",
@@ -147,6 +150,7 @@
     "@semantic-release/changelog": "6.0.1",
     "@semantic-release/git": "10.0.1",
     "@semantic-release/npm": "9.0.1",
+    "@vitejs/plugin-react": "5.0.4",
     "babel-eslint": "10.0.1",
     "babel-loader": "8.2.5",
     "chai": "*",
@@ -195,6 +199,7 @@
     "superagent": "8.0.0",
     "supertest": "6.2.4",
     "terser-webpack-plugin": "5.3.3",
+    "vite": "7.1.7",
     "webpack": "5.73.0",
     "webpack-bundle-analyzer": "4.5.0",
     "webpack-cli": "4.10.0"

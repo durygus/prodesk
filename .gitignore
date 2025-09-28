@@ -76,3 +76,9 @@ data/mongo/  # MongoDB данные (синхронизируются через
 # data/app/ - данные приложения
 # logs/ - логи приложения
 # public/uploads/ - загруженные файлы
+
+# Скомпилированные JS файлы (создаются сборщиком)
+public/js/*.js
+public/js/*.js.map
+public/js/*.gz
+!public/js/socket.io/  # Исключение для socket.io библиотеки
