@@ -21,8 +21,16 @@
 
 // node_modules
 const _ = require('lodash')
-const moment = require('moment-timezone')
-require('moment-duration-format')(moment)
+const dayjs = require('dayjs')
+const timezone = require('dayjs/plugin/timezone')
+const utc = require('dayjs/plugin/utc')
+const duration = require('dayjs/plugin/duration')
+const relativeTime = require('dayjs/plugin/relativeTime')
+
+dayjs.extend(timezone)
+dayjs.extend(utc)
+dayjs.extend(duration)
+dayjs.extend(relativeTime)
 
 // The module to be exported
 const helpers = {
@@ -514,7 +522,7 @@ const helpers = {
   },
 
   now: function () {
-    return new moment.utc()
+    return dayjs.utc()
   },
 
   formatDate: function (date, format, timezone) {
@@ -533,54 +541,25 @@ const helpers = {
   },
 
   durationFormat: function (duration, parseFormat) {
-    return moment.duration(duration, parseFormat).format('Y [year], M [month], d [day], h [hour], m [min]', {
-      trim: 'both'
-    })
+    return dayjs.duration(duration, parseFormat).format('Y [year], M [month], d [day], h [hour], m [min]')
   },
 
   calendarDate: function (date, fallback) {
     if (_.isObject(fallback)) {
       fallback = 'll [at] LT'
     }
-    moment.updateLocale('en', {
-      calendar: {
-        sameDay: '[Today at] LT',
-        lastDay: '[Yesterday at] LT',
-        nextDay: '[Tomorrow at] LT',
-        lastWeek: '[Last] ddd [at] LT',
-        nextWeek: 'ddd [at] LT',
-        sameElse: fallback
-      }
-    })
-    return moment
+    return dayjs
       .utc(date)
       .tz(global.timezone)
-      .calendar()
+      .format('ll [at] LT')
   },
 
   fromNow: function (date) {
     if (_.isUndefined(date)) {
       return 'Never'
     }
-    moment.updateLocale('en', {
-      relativeTime: {
-        future: 'in %s',
-        past: '%s ago',
-        s: 'a few seconds',
-        m: '1m',
-        mm: '%dm',
-        h: '1h',
-        hh: '%dh',
-        d: '1d',
-        dd: '%dd',
-        M: '1mo',
-        MM: '%dmos',
-        y: '1y',
-        yy: '%dyrs'
-      }
-    })
 
-    return moment
+    return dayjs
       .utc(date)
       .tz(global.timezone)
       .fromNow()

@@ -13,14 +13,19 @@
  *  Copyright (c) 2014-2022 Trudesk, Inc. All rights reserved.
  */
 
-const async = require('async')
-const path = require('path')
-const fs = require('fs')
-const winston = require('./src/logger')
-const nconf = require('nconf')
-const Chance = require('chance')
+import async from 'async'
+import path from 'path'
+import fs from 'fs'
+import winston from './src/logger/index.js'
+import nconf from 'nconf'
+import Chance from 'chance'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+
 const chance = new Chance()
-const pkg = require('./package.json')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const pkg = JSON.parse(readFileSync(path.join(__dirname, 'package.json'), 'utf8'))
 // `const memory = require('./src/memory');
 
 const isDocker = process.env.TRUDESK_DOCKER || false
@@ -57,7 +62,7 @@ checkForOldConfig()
 
 const configExists = fs.existsSync(configFile)
 
-function launchInstallServer () {
+async function launchInstallServer () {
   // Load the defaults for the install server
   nconf.defaults({
     tokens: {
@@ -65,8 +70,8 @@ function launchInstallServer () {
     }
   })
 
-  const ws = require('./src/webserver')
-  ws.installServer(function () {
+  const ws = await import('./src/webserver.js')
+  ws.default.installServer(function () {
     return winston.info('Trudesk Install Server Running...')
   })
 }
@@ -106,7 +111,7 @@ function checkForOldConfig () {
   }
 }
 
-function start () {
+async function start () {
   if (!isDocker) loadConfig()
   if (isDocker) {
     // Load some defaults for JWT token that is missing when using docker
@@ -119,14 +124,14 @@ function start () {
     })
   }
 
-  const _db = require('./src/database')
+  const _db = await import('./src/database/index.js')
 
-  _db.init(function (err, db) {
+  _db.default.init(function (err, db) {
     if (err) {
       winston.error('FETAL: ' + err.message)
       winston.warn('Retrying to connect to MongoDB in 10secs...')
       return setTimeout(function () {
-        _db.init(dbCallback)
+        _db.default.init(dbCallback)
       }, 10000)
     } else {
       dbCallback(err, db)
@@ -134,9 +139,9 @@ function start () {
   })
 }
 
-function launchServer (db) {
-  const ws = require('./src/webserver')
-  ws.init(db, function (err) {
+async function launchServer (db) {
+  const ws = await import('./src/webserver.js')
+  ws.default.init(db, function (err) {
     if (err) {
       winston.error(err)
       return
@@ -145,87 +150,95 @@ function launchServer (db) {
     async.series(
       [
         function (next) {
-          require('./src/settings/defaults').init(next)
+          import('./src/settings/defaults.js').then(({ default: settingsDefaults }) => {
+            settingsDefaults.init(next)
+          })
         },
         function (next) {
-          require('./src/permissions').register(next)
+          import('./src/permissions/index.js').then(({ default: permissions }) => {
+            permissions.register(next)
+          })
         },
         function (next) {
-          require('./src/elasticsearch').init(function (err) {
-            if (err) {
-              winston.error(err)
-            }
-
+          import('./src/elasticsearch/index.js').then(({ default: elasticsearch }) => {
+            elasticsearch.init(function (err) {
+              if (err) {
+                winston.error(err)
+              }
+              return next()
+            })
+          })
+        },
+        function (next) {
+          import('./src/socketserver.js').then(({ default: socketserver }) => {
+            socketserver(ws.default)
             return next()
           })
         },
         function (next) {
-          require('./src/socketserver')(ws)
-          return next()
-        },
-        function (next) {
           // Start Check Mail
-          const settingSchema = require('./src/models/setting')
-          settingSchema.getSetting('mailer:check:enable', function (err, mailCheckEnabled) {
-            if (err) {
-              winston.warn(err)
-              return next(err)
-            }
+          import('./src/models/setting.js').then(({ default: settingSchema }) => {
+            settingSchema.getSetting('mailer:check:enable', function (err, mailCheckEnabled) {
+              if (err) {
+                winston.warn(err)
+                return next(err)
+              }
 
-            if (mailCheckEnabled && mailCheckEnabled.value) {
-              settingSchema.getSettings(function (err, settings) {
-                if (err) return next(err)
+              if (mailCheckEnabled && mailCheckEnabled.value) {
+                settingSchema.getSettings(function (err, settings) {
+                  if (err) return next(err)
 
-                const mailCheck = require('./src/mailer/mailCheck')
-                winston.debug('Starting MailCheck...')
-                mailCheck.init(settings)
-
+                  import('./src/mailer/mailCheck.js').then(({ default: mailCheck }) => {
+                    winston.debug('Starting MailCheck...')
+                    mailCheck.init(settings)
+                    return next()
+                  })
+                })
+              } else {
                 return next()
-              })
-            } else {
-              return next()
-            }
+              }
+            })
           })
         },
         function (next) {
-          require('./src/migration').run(next)
+          import('./src/migration/index.js').then(({ default: migration }) => {
+            migration.run(next)
+          })
         },
         function (next) {
           winston.debug('Building dynamic sass...')
-          require('./src/sass/buildsass').build(next)
+          import('./src/sass/buildsass.js').then(({ default: buildsass }) => {
+            buildsass.build(next)
+          })
         },
-        // function (next) {
-        //   // Start Task Runners
-        //   require('./src/taskrunner')
-        //   return next()
-        // },
         function (next) {
-          const cache = require('./src/cache/cache')
-          if (isDocker) {
-            cache.env = {
-              TRUDESK_DOCKER: process.env.TRUDESK_DOCKER,
-              TD_MONGODB_SERVER: process.env.TD_MONGODB_SERVER,
-              TD_MONGODB_PORT: process.env.TD_MONGODB_PORT,
-              TD_MONGODB_USERNAME: process.env.TD_MONGODB_USERNAME,
-              TD_MONGODB_PASSWORD: process.env.TD_MONGODB_PASSWORD,
-              TD_MONGODB_DATABASE: process.env.TD_MONGODB_DATABASE,
-              TD_MONGODB_URI: process.env.TD_MONGODB_URI
+          import('./src/cache/index.js').then(({ default: cache }) => {
+            if (isDocker) {
+              cache.env = {
+                TRUDESK_DOCKER: process.env.TRUDESK_DOCKER,
+                TD_MONGODB_SERVER: process.env.TD_MONGODB_SERVER,
+                TD_MONGODB_PORT: process.env.TD_MONGODB_PORT,
+                TD_MONGODB_USERNAME: process.env.TD_MONGODB_USERNAME,
+                TD_MONGODB_PASSWORD: process.env.TD_MONGODB_PASSWORD,
+                TD_MONGODB_DATABASE: process.env.TD_MONGODB_DATABASE,
+                TD_MONGODB_URI: process.env.TD_MONGODB_URI
+              }
             }
-          }
 
-          cache.init()
-
-          return next()
+            cache.init()
+            return next()
+          })
         },
         function (next) {
-          const taskRunner = require('./src/taskrunner')
-          return taskRunner.init(next)
+          import('./src/taskrunner/index.js').then(({ default: taskRunner }) => {
+            return taskRunner.init(next)
+          })
         }
       ],
       function (err) {
         if (err) throw new Error(err)
 
-        ws.listen(function () {
+        ws.default.listen(function () {
           winston.info('trudesk Ready')
         })
       }
@@ -233,14 +246,14 @@ function launchServer (db) {
   })
 }
 
-function dbCallback (err, db) {
+async function dbCallback (err, db) {
   if (err || !db) {
     return start()
   }
 
   if (isDocker) {
-    const s = require('./src/models/setting')
-    s.getSettingByName('installed', function (err, installed) {
+    const s = await import('./src/models/setting.js')
+    s.default.getSettingByName('installed', function (err, installed) {
       if (err) return start()
 
       if (!installed || !installed.value) {

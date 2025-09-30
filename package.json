@@ -2,6 +2,7 @@
   "name": "trudesk",
   "version": "1.2.11",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=16.0.0"
   },
@@ -44,6 +45,7 @@
     "cookie-signature": "1.2.0",
     "csrf": "3.1.0",
     "csv": "6.1.5",
+    "dayjs": "1.11.18",
     "debug": "4.3.4",
     "dive": "0.5.0",
     "email-templates": "10.0.0",
