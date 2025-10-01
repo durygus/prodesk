@@ -1,20 +1,17 @@
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const User = require('./user').default
-const Ticket = require('./ticket').default
-const TicketType = require('./tickettype').default
-const Priority = require('./ticketpriority').default
-const Status = require('./ticketStatus').default
-const TicketTags = require('./tag').default
-const Role = require('./role').default
-const Session = require('./session').default
-const Setting = require('./setting').default
-const Group = require('./group').default
-const Team = require('./team').default
-const Department = require('./department').default
-const Message = require('./chat/message').default
-const Conversation = require('./chat/conversation').default
+import User from './user.js'
+import Ticket from './ticket.js'
+import TicketType from './tickettype.js'
+import Priority from './ticketpriority.js'
+import Status from './ticketStatus.js'
+import TicketTags from './tag.js'
+import Role from './role.js'
+import Session from './session.js'
+import Setting from './setting.js'
+import Group from './group.js'
+import Team from './team.js'
+import Department from './department.js'
+import Message from './chat/message.js'
+import Conversation from './chat/conversation.js'
 
 
 export default {
