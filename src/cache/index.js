@@ -88,7 +88,7 @@ truCache.refreshCache = function (callback) {
         async.parallel(
           [
             function (done) {
-              const ticketStats = require('./ticketStats')
+              const ticketStats = require('./ticketStats').default
               ticketStats(tickets, function (err, stats) {
                 if (err) return done(err)
                 const expire = 3600 // 1 hour
