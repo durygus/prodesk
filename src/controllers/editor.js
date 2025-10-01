@@ -13,13 +13,10 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
 import path from 'path'
-const fs = require('fs-extra')
-const Busboy = require('busboy')
-const templateSchema = require('../models/template')
+import fs from 'fs-extra'
+import Busboy from 'busboy'
+import templateSchema from '../models/template.js'
 
 const editor = {}
 
