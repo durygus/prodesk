@@ -20,10 +20,22 @@ import pkg from '../../package.json' with { type: 'json' }
 import Chance from 'chance'
 import Status from '../models/ticketStatus.js'
 import counterSchema from '../models/counters.js'
-import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
+import database from '../database/index.js'
+import roleSchema from '../models/role.js'
+import roleOrderSchema from '../models/roleorder.js'
+import UserSchema from '../models/user.js'
+import GroupSchema from '../models/group.js'
+import TicketTypeSchema from '../models/tickettype.js'
+import SettingsSchema from '../models/setting.js'
+import defaults from '../settings/defaults.js'
+import TeamSchema from '../models/team.js'
+import DepartmentSchema from '../models/department.js'
+import { fork } from 'child_process'
+import fs from 'fs'
+import YAML from 'yaml'
+import pm2 from 'pm2'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -45,7 +57,7 @@ installController.elastictest = function (req, res) {
   const data = req.body
   const CONNECTION_URI = data.host + ':' + data.port
 
-  const child = require('child_process').fork(path.join(__dirname, '../../src/install/elasticsearchtest'), {
+  const child = fork(path.join(__dirname, '../../src/install/elasticsearchtest'), {
     env: { FORK: 1, NODE_ENV: global.env, ELASTICSEARCH_URI: CONNECTION_URI }
   })
   global.forks.push({ name: 'elastictest', fork: child })
@@ -80,7 +92,7 @@ installController.mongotest = function (req, res) {
     }
   }
 
-  const child = require('child_process').fork(path.join(__dirname, '../../src/install/mongotest'), {
+  const child = fork(path.join(__dirname, '../../src/install/mongotest'), {
     env: { FORK: 1, NODE_ENV: global.env, MONGOTESTURI: CONNECTION_URI }
   })
 
@@ -114,10 +126,10 @@ installController.existingdb = function (req, res) {
   const password = data.password
 
   // Write Configfile
-  const fs = require('fs')
+  const fsModule = fs
   const chance = new Chance()
   const configFile = path.join(__dirname, '../../config.yml')
-  const YAML = require('yaml')
+  const YAMLModule = YAML
   const conf = {
     mongo: {
       host: host,
@@ -132,7 +144,7 @@ installController.existingdb = function (req, res) {
     }
   }
 
-  fs.writeFile(configFile, YAML.stringify(conf), function (err) {
+  fsModule.writeFile(configFile, YAMLModule.stringify(conf), function (err) {
     if (err) {
       winston.error('FS Error: ' + err.message)
       return res.status(400).json({ success: false, error: err.message })
@@ -143,15 +155,15 @@ installController.existingdb = function (req, res) {
 }
 
 installController.install = function (req, res) {
-  const db = require('../database').default
-  const roleSchema = require('../models/role').default
-  const roleOrderSchema = require('../models/roleorder').default
-  const UserSchema = require('../models/user').default
-  const GroupSchema = require('../models/group').default
-  const Counters = require('../models/counters').default
-  const TicketTypeSchema = require('../models/tickettype').default
-  const TicketStatusSchema = require('../models/ticketStatus').default
-  const SettingsSchema = require('../models/setting').default
+  const db = database
+  const roleSchemaModule = roleSchema
+  const roleOrderSchemaModule = roleOrderSchema
+  const UserSchemaModule = UserSchema
+  const GroupSchemaModule = GroupSchema
+  const Counters = counterSchema
+  const TicketTypeSchemaModule = TicketTypeSchema
+  const TicketStatusSchema = Status
+  const SettingsSchemaModule = SettingsSchema
 
   const data = req.body
 
@@ -206,7 +218,7 @@ installController.install = function (req, res) {
       function (next) {
         const s = new SettingsSchema({
           name: 'gen:version',
-          value: require('../../package.json').version
+          value: pkg.version
         })
 
         return s.save(function (err) {
@@ -351,12 +363,12 @@ installController.install = function (req, res) {
         })
       },
       function (next) {
-        const defaults = require('../settings/defaults').default
+        const defaultsModule = defaults
         const roleResults = {}
         async.parallel(
           [
             function (done) {
-              roleSchema.create(
+              roleSchemaModule.create(
                 {
                   name: 'Admin',
                   description: 'Default role for admins',
@@ -370,7 +382,7 @@ installController.install = function (req, res) {
               )
             },
             function (done) {
-              roleSchema.create(
+              roleSchemaModule.create(
                 {
                   name: 'Support',
                   description: 'Default role for agents',
@@ -384,7 +396,7 @@ installController.install = function (req, res) {
               )
             },
             function (done) {
-              roleSchema.create(
+              roleSchemaModule.create(
                 {
                   name: 'User',
                   description: 'Default role for users',
@@ -404,8 +416,8 @@ installController.install = function (req, res) {
         )
       },
       function (roleResults, next) {
-        const TeamSchema = require('../models/team').default
-        TeamSchema.create(
+        const TeamSchemaModule = TeamSchema
+        TeamSchemaModule.create(
           {
             name: 'Support (Default)',
             members: []
@@ -470,8 +482,8 @@ installController.install = function (req, res) {
         })
       },
       function (defaultTeam, next) {
-        const DepartmentSchema = require('../models/department').default
-        DepartmentSchema.create(
+        const DepartmentSchemaModule = DepartmentSchema
+        DepartmentSchemaModule.create(
           {
             name: 'Support - All Groups (Default)',
             teams: [defaultTeam._id],
@@ -485,7 +497,7 @@ installController.install = function (req, res) {
       },
       function (next) {
         if (!process.env.TRUDESK_DOCKER) return next()
-        const S = require('../models/setting').default
+        const S = SettingsSchemaModule
         const installed = new S({
           name: 'installed',
           value: true
@@ -503,10 +515,10 @@ installController.install = function (req, res) {
       function (next) {
         if (process.env.TRUDESK_DOCKER) return next()
         // Write Configfile
-        const fs = require('fs')
+        const fsModule = fs
         const configFile = path.join(__dirname, '../../config.yml')
         const chance = new Chance()
-        const YAML = require('yaml')
+        const YAMLModule = YAML
 
         const conf = {
           mongo: {
@@ -523,7 +535,7 @@ installController.install = function (req, res) {
           }
         }
 
-        fs.writeFile(configFile, YAML.stringify(conf), function (err) {
+        fsModule.writeFile(configFile, YAMLModule.stringify(conf), function (err) {
           if (err) {
             winston.error('FS Error: ' + err.message)
             return next('FS Error: ' + err.message)
@@ -563,20 +575,20 @@ installController.restart = function (req, res) {
   }
 
   // Production режим с PM2
-  const pm2 = require('pm2')
-  pm2.connect(function (err) {
+  const pm2Module = pm2
+  pm2Module.connect(function (err) {
     if (err) {
       winston.error(err)
       res.status(400).send(err)
       return
     }
-    pm2.restart('trudesk', function (err) {
+    pm2Module.restart('trudesk', function (err) {
       if (err) {
         res.status(400).send(err)
         return winston.error(err)
       }
 
-      pm2.disconnect()
+      pm2Module.disconnect()
       res.send()
     })
   })
