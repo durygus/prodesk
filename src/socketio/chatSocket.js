@@ -11,15 +11,18 @@
  *  Updated:    1/20/19 4:43 PM
  *  Copyright (c) 2014-2019. All rights reserved.
  */
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const async = require('async')
-const winston = require('../logger')
+const winston = require('../logger').default
 const utils = require('../helpers/utils')
-const userSchema = require('../models/user')
+const userSchema = require('../models/user').default
 
 const sharedVars = require('./index').shared
 const sharedUtils = require('./index').utils
-const socketEventConst = require('./socketEventConsts')
+const socketEventConst = require('./socketEventConsts').default
 
 const events = {}
 
@@ -574,7 +577,7 @@ events.onDisconnect = function (socket) {
   })
 }
 
-module.exports = {
+export default {
   events,
   eventLoop,
   register

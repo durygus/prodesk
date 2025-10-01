@@ -11,13 +11,16 @@
  *  Updated:    1/20/19 4:43 PM
  *  Copyright (c) 2014-2019. All rights reserved.
  */
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const async = require('async')
-const winston = require('../logger')
+const winston = require('../logger').default
 const utils = require('../helpers/utils')
-const UserSchema = require('../models/user')
-const Role = require('../models/role')
-const permissions = require('../permissions')
+const UserSchema = require('../models/user').default
+const Role = require('../models/role').default
+const permissions = require('../permissions').default
 
 const events = {}
 
@@ -378,7 +381,7 @@ events.onImportLDAP = function (socket) {
   })
 }
 
-module.exports = {
+export default {
   events: events,
   eventLoop: eventLoop,
   register: register

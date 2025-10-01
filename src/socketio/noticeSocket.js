@@ -12,11 +12,13 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const winston = require('winston')
 const utils = require('../helpers/utils')
-const noticeSchema = require('../models/notice')
-
-const socketEventConst = require('../socketio/socketEventConsts')
+const noticeSchema = require('../models/notice').default
+const socketEventConst = require('../socketio/socketEventConsts').default
 
 const events = {}
 
@@ -50,7 +52,7 @@ events.onClearNotice = function (socket) {
   })
 }
 
-module.exports = {
+export default {
   events: events,
   eventLoop: eventLoop,
   register: register
