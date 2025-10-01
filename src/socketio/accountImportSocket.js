@@ -11,16 +11,13 @@
  *  Updated:    1/20/19 4:43 PM
  *  Copyright (c) 2014-2019. All rights reserved.
  */
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../logger').default
-const utils = require('../helpers/utils')
-const UserSchema = require('../models/user').default
-const Role = require('../models/role').default
-const permissions = require('../permissions').default
+import _ from 'lodash'
+import async from 'async'
+import winston from '../logger/index.js'
+import utils from '../helpers/utils.js'
+import UserSchema from '../models/user.js'
+import Role from '../models/role.js'
+import permissions from '../permissions/index.js'
 
 const events = {}
 
