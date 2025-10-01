@@ -12,16 +12,13 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
 import path from 'path'
+import utils from '../helpers/utils.js'
+import AnsiUp from 'ansi_up'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-const utils = require('../helpers/utils')
-const AnsiUp = require('ansi_up')
 const ansiUp = new AnsiUp.default()
 const Tail = require('tail').Tail
 const fs = require('fs-extra')
