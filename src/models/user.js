@@ -21,7 +21,7 @@ const winston = require('winston')
 const bcrypt = require('bcrypt')
 const _ = require('lodash')
 const Chance = require('chance')
-const utils = require('../helpers/utils')
+const utils = require('../helpers/utils').default
 
 // Required for linkage
 require('./role')
@@ -557,7 +557,7 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
 
           // Send welcome email
           var path = require('path')
-          var mailer = require('../mailer')
+          var mailer = require('../mailer').default
           var Email = require('email-templates')
           var templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
 

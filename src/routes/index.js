@@ -64,7 +64,7 @@ function mainRoutes (router, middleware, controllers) {
   router.get('/signup', controllers.accounts.signup)
 
   router.get('/logoimage', function (req, res) {
-    const s = require('../models/setting')
+    const s = require('../models/setting').default
     const _ = require('lodash')
     s.getSettingByName('gen:customlogo', function (err, hasCustomLogo) {
       if (!err && hasCustomLogo && hasCustomLogo.value) {
@@ -406,13 +406,13 @@ function mainRoutes (router, middleware, controllers) {
     router.get('/debug/populatedb', controllers.debug.populatedatabase)
     router.get('/debug/sendmail', controllers.debug.sendmail)
     router.get('/debug/mailcheck/refetch', function (req, res) {
-      const mailCheck = require('../mailer/mailCheck')
+      const mailCheck = require('../mailer/mailCheck').default
       mailCheck.refetch()
       res.send('OK')
     })
 
     router.get('/debug/cache/refresh', function (req, res) {
-      const cache = require('../cache/cache.js')
+      const cache = require('../cache/cache.js').default
       cache.forceRefresh()
       return res.send('OK')
     })

@@ -143,15 +143,15 @@ installController.existingdb = function (req, res) {
 }
 
 installController.install = function (req, res) {
-  const db = require('../database')
-  const roleSchema = require('../models/role')
-  const roleOrderSchema = require('../models/roleorder')
-  const UserSchema = require('../models/user')
-  const GroupSchema = require('../models/group')
-  const Counters = require('../models/counters')
-  const TicketTypeSchema = require('../models/tickettype')
-  const TicketStatusSchema = require('../models/ticketStatus')
-  const SettingsSchema = require('../models/setting')
+  const db = require('../database').default
+  const roleSchema = require('../models/role').default
+  const roleOrderSchema = require('../models/roleorder').default
+  const UserSchema = require('../models/user').default
+  const GroupSchema = require('../models/group').default
+  const Counters = require('../models/counters').default
+  const TicketTypeSchema = require('../models/tickettype').default
+  const TicketStatusSchema = require('../models/ticketStatus').default
+  const SettingsSchema = require('../models/setting').default
 
   const data = req.body
 
@@ -351,7 +351,7 @@ installController.install = function (req, res) {
         })
       },
       function (next) {
-        const defaults = require('../settings/defaults')
+        const defaults = require('../settings/defaults').default
         const roleResults = {}
         async.parallel(
           [
@@ -404,7 +404,7 @@ installController.install = function (req, res) {
         )
       },
       function (roleResults, next) {
-        const TeamSchema = require('../models/team')
+        const TeamSchema = require('../models/team').default
         TeamSchema.create(
           {
             name: 'Support (Default)',
@@ -470,7 +470,7 @@ installController.install = function (req, res) {
         })
       },
       function (defaultTeam, next) {
-        const DepartmentSchema = require('../models/department')
+        const DepartmentSchema = require('../models/department').default
         DepartmentSchema.create(
           {
             name: 'Support - All Groups (Default)',
@@ -485,7 +485,7 @@ installController.install = function (req, res) {
       },
       function (next) {
         if (!process.env.TRUDESK_DOCKER) return next()
-        const S = require('../models/setting')
+        const S = require('../models/setting').default
         const installed = new S({
           name: 'installed',
           value: true

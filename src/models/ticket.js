@@ -17,13 +17,13 @@ const require = createRequire(import.meta.url)
 
 const async = require('async')
 const mongoose = require('mongoose')
-const winston = require('../logger')
+const winston = require('../logger').default
 const _ = require('lodash')
 const dayjs = require('dayjs')
 const sanitizeHtml = require('sanitize-html')
 // const redisCache          = require('../cache/rediscache');
 const xss = require('xss')
-const utils = require('../helpers/utils')
+const utils = require('../helpers/utils').default
 
 // Needed - For Population
 const groupSchema = require('./group').default
@@ -155,7 +155,7 @@ ticketSchema.pre('save', function (next) {
 
 ticketSchema.post('save', async function (doc, next) {
   if (!this.wasNew) {
-    const emitter = require('../emitter')
+    const emitter = require('../emitter').default
     try {
       const savedTicket = await doc.populate([
         {

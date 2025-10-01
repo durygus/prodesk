@@ -13,14 +13,11 @@
  */
 
 import { createRequire } from 'module'
-import { fileURLToPath } from 'url'
 const require = createRequire(import.meta.url)
-const path = require('path')
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 const NodeCache = require('node-cache')
 const async = require('async')
+const path = require('path')
 const nconf = require('nconf')
 const _ = require('lodash')
 const winston = require('../logger').default
@@ -43,7 +40,7 @@ function loadConfig () {
 }
 
 let refreshTimer
-let lastUpdated = dayjs.utc().tz(process.env.TIMEZONE || 'America/New_York')
+let lastUpdated = moment.utc().tz(process.env.TIMEZONE || 'America/New_York')
 
 truCache.init = function (callback) {
   cache = new NodeCache({
@@ -54,9 +51,7 @@ truCache.init = function (callback) {
     winston.debug('Cache Loaded')
     // restartRefreshClock()
 
-    if (_.isFunction(callback)) {
-      return callback()
-    }
+    return callback()
   })
 }
 
@@ -90,7 +85,7 @@ truCache.refreshCache = function (callback) {
         async.parallel(
           [
             function (done) {
-              const ticketStats = require('./ticketStats').default
+              const ticketStats = require('./ticketStats')
               ticketStats(tickets, function (err, stats) {
                 if (err) return done(err)
                 const expire = 3600 // 1 hour
@@ -125,7 +120,7 @@ truCache.refreshCache = function (callback) {
               })
             },
             function (done) {
-              const tagStats = require('./tagStats').default
+              const tagStats = require('./tagStats')
               async.parallel(
                 [
                   function (c) {
@@ -189,7 +184,7 @@ truCache.refreshCache = function (callback) {
               )
             },
             function (done) {
-              const quickStats = require('./quickStats').default
+              const quickStats = require('./quickStats')
               quickStats(tickets, function (err, stats) {
                 if (err) return done(err)
 
@@ -212,14 +207,12 @@ truCache.refreshCache = function (callback) {
     function (err) {
       if (err) return winston.warn(err)
       // Send to parent
-      if (process.send) {
-        process.send({ cache: cache })
-      }
+      process.send({ cache: cache })
 
       cache.flushAll()
 
       if (_.isFunction(callback)) {
-        return callback()
+        return callback(err)
       }
     }
   )

@@ -18,10 +18,10 @@ const require = createRequire(import.meta.url)
 const _ = require('lodash')
 const path = require('path')
 const nconf = require('nconf')
-const winston = require('../logger')
+const winston = require('../logger').default
 const elasticsearch = require('@elastic/elasticsearch')
 const ESErrors = require('@elastic/elasticsearch').errors
-const emitter = require('../emitter')
+const emitter = require('../emitter').default
 const dayjs = require('dayjs')
 const timezone = require('dayjs/plugin/timezone')
 const utc = require('dayjs/plugin/utc')
@@ -83,7 +83,7 @@ ES.testConnection = async callback => {
 }
 
 ES.setupHooks = () => {
-  const ticketSchema = require('../models/ticket')
+  const ticketSchema = require('../models/ticket').default
 
   emitter.on('ticket:deleted', async _id => {
     if (_.isUndefined(_id)) return false
