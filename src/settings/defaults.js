@@ -267,7 +267,7 @@ function timezoneDefault (callback) {
         }
 
         winston.debug('Timezone set to ' + setting.value)
-        moment.tz.setDefault(setting.value)
+        dayjs.tz.setDefault(setting.value)
 
         global.timezone = setting.value
 
@@ -275,7 +275,7 @@ function timezoneDefault (callback) {
       })
     } else {
       winston.debug('Timezone set to ' + setting.value)
-      moment.tz.setDefault(setting.value)
+      dayjs.tz.setDefault(setting.value)
 
       global.timezone = setting.value
 
