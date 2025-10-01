@@ -193,3 +193,16 @@ export default {
   isAdminSync,
   buildGrants
 }
+
+export default {
+  register,
+  flushRoles: register,
+  canThis,
+  hasHierarchyEnabled,
+  parseRoleHierarchy,
+  hasPermOverRole,
+  getRoles,
+  isAdmin,
+  isAdminSync,
+  buildGrants
+}
