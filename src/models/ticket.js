@@ -12,30 +12,32 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const async = require('async')
-const mongoose = require('mongoose')
-const winston = require('../logger').default
-const _ = require('lodash')
-const dayjs = require('dayjs')
-const sanitizeHtml = require('sanitize-html')
-// const redisCache          = require('../cache/rediscache');
-const xss = require('xss')
-const utils = require('../helpers/utils').default
+import async from 'async'
+import mongoose from 'mongoose'
+import winston from '../logger/index.js'
+import _ from 'lodash'
+import dayjs from 'dayjs'
+import sanitizeHtml from 'sanitize-html'
+// import redisCache from '../cache/rediscache.js'
+import xss from 'xss'
+import utils from '../helpers/utils.js'
 
 // Needed - For Population
-const groupSchema = require('./group').default
-const userSchema = require('./user').default
-const commentSchema = require('./comment').default
-const noteSchema = require('./note').default
-const attachmentSchema = require('./attachment').default
-const historySchema = require('./history').default
-const statusSchema = require('./ticketStatus').default
-require('./tag')
-require('./ticketpriority')
-require('./tickettype')
+import groupSchema from './group.js'
+import userSchema from './user.js'
+import commentSchema from './comment.js'
+import noteSchema from './note.js'
+import attachmentSchema from './attachment.js'
+import historySchema from './history.js'
+import statusSchema from './ticketStatus.js'
+import countersSchema from './counters.js'
+import emitter from '../emitter/index.js'
+import permissions from '../permissions/index.js'
+import typeSchema from './tickettype.js'
+import marked from 'marked'
+import './tag.js'
+import './ticketpriority.js'
+import './tickettype.js'
 
 const COLLECTION = 'tickets'
 
@@ -137,7 +139,7 @@ ticketSchema.pre('save', function (next) {
     return next()
   }
 
-  const c = require('./counters')
+  const c = countersSchema
   const self = this
   c.increment('tickets', function (err, res) {
     if (err) return next(err)
@@ -155,7 +157,7 @@ ticketSchema.pre('save', function (next) {
 
 ticketSchema.post('save', async function (doc, next) {
   if (!this.wasNew) {
-    const emitter = require('../emitter').default
+    const emitterModule = emitter
     try {
       const savedTicket = await doc.populate([
         {
@@ -194,7 +196,7 @@ ticketSchema.post('save', async function (doc, next) {
 
 ticketSchema.virtual('statusFormatted').get(function (callback) {
   const s = this.status
-  const ticketStatus = require('./ticketStatus')
+  const ticketStatus = statusSchema
 
   ticketStatus.findOne({ uid: s }, function (err, status) {
     if (err) return callback(err)
@@ -241,8 +243,8 @@ ticketSchema.methods.setStatus = function (ownerId, status, callback) {
       return reject(new Error('Invalid Status'))
     }
 
-    const statusSchema = require('./ticketStatus')
-    statusSchema.getStatusById(status, function (err, statusModel) {
+    const statusSchemaModule = statusSchema
+    statusSchemaModule.getStatusById(status, function (err, statusModel) {
       if (err) {
         if (typeof callback === 'function') return callback(err)
         return reject(new Error('Invalid Status'))
@@ -283,7 +285,7 @@ ticketSchema.methods.setStatus = function (ownerId, status, callback) {
  */
 ticketSchema.methods.setAssignee = function (ownerId, userId, callback) {
   if (_.isUndefined(userId)) return callback('Invalid User Id', null)
-  const permissions = require('../permissions')
+  const permissionsModule = permissions
   const self = this
 
   self.assignee = userId
@@ -344,10 +346,10 @@ ticketSchema.methods.clearAssignee = function (ownerId, callback) {
  * @param {function} callback Callback with the updated ticket.
  */
 ticketSchema.methods.setTicketType = function (ownerId, typeId, callback) {
-  const typeSchema = require('./tickettype')
+  const typeSchemaModule = typeSchema
   const self = this
   self.type = typeId
-  typeSchema.findOne({ _id: typeId }, function (err, type) {
+  typeSchemaModule.findOne({ _id: typeId }, function (err, type) {
     if (err) return callback(err)
     if (!type) return callback('Invalid Type Id: ' + typeId)
 
@@ -457,12 +459,12 @@ ticketSchema.methods.setTicketDueDate = function (ownerId, dueDate, callback) {
  * });
  */
 ticketSchema.methods.setIssue = function (ownerId, issue, callback) {
-  const marked = require('marked')
+  const markedModule = marked
   const self = this
   return new Promise(resolve => {
     issue = issue.replace(/(\r\n|\n\r|\r|\n)/g, '<br>')
     issue = sanitizeHtml(issue).trim()
-    self.issue = xss(marked.parse(issue))
+    self.issue = xss(markedModule.parse(issue))
 
     const historyItem = {
       action: 'ticket:update:issue',
