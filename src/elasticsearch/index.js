@@ -27,7 +27,7 @@ const timezone = require('dayjs/plugin/timezone')
 const utc = require('dayjs/plugin/utc')
 dayjs.extend(timezone)
 dayjs.extend(utc)
-const settingUtil = require('../settings/settingsUtil')
+const settingUtil = require('../settings/settingsUtil').default
 
 const ES = {}
 ES.indexName = process.env.ELASTICSEARCH_INDEX_NAME || 'trudesk'

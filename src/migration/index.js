@@ -22,10 +22,10 @@ const semver = require('semver')
 const dayjs = require('dayjs')
 const version = require('../../package.json').version
 
-var SettingsSchema = require('../models/setting')
-var userSchema = require('../models/user')
-var roleSchema = require('../models/role')
-var database = require('../database')
+var SettingsSchema = require('../models/setting').default
+var userSchema = require('../models/user').default
+var roleSchema = require('../models/role').default
+var database = require('../database').default
 const path = require('path')
 
 var migrations = {}
