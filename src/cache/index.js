@@ -44,7 +44,7 @@ async function loadConfig () {
 let refreshTimer
 let lastUpdated = dayjs.utc().tz(process.env.TIMEZONE || 'America/New_York')
 
-truCache.init = function (callback) {
+truCache.init = function () {
   cache = new NodeCache({
     checkperiod: 0
   })
@@ -52,10 +52,6 @@ truCache.init = function (callback) {
   truCache.refreshCache(function () {
     winston.debug('Cache Loaded')
     // restartRefreshClock()
-
-    if (_.isFunction(callback)) {
-      return callback()
-    }
   })
 }
 
@@ -64,7 +60,7 @@ function restartRefreshClock () {
     clearInterval(refreshTimer)
   }
 
-  lastUpdated = moment()
+  lastUpdated = dayjs()
 
   refreshTimer = setInterval(function () {
     truCache.refreshCache()
@@ -72,17 +68,19 @@ function restartRefreshClock () {
   }, 55 * 60 * 1000)
 }
 
-truCache.refreshCache = async function (callback) {
+truCache.refreshCache = function (callback) {
   async.waterfall(
     [
-      async function (done) {
-        const ticketSchema = (await import('../models/ticket.js')).default
-        ticketSchema.getForCache(function (e, tickets) {
-          if (e) return done(e)
-          winston.debug('Pulled ' + tickets.length)
+      function (done) {
+        import('../models/ticket.js').then((ticketSchemaModule) => {
+          const ticketSchema = ticketSchemaModule.default
+          ticketSchema.getForCache(function (e, tickets) {
+            if (e) return done(e)
+            winston.debug('Pulled ' + tickets.length)
 
-          return done(null, tickets)
-        })
+            return done(null, tickets)
+          })
+        }).catch(done)
       },
 
       function (tickets, cb) {

@@ -88,7 +88,7 @@ events.onSetUserOnlineStatus = function (socket) {
 
 async function updateUsers () {
   const sortedUserList = sharedUtils.sortByKeys(sharedVars.usersOnline)
-  for (const v of sortedUserList) {
+  for (const v of Object.values(sortedUserList)) {
     const user = v.user
     const sockets = v.sockets
     if (user && sockets.length > 0) {
