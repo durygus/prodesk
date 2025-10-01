@@ -116,17 +116,17 @@ export default function (app, db, callback) {
 
         next(null, sessionStore)
       },
-      async function (store, next) {
-        const passport = await getPassportConfig()
-        app.use(passport.initialize())
-        app.use(passport.session())
-        app.use(flash())
+      function (store, next) {
+        getPassportConfig().then(passport => {
+          app.use(passport.initialize())
+          app.use(passport.session())
+          app.use(flash())
 
-        // CORS
-        app.use(allowCrossDomain)
-        const csrf = require('../dependencies/csrf-td').default
-        csrf.init()
-        app.use(csrf.generateToken)
+          // CORS
+          app.use(allowCrossDomain)
+          const csrf = require('../dependencies/csrf-td').default
+          csrf.init()
+          app.use(csrf.generateToken)
 
         // Maintenance Mode
         app.use(function (req, res, next) {
@@ -161,8 +161,9 @@ export default function (app, db, callback) {
           express.static(path.join(__dirname, '../../backups'))
         )
 
-        // Uncomment to enable plugins
-        return next(null, store)
+          // Uncomment to enable plugins
+          return next(null, store)
+        })
         // global.plugins = [];
         // var dive = require('dive');
         // dive(path.join(__dirname, '../../plugins'), {directories: true, files: false, recursive: false}, function(err, dir) {
