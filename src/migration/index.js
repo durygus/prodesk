@@ -194,9 +194,9 @@ function migrateUserRoles (callback) {
 }
 
 function createAdminTeamDepartment (callback) {
-  const Team = require('../models/team')
-  const Department = require('../models/department')
-  const Account = require('../models/user')
+  const Team = require('../models/team').default
+  const Department = require('../models/department').default
+  const Account = require('../models/user').default
 
   async.waterfall(
     [
@@ -234,7 +234,7 @@ function createAdminTeamDepartment (callback) {
 
 function removeAgentsFromGroups (callback) {
   // winston.debug('Migrating Agents from Groups...')
-  var groupSchema = require('../models/group')
+  var groupSchema = require('../models/group').default
   groupSchema.getAllGroups(function (err, groups) {
     if (err) return callback(err)
     async.eachSeries(
@@ -252,8 +252,8 @@ function removeAgentsFromGroups (callback) {
 }
 
 function createTicketStatus (callback) {
-  const Status = require('../models/ticketStatus')
-  const counterSchema = require('../models/counters')
+  const Status = require('../models/ticketStatus').default
+  const counterSchema = require('../models/counters').default
   let newId = ''
   let openId = ''
   let pendingId = ''
@@ -371,7 +371,7 @@ migrations.run = function (callback) {
         })
       },
       function (next) {
-        if (databaseVersion && semver.satisfies(semver.coerce(databaseVersion).version, '<1.0.11')) {
+        if (semver.satisfies(semver.coerce(databaseVersion).version, '<1.0.11')) {
           async.parallel(
             [
               function (done) {
