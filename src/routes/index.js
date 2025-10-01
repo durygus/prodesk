@@ -15,9 +15,17 @@ import path from 'path'
 import winston from '../logger/index.js'
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
-import { createRequire } from 'module'
+import settingSchema from '../models/setting.js'
+import mailCheck from '../mailer/mailCheck.js'
+import cache from '../cache/cache.js'
+import _ from 'lodash'
+import svgCaptcha from 'svg-captcha'
+import apiV1Routes from '../controllers/api/v1/routes.js'
+import apiV2Routes from '../controllers/api/v2/routes.js'
+import pm2 from 'pm2'
+import dive from 'dive'
+import fs from 'fs'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const packagejson = JSON.parse(readFileSync(path.join(__dirname, '../../package.json'), 'utf8'))
@@ -51,7 +59,6 @@ function mainRoutes (router, middleware, controllers) {
   router.get('/about', middleware.redirectToLogin, middleware.loadCommonData, controllers.main.about)
 
   router.get('/captcha', function (req, res) {
-    const svgCaptcha = require('svg-captcha')
     const captcha = svgCaptcha.create()
     req.session.captcha = captcha.text
     res.set('Content-Type', 'image/svg+xml')
@@ -64,8 +71,7 @@ function mainRoutes (router, middleware, controllers) {
   router.get('/signup', controllers.accounts.signup)
 
   router.get('/logoimage', function (req, res) {
-    const s = require('../models/setting').default
-    const _ = require('lodash')
+    const s = settingSchema
     s.getSettingByName('gen:customlogo', function (err, hasCustomLogo) {
       if (!err && hasCustomLogo && hasCustomLogo.value) {
         s.getSettingByName('gen:customlogofilename', function (err, logoFilename) {
@@ -360,9 +366,9 @@ function mainRoutes (router, middleware, controllers) {
 
   // API
   // v1
-  require('../controllers/api/v1/routes').default(middleware, router, controllers)
+  apiV1Routes(middleware, router, controllers)
   // v2
-  require('../controllers/api/v2/routes').default(middleware, router, controllers)
+  apiV2Routes(middleware, router, controllers)
 
   router.get('/api/v1/plugins/list/installed', middleware.api, function (req, res) {
     return res.json({ success: true, loadedPlugins: global.plugins })
@@ -383,7 +389,7 @@ function mainRoutes (router, middleware, controllers) {
   router.post('/api/v1/admin/restart', middleware.csrfCheck, middleware.api, middleware.isAdmin, function (req, res) {
     if (process.env.DISABLE_RESTART) return res.json({ success: true })
 
-    const pm2 = require('pm2')
+    const pm2Module = pm2
     pm2.connect(function (err) {
       if (err) {
         winston.error(err)
@@ -406,20 +412,20 @@ function mainRoutes (router, middleware, controllers) {
     router.get('/debug/populatedb', controllers.debug.populatedatabase)
     router.get('/debug/sendmail', controllers.debug.sendmail)
     router.get('/debug/mailcheck/refetch', function (req, res) {
-      const mailCheck = require('../mailer/mailCheck').default
-      mailCheck.refetch()
+      const mailCheckModule = mailCheck
+      mailCheckModule.refetch()
       res.send('OK')
     })
 
     router.get('/debug/cache/refresh', function (req, res) {
-      const cache = require('../cache/cache.js').default
-      cache.forceRefresh()
+      const cacheModule = cache
+      cacheModule.forceRefresh()
       return res.send('OK')
     })
 
     router.get('/debug/restart', function (req, res) {
       if (process.env.DISABLE_RESTART) return res.send('RESTART DISABLED')
-      const pm2 = require('pm2')
+      const pm2Module = pm2
       pm2.connect(function (err) {
         if (err) {
           winston.error(err)
@@ -445,11 +451,11 @@ export default function (app, middleware) {
   app.use('/', router)
 
   // Load Plugin routes
-  const dive = require('dive')
-  const fs = require('fs')
+  const diveModule = dive
+  const fsModule = fs
   const pluginDir = path.join(__dirname, '../../plugins')
-  if (!fs.existsSync(pluginDir)) fs.mkdirSync(pluginDir)
-  dive(pluginDir, { directories: true, files: false, recursive: false }, function (err, dir) {
+  if (!fsModule.existsSync(pluginDir)) fsModule.mkdirSync(pluginDir)
+  diveModule(pluginDir, { directories: true, files: false, recursive: false }, function (err, dir) {
     if (err) throw err
     const pluginRoutes = require(path.join(dir, '/routes'))
     if (pluginRoutes) {
