@@ -13,13 +13,10 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
 import async from 'async'
 import winston from '../logger/index.js'
-const conversationSchema = require('../models/chat/conversation')
-const messageSchema = require('../models/chat/message')
+import conversationSchema from '../models/chat/conversation.js'
+import messageSchema from '../models/chat/message.js'
 const messagesController = {}
 
 messagesController.content = {}
