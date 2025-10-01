@@ -12,12 +12,15 @@
 
  **/
 
-var _ = require('lodash')
-var async = require('async')
-var winston = require('../logger')
-var semver = require('semver')
-var dayjs = require('dayjs')
-var version = require('../../package.json').version
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+const _ = require('lodash')
+const async = require('async')
+const winston = require('../logger').default
+const semver = require('semver')
+const dayjs = require('dayjs')
+const version = require('../../package.json').version
 
 var SettingsSchema = require('../models/setting')
 var userSchema = require('../models/user')
