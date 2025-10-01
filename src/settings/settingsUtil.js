@@ -133,7 +133,7 @@ util.getSettings = async callback => {
           type.priorities = _.sortBy(type.priorities, ['migrationNum', 'name'])
         })
 
-        const ticketPrioritySchema = require('../models/ticketpriority')
+        const ticketPrioritySchema = require('../models/ticketpriority').default
         const priorities = await ticketPrioritySchema.getPriorities()
         content.data.priorities = _.sortBy(priorities, ['migrationNum', 'name'])
 
