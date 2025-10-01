@@ -54,7 +54,9 @@ truCache.init = function (callback) {
     winston.debug('Cache Loaded')
     // restartRefreshClock()
 
-    return callback()
+    if (_.isFunction(callback)) {
+      return callback()
+    }
   })
 }
 
