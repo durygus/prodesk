@@ -16,9 +16,9 @@ import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 
 const _ = require('lodash')
-const winston = require('../logger')
-const roleSchema = require('../models/role')
-const roleOrder = require('../models/roleorder')
+const winston = require('../logger').default
+const roleSchema = require('../models/role').default
+const roleOrder = require('../models/roleorder').default
 
 const register = function (callback) {
   // Register Roles
