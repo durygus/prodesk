@@ -20,6 +20,12 @@ import pkg from '../../package.json' with { type: 'json' }
 import Chance from 'chance'
 import Status from '../models/ticketStatus.js'
 import counterSchema from '../models/counters.js'
+import { createRequire } from 'module'
+import { fileURLToPath } from 'url'
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const installController = {}
 installController.content = {}
