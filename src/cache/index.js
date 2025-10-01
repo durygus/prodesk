@@ -12,16 +12,18 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
+import NodeCache from 'node-cache'
+import async from 'async'
+import path from 'path'
+import nconf from 'nconf'
+import _ from 'lodash'
+import winston from '../logger/index.js'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
 
-const NodeCache = require('node-cache')
-const async = require('async')
-const path = require('path')
-const nconf = require('nconf')
-const _ = require('lodash')
-const winston = require('../logger').default
-const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(utc)
 
 const truCache = {}
 let cache
