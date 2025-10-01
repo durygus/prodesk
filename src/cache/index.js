@@ -187,7 +187,7 @@ truCache.refreshCache = function (callback) {
               )
             },
             function (done) {
-              const quickStats = require('./quickStats')
+              const quickStats = require('./quickStats').default
               quickStats(tickets, function (err, stats) {
                 if (err) return done(err)
 
