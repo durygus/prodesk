@@ -13,13 +13,10 @@
  */
 
 import async from 'async'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
 import _ from 'lodash'
-const userSchema = require('../models/user')
-const groupSchema = require('../models/group')
-const permissions = require('../permissions')
+import userSchema from '../models/user.js'
+import groupSchema from '../models/group.js'
+import permissions from '../permissions/index.js'
 
 const groupsController = {}
 
