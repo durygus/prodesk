@@ -404,4 +404,4 @@ migrations.run = function (callback) {
   )
 }
 
-module.exports = migrations
+export default migrations

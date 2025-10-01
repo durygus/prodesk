@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const redis = require('redis')
 const winston = require('winston')
@@ -63,4 +66,4 @@ function rake () {
   return Array.prototype.slice.call(arguments).join(':')
 }
 
-module.exports = redisCache
+export default redisCache

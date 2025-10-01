@@ -798,4 +798,4 @@ settingsDefaults.init = function (callback) {
   )
 }
 
-module.exports = settingsDefaults
+export default settingsDefaults

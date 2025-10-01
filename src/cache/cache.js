@@ -56,4 +56,4 @@ function spawnCache () {
   })
 }
 
-module.exports = cache
+export default cache

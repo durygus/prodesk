@@ -193,4 +193,4 @@ function buildMostActiveTicket (ticketArray, callback) {
   return callback(tickets)
 }
 
-module.exports = init
+export default init

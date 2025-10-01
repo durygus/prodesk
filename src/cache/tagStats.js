@@ -104,4 +104,4 @@ const init = function (tickets, timespan, callback) {
   )
 }
 
-module.exports = init
+export default init

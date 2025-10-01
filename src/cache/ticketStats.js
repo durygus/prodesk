@@ -274,4 +274,4 @@ const init = function (tickets, callback) {
   )
 }
 
-module.exports = init
+export default init

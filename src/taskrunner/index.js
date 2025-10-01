@@ -123,4 +123,4 @@ taskRunner.sendStats = function (callback) {
   })
 }
 
-module.exports = taskRunner
+export default taskRunner
