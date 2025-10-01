@@ -11,18 +11,13 @@
  *  Updated:    1/20/19 4:43 PM
  *  Copyright (c) 2014-2019. All rights reserved.
  */
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../logger').default
-const utils = require('../helpers/utils')
-const userSchema = require('../models/user').default
-
-const sharedVars = require('./index').shared
-const sharedUtils = require('./index').utils
-const socketEventConst = require('./socketEventConsts').default
+import _ from 'lodash'
+import async from 'async'
+import winston from '../logger/index.js'
+import utils from '../helpers/utils.js'
+import userSchema from '../models/user.js'
+import { shared as sharedVars, utils as sharedUtils } from './index.js'
+import socketEventConst from './socketEventConsts.js'
 
 const events = {}
 
