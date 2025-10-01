@@ -128,7 +128,7 @@ function rolesDefault (callback) {
         })
       },
       function (done) {
-        var roleOrderSchema = require('../models/roleorder').default.default
+        var roleOrderSchema = require('../models/roleorder').default
         roleOrderSchema.getOrder(function (err, roleOrder) {
           if (err) return done(err)
           if (roleOrder) return done()
