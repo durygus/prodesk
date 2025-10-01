@@ -60,7 +60,7 @@ roleDefaults.adminGrants = [
 settingsDefaults.roleDefaults = roleDefaults
 
 function rolesDefault (callback) {
-  const roleSchema = require('../models/role')
+  const roleSchema = require('../models/role').default
 
   async.series(
     [
