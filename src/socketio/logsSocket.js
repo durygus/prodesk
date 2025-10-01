@@ -12,14 +12,21 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-var utils = require('../helpers/utils')
-var path = require('path')
-var AnsiUp = require('ansi_up')
-var ansiUp = new AnsiUp.default()
-var Tail = require('tail').Tail
-var fs = require('fs-extra')
+import { createRequire } from 'module'
+import { fileURLToPath } from 'url'
+import path from 'path'
 
-var logFile = path.join(__dirname, '../../logs/error.log')
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const utils = require('../helpers/utils')
+const AnsiUp = require('ansi_up')
+const ansiUp = new AnsiUp.default()
+const Tail = require('tail').Tail
+const fs = require('fs-extra')
+
+const logFile = path.join(__dirname, '../../logs/error.log')
 
 var events = {}
 
@@ -47,7 +54,7 @@ events.onLogsFetch = function (socket) {
   })
 }
 
-module.exports = {
+export default {
   events: events,
   eventLoop: eventLoop,
   register: register

@@ -26,4 +26,4 @@ pluginHelpers.checkPermissions = function (userRole, permissions) {
   return result
 }
 
-module.exports = pluginHelpers
+export default pluginHelpers

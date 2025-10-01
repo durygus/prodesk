@@ -11,11 +11,14 @@
  *  Updated:    1/20/19 4:43 PM
  *  Copyright (c) 2014-2019. All rights reserved.
  */
-var _ = require('lodash')
-var async = require('async')
-var winston = require('../logger')
-var utils = require('../helpers/utils')
-var socketEvents = require('./socketEventConsts')
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+const _ = require('lodash')
+const async = require('async')
+const winston = require('../logger').default
+const utils = require('../helpers/utils')
+const socketEvents = require('./socketEventConsts').default
 
 var events = {}
 
@@ -126,7 +129,7 @@ events.clearNotifications = function (socket) {
   })
 }
 
-module.exports = {
+export default {
   events: events,
   eventLoop: eventLoop,
   register: register

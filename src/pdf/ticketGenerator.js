@@ -12,9 +12,15 @@
  *  Copyright (c) 2014-2022. All rights reserved.
  */
 
-const path = require('path')
-const PDFDocument = require('pdfkit')
+import { createRequire } from 'module'
+import { fileURLToPath } from 'url'
+import path from 'path'
 
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const PDFDocument = require('pdfkit')
 const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
 const marked = require('marked')
 const convert = require('html-to-text').convert
@@ -35,7 +41,7 @@ class TicketPDFGenerator {
       .fontSize(10)
       .text('Ticket Number:   ' + this.ticket.uid, { align: 'right' })
       .text('Group:   ' + this.ticket.group.name, { align: 'right' })
-      .text('Due Date:   ' + moment(this.ticket.dueDate).format('MM-DD-YYYY'), { align: 'right' })
+      .text('Due Date:   ' + dayjs(this.ticket.dueDate).format('MM-DD-YYYY'), { align: 'right' })
       .text('Priority:   ' + this.ticket.priority.name, { align: 'right' })
       .text('Type:   ' + this.ticket.type.name, { align: 'right' })
 
@@ -61,7 +67,7 @@ class TicketPDFGenerator {
       .fill('#0000ff')
       .text(this.ticket.owner.fullname + ' <' + this.ticket.owner.email + '>', 100, doc.y + 5)
       .fill('#000')
-      .text(moment(this.ticket.date).format('MM-DD-YYYY HH:mm:ss'))
+      .text(dayjs(this.ticket.date).format('MM-DD-YYYY HH:mm:ss'))
       .moveDown(2)
 
     const markedIssue = marked.parse(this.ticket.issue)
@@ -125,7 +131,7 @@ class TicketPDFGenerator {
           .fill('#0000ff')
           .text(comment.owner.fullname + ' <' + comment.owner.email + '>', 100, doc.y + 5)
           .fill('#000')
-          .text(moment(this.ticket.date).format('MM-DD-YYYY HH:mm:ss'))
+          .text(dayjs(this.ticket.date).format('MM-DD-YYYY HH:mm:ss'))
 
         doc.moveDown(2)
 
@@ -178,7 +184,7 @@ class TicketPDFGenerator {
         doc
           .fontSize(10)
           .text('Action by: ..... ' + item.owner.fullname)
-          .text('Date: ............ ' + moment(item.date).format('MM-DD-YYYY HH:mm:ss'))
+          .text('Date: ............ ' + dayjs(item.date).format('MM-DD-YYYY HH:mm:ss'))
           .moveDown()
           .text(item.description)
 
@@ -224,4 +230,4 @@ class TicketPDFGenerator {
   }
 }
 
-module.exports = TicketPDFGenerator
+export default TicketPDFGenerator

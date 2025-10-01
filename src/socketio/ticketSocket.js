@@ -11,20 +11,23 @@
  *  Updated:    1/20/19 4:43 PM
  *  Copyright (c) 2014-2019. All rights reserved.
  */
-var _ = require('lodash')
-var async = require('async')
-var winston = require('../logger')
-var marked = require('marked')
-var sanitizeHtml = require('sanitize-html')
-var utils = require('../helpers/utils')
-var emitter = require('../emitter')
-var socketEvents = require('./socketEventConsts')
-var ticketSchema = require('../models/ticket')
-var prioritySchema = require('../models/ticketpriority')
-var userSchema = require('../models/user')
-var roleSchema = require('../models/role')
-var permissions = require('../permissions')
-var xss = require('xss')
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+const _ = require('lodash')
+const async = require('async')
+const winston = require('../logger').default
+const marked = require('marked')
+const sanitizeHtml = require('sanitize-html')
+const utils = require('../helpers/utils')
+const emitter = require('../emitter').default
+const socketEvents = require('./socketEventConsts').default
+const ticketSchema = require('../models/ticket').default
+const prioritySchema = require('../models/ticketpriority').default
+const userSchema = require('../models/user').default
+const roleSchema = require('../models/role').default
+const permissions = require('../permissions').default
+const xss = require('xss')
 
 var events = {}
 
@@ -398,7 +401,7 @@ events.onAttachmentsUIUpdate = socket => {
   })
 }
 
-module.exports = {
+export default {
   events: events,
   eventLoop: eventLoop,
   register: register

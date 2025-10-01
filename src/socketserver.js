@@ -12,20 +12,23 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const winston = require('./logger')
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+const winston = require('./logger').default
 const async = require('async')
 const passportSocketIo = require('passport.socketio')
 const cookieparser = require('cookie-parser')
 const nconf = require('nconf')
 
 // Submodules
-const ticketSocket = require('./socketio/ticketSocket')
-const chatSocket = require('./socketio/chatSocket')
-const notificationSocket = require('./socketio/notificationSocket')
-const noticeSocket = require('./socketio/noticeSocket')
-const accountsImportSocket = require('./socketio/accountImportSocket')
-const backupRestoreSocket = require('./socketio/backupRestoreSocket')
-const logsSocket = require('./socketio/logsSocket')
+const ticketSocket = require('./socketio/ticketSocket').default
+const chatSocket = require('./socketio/chatSocket').default
+const notificationSocket = require('./socketio/notificationSocket').default
+const noticeSocket = require('./socketio/noticeSocket').default
+const accountsImportSocket = require('./socketio/accountImportSocket').default
+const backupRestoreSocket = require('./socketio/backupRestoreSocket').default
+const logsSocket = require('./socketio/logsSocket').default
 
 const socketServer = function (ws) {
   'use strict'
@@ -133,4 +136,4 @@ function onAuthorizeSuccess (data, accept) {
   accept()
 }
 
-module.exports = socketServer
+export default socketServer
