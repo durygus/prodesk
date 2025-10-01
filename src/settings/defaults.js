@@ -13,14 +13,11 @@
  **/
 
 import { createRequire } from 'module'
-import { fileURLToPath } from 'url'
 const require = createRequire(import.meta.url)
-const path = require('path')
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 const _ = require('lodash')
 const fs = require('fs-extra')
+const path = require('path')
 const async = require('async')
 const winston = require('../logger').default
 const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
@@ -128,7 +125,7 @@ function rolesDefault (callback) {
         })
       },
       function (done) {
-        var roleOrderSchema = require('../models/roleorder').default
+        var roleOrderSchema = require('../models/roleorder').default.default
         roleOrderSchema.getOrder(function (err, roleOrder) {
           if (err) return done(err)
           if (roleOrder) return done()
@@ -265,7 +262,7 @@ function timezoneDefault (callback) {
         }
 
         winston.debug('Timezone set to ' + setting.value)
-        dayjs.tz.setDefault(setting.value)
+        moment.tz.setDefault(setting.value)
 
         global.timezone = setting.value
 
@@ -273,7 +270,7 @@ function timezoneDefault (callback) {
       })
     } else {
       winston.debug('Timezone set to ' + setting.value)
-      dayjs.tz.setDefault(setting.value)
+      moment.tz.setDefault(setting.value)
 
       global.timezone = setting.value
 
@@ -376,7 +373,7 @@ function ticketStatusSettingDefault(callback) {
       return callback()
     }
 
-    const ticketStatusSchema = require('../models/ticketStatus')
+    const ticketStatusSchema = require('../models/ticketStatus').default
     ticketStatusSchema.getStatus(function(err, statuses) {
       if (err) {
         winston.warn(err)
@@ -450,7 +447,7 @@ function ticketPriorityDefaults (callback) {
 }
 
 function normalizeTags (callback) {
-  var tagSchema = require('../models/tag')
+  var tagSchema = require('../models/tag').default
   tagSchema.find({}, function (err, tags) {
     if (err) return callback(err)
     async.each(
@@ -464,7 +461,7 @@ function normalizeTags (callback) {
 }
 
 function checkPriorities (callback) {
-  var ticketSchema = require('../models/ticket')
+  var ticketSchema = require('../models/ticket').default
   var migrateP1 = false
   var migrateP2 = false
   var migrateP3 = false
@@ -615,7 +612,7 @@ function addedDefaultPrioritiesToTicketTypes (callback) {
 function mailTemplates (callback) {
   var newTicket = require('./json/mailer-new-ticket')
   var passwordReset = require('./json/mailer-password-reset')
-  var templateSchema = require('../models/template')
+  var templateSchema = require('../models/template').default
   async.parallel(
     [
       function (done) {
