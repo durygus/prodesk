@@ -12,12 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const ticketSchema = require('../models/ticket').default
+import _ from 'lodash'
+import async from 'async'
+import ticketSchema from '../models/ticket.js'
 
 _.mixin({
   sortKeysBy: function (obj, comparator) {
