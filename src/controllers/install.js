@@ -553,7 +553,16 @@ installController.restart = function (req, res) {
     return
   }
 
-  // Обычная логика с PM2 для не-Docker окружения
+  // В development режиме (без PM2) просто уведомляем пользователя
+  if (process.env.NODE_ENV === 'development') {
+    res.json({ 
+      success: true, 
+      message: 'Installation completed! Please manually restart the server: npm run start' 
+    })
+    return
+  }
+
+  // Production режим с PM2
   const pm2 = require('pm2')
   pm2.connect(function (err) {
     if (err) {
