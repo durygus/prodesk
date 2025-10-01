@@ -40,7 +40,7 @@ function loadConfig () {
 }
 
 let refreshTimer
-let lastUpdated = moment.utc().tz(process.env.TIMEZONE || 'America/New_York')
+let lastUpdated = dayjs.utc().tz(process.env.TIMEZONE || 'America/New_York')
 
 truCache.init = function (callback) {
   cache = new NodeCache({
