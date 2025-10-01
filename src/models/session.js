@@ -12,12 +12,8 @@
  *  Copyright (c) 2014-2022. All rights reserved.
  */
 // This is used to connect to MongoStore for express-session to destroy the sessions of users
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-
-const mongoose = require('mongoose')
-const winston = require('../logger')
+import mongoose from 'mongoose'
+import winston from '../logger/index.js'
 
 const COLLECTION = 'sessions'
 
