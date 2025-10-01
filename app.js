@@ -21,7 +21,9 @@ import nconf from 'nconf'
 import Chance from 'chance'
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 
+const require = createRequire(import.meta.url)
 const chance = new Chance()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
