@@ -75,7 +75,7 @@ truCache.refreshCache = function (callback) {
   async.waterfall(
     [
       function (done) {
-        const ticketSchema = require('../models/ticket')
+        const ticketSchema = require('../models/ticket').default
         ticketSchema.getForCache(function (e, tickets) {
           if (e) return done(e)
           winston.debug('Pulled ' + tickets.length)
