@@ -199,7 +199,7 @@ function downloadWin32MongoDBTools (callback) {
   var http = require('http')
   var os = require('os')
   var semver = require('semver')
-  var dbVersion = require('../database').db.version || '5.0.6'
+  var dbVersion = require('../database').default.db.version || '5.0.6'
   var fileVersion = semver.major(dbVersion) + '.' + semver.minor(dbVersion)
 
   if (os.platform() === 'win32') {
