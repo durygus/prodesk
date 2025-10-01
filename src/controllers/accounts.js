@@ -16,13 +16,10 @@ import async from 'async'
 import _ from 'lodash'
 import winston from '../logger/index.js'
 import path from 'path'
-import { createRequire } from 'module'
-
-const require = createRequire(import.meta.url)
-const userSchema = require('../models/user')
-const permissions = require('../permissions')
-const emitter = require('../emitter')
-const xss = require('xss')
+import userSchema from '../models/user.js'
+import permissions from '../permissions/index.js'
+import emitter from '../emitter/index.js'
+import xss from 'xss'
 
 const accountsController = {}
 
