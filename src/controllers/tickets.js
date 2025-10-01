@@ -13,15 +13,12 @@ import async from 'async'
 import path from 'path'
 import _ from 'lodash'
 import winston from '../logger/index.js'
-import { createRequire } from 'module'
-
-const require = createRequire(import.meta.url)
-const ticketSchema = require('../models/ticket')
-const groupSchema = require('../models/group')
-const departmentSchema = require('../models/department')
-const permissions = require('../permissions')
-const xss = require('xss')
-const fs = require('fs-extra')
+import ticketSchema from '../models/ticket.js'
+import groupSchema from '../models/group.js'
+import departmentSchema from '../models/department.js'
+import permissions from '../permissions/index.js'
+import xss from 'xss'
+import fs from 'fs-extra'
 /**
  * @since 1.0
  * @author Chris Brame <polonel@gmail.com>
