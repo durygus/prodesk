@@ -12,19 +12,22 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const async = require('async')
-const mongoose = require('mongoose')
-const winston = require('winston')
-const bcrypt = require('bcrypt')
-const _ = require('lodash')
-const Chance = require('chance')
-const utils = require('../helpers/utils').default
+import async from 'async'
+import mongoose from 'mongoose'
+import winston from 'winston'
+import bcrypt from 'bcrypt'
+import _ from 'lodash'
+import Chance from 'chance'
+import utils from '../helpers/utils.js'
+import base32 from 'thirty-two'
+import settingSchema from './setting.js'
+import GroupSchema from './group.js'
+import path from 'path'
+import mailer from '../mailer/index.js'
+import Email from 'email-templates'
 
 // Required for linkage
-require('./role')
+import './role.js'
 
 const SALT_FACTOR = 10
 const COLLECTION = 'accounts'
@@ -156,14 +159,14 @@ userSchema.methods.generateL2Auth = function (callback) {
     ;(async () => {
       if (_.isUndefined(user.tOTPKey) || _.isNull(user.tOTPKey)) {
         const chance = new Chance()
-        const base32 = require('thirty-two')
+        const base32Module = base32
 
         const genOTPKey = chance.string({
           length: 7,
           pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789'
         })
 
-        const base32GenOTPKey = base32
+        const base32GenOTPKey = base32Module
           .encode(genOTPKey)
           .toString()
           .replace(/=/g, '')
@@ -515,15 +518,13 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
 
   var self = this
 
-  var settingSchema = require('./setting')
-  settingSchema.getSetting('role:user:default', function (err, userRoleDefault) {
+  var settingSchemaModule = settingSchema
+  settingSchemaModule.getSetting('role:user:default', function (err, userRoleDefault) {
     if (err || !userRoleDefault) return callback('Invalid Setting - UserRoleDefault')
 
-    var Chance = require('chance')
+    var chanceModule = new Chance()
 
-    var chance = new Chance()
-
-    var plainTextPass = chance.string({
+    var plainTextPass = chanceModule.string({
       length: 6,
       pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
     })
@@ -544,8 +545,8 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
         if (err) return callback(err)
 
         // Create a group for this user
-        var GroupSchema = require('./group')
-        var group = new GroupSchema({
+        var GroupSchemaModule = GroupSchema
+        var group = new GroupSchemaModule({
           name: savedUser.email,
           members: [savedUser._id],
           sendMailTo: [savedUser._id],
@@ -556,12 +557,12 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
           if (err) return callback(err)
 
           // Send welcome email
-          var path = require('path')
-          var mailer = require('../mailer').default
-          var Email = require('email-templates')
-          var templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
+          var pathModule = path
+          var mailerModule = mailer
+          var EmailModule = Email
+          var templateDir = pathModule.resolve(__dirname, '..', 'mailer', 'templates')
 
-          var email = new Email({
+          var email = new EmailModule({
             views: {
               root: templateDir,
               options: {
@@ -570,7 +571,7 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
             }
           })
 
-          var settingSchema = require('./setting')
+          var settingSchemaModule = settingSchema
           settingSchema.getSetting('gen:siteurl', function (err, setting) {
             if (err) return callback(err)
 
@@ -596,7 +597,7 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
                   generateTextFromHTML: true
                 }
 
-                mailer.sendMail(mailOptions, function (err) {
+                mailerModule.sendMail(mailOptions, function (err) {
                   if (err) {
                     winston.warn(err)
                     return callback(err)
