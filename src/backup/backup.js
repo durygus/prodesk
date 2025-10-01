@@ -12,14 +12,21 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const fs = require('fs-extra')
-const os = require('os')
-const path = require('path')
+import { createRequire } from 'module'
+import { fileURLToPath } from 'url'
+import path from 'path'
+import fs from 'fs-extra'
+import os from 'os'
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const spawn = require('child_process').spawn
 const archiver = require('archiver')
-const database = require('../database')
-const winston = require('../logger')
-const moment = require('moment')
+const database = require('../database').default
+const winston = require('../logger').default
+const dayjs = require('dayjs')
 const pkg = require('../../package.json')
 
 global.env = process.env.NODE_ENV || 'production'
@@ -125,7 +132,7 @@ function runBackup (callback) {
 
 ;(function () {
   CONNECTION_URI = process.env.MONGOURI
-  FILENAME = process.env.FILENAME || 'trudesk-v' + pkg.version + '-' + moment().format('MMDDYYYY_HHmm') + '.zip'
+  FILENAME = process.env.FILENAME || 'trudesk-v' + pkg.version + '-' + dayjs().format('MMDDYYYY_HHmm') + '.zip'
 
   if (!CONNECTION_URI) return process.send({ error: { message: 'Invalid connection uri' } })
   const options = {

@@ -12,12 +12,15 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const async = require('async')
 const dayjs = require('dayjs')
 const winston = require('winston')
 
-const ticketSchema = require('../models/ticket')
+const ticketSchema = require('../models/ticket').default
 
 const ex = {}
 

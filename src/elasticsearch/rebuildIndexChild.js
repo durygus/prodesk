@@ -1,8 +1,11 @@
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const async = require('async')
 const elasticsearch = require('@elastic/elasticsearch')
-const winston = require('../logger')
+const winston = require('../logger').default
 const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
-const database = require('../database')
+const database = require('../database').default
 
 global.env = process.env.NODE_ENV || 'production'
 
@@ -12,7 +15,7 @@ ES.indexName = process.env.ELASTICSEARCH_INDEX_NAME || 'trudesk'
 function setupTimezone (callback) {
   return new Promise((resolve, reject) => {
     ;(async () => {
-      const settingsSchema = require('../models/setting')
+      const settingsSchema = require('../models/setting').default
       try {
         const setting = await settingsSchema.getSettingByName('gen:timezone')
         let tz = 'UTC'
@@ -201,7 +204,7 @@ async function sendAndEmptyQueue (bulk) {
 }
 
 function crawlUsers (callback) {
-  const Model = require('../models/user')
+  const Model = require('../models/user').default
   let count = 0
   const startTime = new Date().getTime()
   const stream = Model.find({ deleted: false })
@@ -240,7 +243,7 @@ function crawlUsers (callback) {
 }
 
 function crawlTickets (callback) {
-  const Model = require('../models/ticket')
+  const Model = require('../models/ticket').default
   let count = 0
   const startTime = new Date().getTime()
   const stream = Model.find({ deleted: false })

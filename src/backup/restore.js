@@ -12,15 +12,22 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+import { fileURLToPath } from 'url'
+import path from 'path'
+import fs from 'fs-extra'
+import os from 'os'
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const _ = require('lodash')
-const fs = require('fs-extra')
-const path = require('path')
 const spawn = require('child_process').spawn
-const os = require('os')
 const async = require('async')
 const AdmZip = require('adm-zip')
-const database = require('../database')
-const winston = require('../logger')
+const database = require('../database').default
+const winston = require('../logger').default
 
 global.env = process.env.NODE_ENV || 'production'
 
