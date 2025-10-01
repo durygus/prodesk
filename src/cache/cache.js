@@ -12,12 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const NodeCache = require('node-cache')
-const path = require('path')
+import _ from 'lodash'
+import NodeCache from 'node-cache'
+import path from 'path'
 const cache = {}
 
 cache.init = function () {
