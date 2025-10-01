@@ -116,9 +116,10 @@ export default function (app, db, callback) {
 
         next(null, sessionStore)
       },
-      function (store, next) {
-        app.use(passportConfig.initialize())
-        app.use(passportConfig.session())
+      async function (store, next) {
+        const passport = await getPassportConfig()
+        app.use(passport.initialize())
+        app.use(passport.session())
         app.use(flash())
 
         // CORS
