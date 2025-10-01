@@ -13,16 +13,13 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
 import async from 'async'
 import path from 'path'
-const passport = require('passport')
-const winston = require('winston')
-const pkg = require('../../package')
-const xss = require('xss')
-const settingsUtil = require('../settings/settingsUtil')
+import passport from 'passport'
+import winston from 'winston'
+import pkg from '../../package.json' with { type: 'json' }
+import xss from 'xss'
+import settingsUtil from '../settings/settingsUtil.js'
 const RateLimiterMemory = require('rate-limiter-flexible').RateLimiterMemory
 
 const limiterSlowBruteByIP = new RateLimiterMemory({
