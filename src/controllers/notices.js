@@ -13,11 +13,8 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const noticeSchema = require('../models/notice')
-const permissions = require('../permissions')
+import noticeSchema from '../models/notice.js'
+import permissions from '../permissions/index.js'
 
 const noticesController = {}
 
