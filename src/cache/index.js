@@ -23,7 +23,7 @@ const NodeCache = require('node-cache')
 const async = require('async')
 const nconf = require('nconf')
 const _ = require('lodash')
-const winston = require('../logger')
+const winston = require('../logger').default
 const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
 
 const truCache = {}
