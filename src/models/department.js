@@ -12,18 +12,15 @@
 
  **/
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash')
-var async = require('async')
-var mongoose = require('mongoose')
-var utils = require('../helpers/utils')
+import _ from 'lodash'
+import async from 'async'
+import mongoose from 'mongoose'
+import utils from '../helpers/utils.js'
 
 // Refs
-require('./group')
-var Teams = require('./team')
-var Groups = require('./group')
+import './group.js'
+import Teams from './team.js'
+import Groups from './group.js'
 
 var COLLECTION = 'departments'
 
