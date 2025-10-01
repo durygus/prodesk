@@ -13,9 +13,6 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
 import async from 'async'
 import path from 'path'
 import winston from '../logger/index.js'
