@@ -12,22 +12,18 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const Imap = require('imap')
-const winston = require('../logger')
-const simpleParser = require('mailparser').simpleParser
-const cheerio = require('cheerio')
-
-const emitter = require('../emitter')
-const userSchema = require('../models/user').default
-const groupSchema = require('../models/group').default
-const ticketTypeSchema = require('../models/tickettype').default
-const statusSchema = require('../models').default.Status
-const Ticket = require('../models/ticket').default
+import _ from 'lodash'
+import async from 'async'
+import Imap from 'imap'
+import winston from '../logger/index.js'
+import { simpleParser } from 'mailparser'
+import cheerio from 'cheerio'
+import emitter from '../emitter/index.js'
+import userSchema from '../models/user.js'
+import groupSchema from '../models/group.js'
+import ticketTypeSchema from '../models/tickettype.js'
+import statusSchema from '../models/index.js'
+import Ticket from '../models/ticket.js'
 
 const mailCheck = {}
 mailCheck.inbox = []

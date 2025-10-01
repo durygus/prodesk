@@ -15,6 +15,7 @@
 import _ from 'lodash'
 import mongoose from 'mongoose'
 import utils from '../helpers/utils.js'
+import autopopulate from 'mongoose-autopopulate'
 
 var COLLECTION = 'groups'
 
@@ -42,7 +43,7 @@ var groupSchema = mongoose.Schema({
   public: { type: Boolean, required: true, default: false }
 })
 
-groupSchema.plugin(require('mongoose-autopopulate'))
+groupSchema.plugin(autopopulate)
 
 groupSchema.pre('save', function (next) {
   this.name = utils.sanitizeFieldPlainText(this.name.trim())

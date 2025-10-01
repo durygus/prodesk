@@ -12,12 +12,11 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../../../logger')
+import _ from 'lodash'
+import async from 'async'
+import winston from '../../../logger/index.js'
+import userSchema from '../../../models/user.js'
+import settingsUtil from '../../../settings/settingsUtil.js'
 
 const commonV1 = {}
 
@@ -46,7 +45,7 @@ const commonV1 = {}
  *
  */
 commonV1.login = function (req, res) {
-  var userModel = require('../../../models/user')
+  const userModel = userSchema
   var username = req.body.username
   var password = req.body.password
 
@@ -138,7 +137,7 @@ commonV1.logout = function (req, res) {
 }
 
 commonV1.privacyPolicy = async (req, res) => {
-  const SettingsUtil = require('../../../settings/settingsUtil')
+  const SettingsUtil = settingsUtil
   try {
     const results = await SettingsUtil.getSettings()
 

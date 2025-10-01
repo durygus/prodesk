@@ -12,19 +12,19 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../../../logger')
-const Chance = require('chance')
-const apiUtil = require('../apiUtils')
-const User = require('../../../models/user')
-const Group = require('../../../models/group')
-const Team = require('../../../models/team')
-const Department = require('../../../models/department')
-const passwordComplexity = require('../../../settings/passwordComplexity')
+import _ from 'lodash'
+import async from 'async'
+import winston from '../../../logger/index.js'
+import Chance from 'chance'
+import apiUtil from '../apiUtils.js'
+import User from '../../../models/user.js'
+import Group from '../../../models/group.js'
+import Team from '../../../models/team.js'
+import Department from '../../../models/department.js'
+import passwordComplexity from '../../../settings/passwordComplexity.js'
+import SettingsUtil from '../../../settings/settingsUtil.js'
+import Session from '../../../models/session.js'
+import passport from '../../../passport/index.js'
 
 const accountsApi = {}
 
@@ -66,8 +66,8 @@ accountsApi.create = async function (req, res) {
     if (!postData.password || !postData.passwordConfirm) throw new Error('Password length is too short.')
 
     // SETTINGS
-    const SettingsUtil = require('../../../settings/settingsUtil')
-    const settingsContent = await SettingsUtil.getSettings()
+    const SettingsUtilModule = SettingsUtil
+    const settingsContent = await SettingsUtilModule.getSettings()
     const settings = settingsContent.data.settings
     const passwordComplexityEnabled = settings.accountsPasswordComplexity.value
 
@@ -260,8 +260,8 @@ accountsApi.update = async function (req, res) {
 
   try {
     // SETTINGS
-    const SettingsUtil = require('../../../settings/settingsUtil')
-    const settingsContent = await SettingsUtil.getSettings()
+    const SettingsUtilModule = SettingsUtil
+    const settingsContent = await SettingsUtilModule.getSettings()
     const settings = settingsContent.data.settings
     const passwordComplexityEnabled = settings.accountsPasswordComplexity.value
 
@@ -363,8 +363,8 @@ accountsApi.update = async function (req, res) {
     }
 
     if (passwordUpdated) {
-      const Session = require('../../../models/session')
-      await Session.destroy(user._id)
+      const SessionModel = Session
+      await SessionModel.destroy(user._id)
     }
 
     return apiUtil.sendApiSuccess(res, { user })
@@ -433,8 +433,8 @@ accountsApi.verifyMFA = async (req, res) => {
 
   req.user.tOTPKey = payload.tOTPKey
 
-  const passport = require('../../../passport')
-  passport().authenticate('totp-verify', (err, success) => {
+  const passportModule = passport
+  passportModule().authenticate('totp-verify', (err, success) => {
     if (err || !success) return apiUtil.sendApiError(res, 400, 'Invalid Verification')
 
     User.findOne({ _id: req.user._id }, function (err, user) {
@@ -491,8 +491,8 @@ accountsApi.updatePassword = async (req, res) => {
       return apiUtil.sendApiError(res, 400, 'Invalid Credentials')
 
     // SETTINGS
-    const SettingsUtil = require('../../../settings/settingsUtil')
-    const settingsContent = await SettingsUtil.getSettings()
+    const SettingsUtilModule = SettingsUtil
+    const settingsContent = await SettingsUtilModule.getSettings()
     const settings = settingsContent.data.settings
     const passwordComplexityEnabled = settings.accountsPasswordComplexity.value
 
@@ -503,8 +503,8 @@ accountsApi.updatePassword = async (req, res) => {
 
     dbUser = await dbUser.save()
 
-    const Session = require('../../../models/session')
-    await Session.destroy(dbUser._id)
+    const SessionModel = Session
+    await SessionModel.destroy(dbUser._id)
 
     return apiUtil.sendApiSuccess(res, {})
   } catch (err) {

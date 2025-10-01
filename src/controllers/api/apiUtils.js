@@ -12,10 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
+import _ from 'lodash'
+import nconfModule from 'nconf'
+import jwtModule from 'jsonwebtoken'
+import groupSchema from '../../models/group.js'
 
 const apiUtils = {}
 
@@ -34,8 +34,8 @@ apiUtils.sendApiError_InvalidPostData = function (res) {
 }
 
 apiUtils.generateJWTToken = function (dbUser, callback) {
-  const nconf = require('nconf')
-  const jwt = require('jsonwebtoken')
+  const nconf = nconfModule
+  const jwt = jwtModule
 
   const resUser = _.clone(dbUser._doc)
   const refreshToken = resUser.accessToken
@@ -54,7 +54,7 @@ apiUtils.generateJWTToken = function (dbUser, callback) {
   const expires = nconf.get('tokens') ? nconf.get('tokens').expires : 3600
   if (!secret || !expires) return callback({ message: 'Invalid Server Configuration' })
 
-  require('../../models/group').getAllGroupsOfUserNoPopulate(dbUser._id, function (err, grps) {
+  groupSchema.getAllGroupsOfUserNoPopulate(dbUser._id, function (err, grps) {
     if (err) return callback(err)
     resUser.groups = grps.map(function (g) {
       return g._id

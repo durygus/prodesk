@@ -457,7 +457,7 @@ export default function (app, middleware) {
   if (!fsModule.existsSync(pluginDir)) fsModule.mkdirSync(pluginDir)
   diveModule(pluginDir, { directories: true, files: false, recursive: false }, function (err, dir) {
     if (err) throw err
-    const pluginRoutes = require(path.join(dir, '/routes'))
+    const pluginRoutes = (await import(path.join(dir, '/routes'))).default
     if (pluginRoutes) {
       pluginRoutes(router, middleware)
     } else {

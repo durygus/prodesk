@@ -16,6 +16,7 @@ import _ from 'lodash'
 import async from 'async'
 import mongoose from 'mongoose'
 import utils from '../helpers/utils.js'
+import autopopulate from 'mongoose-autopopulate'
 
 // Refs
 import './group.js'
@@ -33,7 +34,7 @@ var departmentSchema = mongoose.Schema({
   groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'groups', autopopulate: true }]
 })
 
-departmentSchema.plugin(require('mongoose-autopopulate'))
+departmentSchema.plugin(autopopulate)
 
 departmentSchema.pre('save', function (next) {
   this.name = utils.sanitizeFieldPlainText(this.name.trim())

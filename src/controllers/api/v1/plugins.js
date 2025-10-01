@@ -12,26 +12,18 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
 import path from 'path'
-
-const require = createRequire(import.meta.url)
 import { fileURLToPath } from 'url'
+import winston from 'winston'
+import fs from 'fs'
+import request from 'request'
+import rimraf from 'rimraf'
+import mkdirp from 'mkdirp'
+import tar from 'tar'
+import pm2Module from 'pm2'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-
-var winston = require('winston')
-
-var fs = require('fs')
-
-var request = require('request')
-
-var rimraf = require('rimraf')
-
-var mkdirp = require('mkdirp')
-
-var tar = require('tar')
 
 var apiPlugins = {}
 
@@ -134,7 +126,7 @@ apiPlugins.removePlugin = function (req, res) {
 }
 
 function restartServer () {
-  var pm2 = require('pm2')
+  const pm2 = pm2Module
   pm2.connect(function (err) {
     if (err) {
       winston.error(err)

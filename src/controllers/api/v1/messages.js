@@ -12,15 +12,12 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const async = require('async')
-const _ = require('lodash')
-const winston = require('../../../logger')
-const ConversationSchema = require('../../../models/chat/conversation')
-const MessageSchema = require('../../../models/chat/message')
-const UserSchema = require('../../../models/user')
+import async from 'async'
+import _ from 'lodash'
+import winston from '../../../logger/index.js'
+import ConversationSchema from '../../../models/chat/conversation.js'
+import MessageSchema from '../../../models/chat/message.js'
+import UserSchema from '../../../models/user.js'
 
 const apiMessages = {}
 

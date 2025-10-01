@@ -12,11 +12,8 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const Department = require('../../../models/department')
-const apiUtils = require('../apiUtils')
+import Department from '../../../models/department.js'
+import apiUtils from '../apiUtils.js'
 
 const apiDepartments = {}
 

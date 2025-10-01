@@ -26,6 +26,7 @@ import timezone from 'dayjs/plugin/timezone.js'
 import utc from 'dayjs/plugin/utc.js'
 import duration from 'dayjs/plugin/duration.js'
 import relativeTime from 'dayjs/plugin/relativeTime.js'
+import permissions from '../../permissions/index.js'
 
 dayjs.extend(timezone)
 dayjs.extend(utc)
@@ -645,7 +646,7 @@ const helpers = {
       throw new Error('Invalid Type sent to hasPermOverRole. Should be role object')
     }
 
-    var p = require('../../permissions')
+    var p = permissions
     if (!p.canThis(userRole, perm)) return options.inverse(this)
     if (ownerRole._id.toString() === userRole._id.toString()) return options.fn(this)
 
@@ -658,7 +659,7 @@ const helpers = {
   },
 
   checkPerm: function (user, perm, options) {
-    var P = require('../../permissions')
+    var P = permissions
     if (_.isUndefined(user)) return options.inverse(this)
 
     if (P.canThis(user.role, perm)) {
@@ -672,14 +673,14 @@ const helpers = {
     if (_.isUndefined(user)) return options.inverse(this)
     if (user.role.isAdmin) return options.fn(this)
 
-    var p = require('../../permissions')
+    var p = permissions
     if (p.canThis(user.role, perm)) return options.fn(this)
 
     return options.inverse(this)
   },
 
   checkRole: function (role, perm, options) {
-    var P = require('../../permissions')
+    var P = permissions
     if (P.canThis(role, perm)) {
       return options.fn(this)
     }
@@ -707,7 +708,7 @@ const helpers = {
   },
 
   checkEditSelf: function (user, owner, perm, options) {
-    var P = require('../../permissions')
+    var P = permissions
     if (P.canThis(user.role, perm + ':editSelf')) {
       if (user._id.toString() === owner._id.toString()) {
         return options.fn(this)
@@ -805,7 +806,7 @@ const helpers = {
   },
 
   shouldShowCommentSection: function (user, options) {
-    var p = require('../../permissions')
+    var p = permissions
     var hasComments = p.canThis(user.role, 'comments:create')
     var hasNotes = p.canThis(user.role, 'tickets:notes')
 

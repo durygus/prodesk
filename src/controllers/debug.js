@@ -16,19 +16,27 @@ import _ from 'lodash'
 import async from 'async'
 import path from 'path'
 import winston from '../logger/index.js'
+import Chance from 'chance'
+import ticketSchema from '../models/ticket.js'
+import ticketTypeSchema from '../models/tickettype.js'
+import userSchema from '../models/user.js'
+import groupSchema from '../models/group.js'
+import tagSchema from '../models/tag.js'
+import loremIpsumModule from 'lorem-ipsum'
+import counterSchemaModule from '../models/counters.js'
+import mailerModule from '../mailer/index.js'
+import templateSchemaModule from '../models/template.js'
+import EmailModule from 'email-templates'
+import fsModule from 'fs'
+import BusboyModule from 'busboy'
+import unzipperModule from 'unzipper'
 
 const debugController = {}
 
 debugController.content = {}
 
 debugController.populatedatabase = function (req, res) {
-  const Chance = require('chance')
   const chance = new Chance()
-  const ticketSchema = require('../models/ticket')
-  const ticketTypeSchema = require('../models/tickettype')
-  const userSchema = require('../models/user')
-  const groupSchema = require('../models/group')
-  const tagSchema = require('../models/tag')
 
   const ticketsToSave = []
   let users = []
@@ -403,7 +411,7 @@ debugController.populatedatabase = function (req, res) {
               tagSchema.getTags(function (err, tags) {
                 if (err) return done(err)
 
-                const loremIpsum = require('lorem-ipsum')
+                const loremIpsum = loremIpsumModule
                 for (let i = 0; i < 100001; i++) {
                   const user = users[Math.floor(Math.random() * users.length)]
                   const group = groups[Math.floor(Math.random() * groups.length)]
@@ -448,7 +456,7 @@ debugController.populatedatabase = function (req, res) {
         ticketSchema.collection.insert(ticketsToSave, done)
       },
       function (done) {
-        const counterSchema = require('../models/counters')
+        const counterSchema = counterSchemaModule
         counterSchema.setCounter('tickets', 101001, done)
       }
     ],
@@ -465,9 +473,9 @@ function randomDate (start, end) {
 }
 
 debugController.sendmail = function (req, res) {
-  const mailer = require('../mailer')
-  const templateSchema = require('../models/template')
-  const Email = require('email-templates')
+  const mailer = mailerModule
+  const templateSchema = templateSchemaModule
+  const Email = EmailModule
   const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
 
   const to = req.query.email
@@ -535,8 +543,8 @@ debugController.sendmail = function (req, res) {
 }
 
 debugController.uploadPlugin = function (req, res) {
-  const fs = require('fs')
-  const Busboy = require('busboy')
+  const fs = fsModule
+  const Busboy = BusboyModule
   const busboy = new Busboy({
     headers: req.headers,
     limits: {
@@ -597,7 +605,7 @@ debugController.uploadPlugin = function (req, res) {
     // Everything Checks out lets make sure the file exists and then add it to the attachments array
     if (!fs.existsSync(object.filePath)) return res.status(500).send('File Failed to Save to Disk')
 
-    const unzipper = require('unzipper')
+    const unzipper = unzipperModule
     fs.createReadStream(object.filePath).pipe(unzipper.Extract({ path: path.join(__dirname, '../../plugins') }))
 
     return res.sendStatus(200)

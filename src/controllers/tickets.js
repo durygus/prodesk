@@ -19,6 +19,14 @@ import departmentSchema from '../models/department.js'
 import permissions from '../permissions/index.js'
 import xss from 'xss'
 import fs from 'fs-extra'
+import marked from 'marked'
+import settings from '../models/setting.js'
+import urlModule from 'url'
+import TicketPDFGeneratorModule from '../pdf/ticketGenerator.js'
+import departmentSchemaModule from '../models/department.js'
+import ChanceModule from 'chance'
+import fsModule from 'fs-extra'
+import BusboyModule from 'busboy'
 /**
  * @since 1.0
  * @author Chris Brame <polonel@gmail.com>
@@ -43,8 +51,6 @@ const ticketsController = {}
 ticketsController.content = {}
 
 ticketsController.pubNewIssue = function (req, res) {
-  const marked = require('marked')
-  const settings = require('../models/setting')
   settings.getSettingByName('allowPublicTickets:enable', function (err, setting) {
     if (err) return handleError(res, err)
     if (setting && setting.value === true) {
@@ -77,7 +83,7 @@ ticketsController.pubNewIssue = function (req, res) {
  * @see Ticket
  */
 ticketsController.getByStatus = function (req, res, next) {
-  const url = require('url')
+  const url = urlModule
   let page = req.params.page
   if (_.isUndefined(page)) page = 0
 
@@ -312,7 +318,7 @@ ticketsController.processor = function (req, res) {
 }
 
 ticketsController.pdf = function (req, res) {
-  const TicketPDFGenerator = require('../pdf/ticketGenerator')
+  const TicketPDFGenerator = TicketPDFGeneratorModule
   let uid = null
   try {
     uid = parseInt(req.params.uid)
@@ -475,7 +481,7 @@ ticketsController.single = function (req, res) {
     if (err) return handleError(res, err)
     if (_.isNull(ticket) || _.isUndefined(ticket)) return res.redirect('/tickets')
 
-    const departmentSchema = require('../models/department')
+    const departmentSchema = departmentSchemaModule
     async.waterfall(
       [
         function (next) {
@@ -543,10 +549,10 @@ ticketsController.single = function (req, res) {
 }
 
 ticketsController.uploadImageMDE = function (req, res) {
-  const Chance = require('chance')
+  const Chance = ChanceModule
   const chance = new Chance()
-  const fs = require('fs-extra')
-  const Busboy = require('busboy')
+  const fs = fsModule
+  const Busboy = BusboyModule
   const busboy = Busboy({
     headers: req.headers,
     limits: {
@@ -653,7 +659,7 @@ ticketsController.uploadImageMDE = function (req, res) {
 }
 
 ticketsController.uploadAttachment = function (req, res) {
-  const Busboy = require('busboy')
+  const Busboy = BusboyModule
   const busboy = Busboy({
     headers: req.headers,
     limits: {
@@ -746,7 +752,7 @@ ticketsController.uploadAttachment = function (req, res) {
     object.mimetype = mimetype
 
     if (fs.existsSync(object.filePath)) {
-      const Chance = require('chance')
+      const Chance = ChanceModule
       const chance = new Chance()
       sanitizedFilename = chance.hash({ length: 15 }) + '-' + sanitizedFilename
       object.filePath = path.join(savePath, 'attachment_' + sanitizedFilename)

@@ -12,13 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const apiUtils = require('../apiUtils')
-const Conversation = require('../../../models/chat/conversation')
-const Message = require('../../../models/chat/message')
+import _ from 'lodash'
+import apiUtils from '../apiUtils.js'
+import Conversation from '../../../models/chat/conversation.js'
+import Message from '../../../models/chat/message.js'
 
 const apiMessages = {}
 

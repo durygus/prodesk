@@ -24,9 +24,9 @@ import Email from 'email-templates'
 import socketEvents from '../socketio/socketEventConsts.js'
 import * as notifications from '../notifications/index.js'
 import eventTicketCreated from './events/event_ticket_created.js'
-import { createRequire } from 'module'
+import mailer from '../mailer/index.js'
+import permissions from '../permissions/index.js'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
@@ -215,7 +215,7 @@ const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
           function (c) {
             if (!mailerEnabled) return c()
 
-            const mailer = require('../mailer')
+            const mailerModule = mailer
             let emails = []
             async.each(
               ticket.subscribers,
@@ -299,7 +299,7 @@ const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
   })
 
   emitter.on(socketEvents.ROLES_FLUSH, function () {
-    require('../permissions').register(function () {
+    permissions.register(function () {
       io.sockets.emit(socketEvents.ROLES_FLUSH)
     })
   })

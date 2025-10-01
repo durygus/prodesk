@@ -30,10 +30,10 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
-import { createRequire } from 'module'
 import middlewareModule from './middleware.js'
+import csrf from '../dependencies/csrf-td/index.js'
+import settingsUtil from '../settings/settingsUtil.js'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -124,13 +124,13 @@ export default function (app, db, callback) {
 
           // CORS
           app.use(allowCrossDomain)
-          const csrf = require('../dependencies/csrf-td').default
-          csrf.init()
-          app.use(csrf.generateToken)
+          const csrfModule = csrf
+          csrfModule.init()
+          app.use(csrfModule.generateToken)
 
         // Maintenance Mode
         app.use(function (req, res, next) {
-          var settings = require('../settings/settingsUtil').default
+          var settings = settingsUtil
           settings.getSettings(function (err, setting) {
             if (err) return winston.warn(err)
             var maintenanceMode = setting.data.settings.maintenanceMode

@@ -11,6 +11,7 @@
 
 import mongoose from 'mongoose'
 import _ from 'lodash'
+import counters from './counters.js'
 
 var COLLECTION = 'reports'
 
@@ -43,7 +44,7 @@ var reportSchema = mongoose.Schema({
 reportSchema.pre('save', function (next) {
   if (!_.isUndefined(this.uid) || this.uid) return next()
 
-  var c = require('./counters')
+  var c = counters
   var self = this
   c.increment('reports', function (err, res) {
     if (err) return next(err)

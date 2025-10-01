@@ -20,6 +20,13 @@ import userSchema from '../models/user.js'
 import permissions from '../permissions/index.js'
 import emitter from '../emitter/index.js'
 import xss from 'xss'
+import marked from 'marked'
+import settings from '../models/setting.js'
+import ldapModule from '../ldap/index.js'
+import csvModule from 'fast-csv'
+import BusboyModule from 'busboy'
+import fsModule from 'fs'
+import utilsModule from '../helpers/utils.js'
 
 const accountsController = {}
 
@@ -36,8 +43,6 @@ function handleError (res, err) {
 }
 
 accountsController.signup = function (req, res) {
-  const marked = require('marked')
-  const settings = require('../models/setting')
   settings.getSettingByName('allowUserRegistration:enable', function (err, setting) {
     if (err) return handleError(res, err)
     if (setting && setting.value === true) {
@@ -195,7 +200,7 @@ accountsController.profile = function (req, res) {
 }
 
 accountsController.bindLdap = function (req, res) {
-  const ldap = require('../ldap')
+  const ldap = ldapModule
   const postData = req.body
   if (_.isUndefined(postData)) return res.status(400).json({ success: false, error: 'Invalid Post Data.' })
 
@@ -278,8 +283,8 @@ function processUsers (addedUserArray, updatedUserArray, item, callback) {
 }
 
 accountsController.uploadCSV = function (req, res) {
-  const csv = require('fast-csv')
-  const Busboy = require('busboy')
+  const csv = csvModule
+  const Busboy = BusboyModule
   const busboy = Busboy({
     headers: req.headers,
     limits: {
@@ -377,7 +382,7 @@ accountsController.uploadCSV = function (req, res) {
 }
 
 accountsController.uploadJSON = function (req, res) {
-  const Busboy = require('busboy')
+  const Busboy = BusboyModule
   const busboy = new Busboy({
     headers: req.headers,
     limits: {
@@ -452,8 +457,8 @@ accountsController.uploadJSON = function (req, res) {
 }
 
 accountsController.uploadImage = function (req, res) {
-  const fs = require('fs')
-  const Busboy = require('busboy')
+  const fs = fsModule
+  const Busboy = BusboyModule
   const busboy = Busboy({
     headers: req.headers,
     limits: {
@@ -527,7 +532,7 @@ accountsController.uploadImage = function (req, res) {
     // Everything Checks out lets make sure the file exists and then add it to the attachments array
     if (!fs.existsSync(object.filePath)) return res.status(400).send('File Failed to Save to Disk')
     if (path.extname(object.filename) === '.jpg' || path.extname(object.filename) === '.jpeg') {
-      require('../helpers/utils').stripExifData(object.filePath)
+      utilsModule.stripExifData(object.filePath)
     }
 
     userSchema.getUser(object._id, function (err, user) {

@@ -12,12 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const mongoose = require('mongoose')
-const _ = require('lodash')
-const utils = require('../../helpers/utils')
+import mongoose from 'mongoose'
+import _ from 'lodash'
+import utils from '../../helpers/utils.js'
 
 const COLLECTION = 'messages'
 

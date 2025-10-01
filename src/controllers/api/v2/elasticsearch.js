@@ -12,18 +12,16 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../../../logger')
-const es = require('../../../elasticsearch')
-const ticketSchema = require('../../../models/ticket')
-const groupSchema = require('../../../models/group')
+import _ from 'lodash'
+import async from 'async'
+import winston from '../../../logger/index.js'
+import es from '../../../elasticsearch/index.js'
+import ticketSchema from '../../../models/ticket.js'
+import groupSchema from '../../../models/group.js'
+import apiUtil from '../apiUtils.js'
+import Department from '../../../models/department.js'
 
 const apiElasticSearch = {}
-const apiUtil = require('../apiUtils')
 
 apiElasticSearch.rebuild = (req, res) => {
   es.rebuildIndex()
@@ -90,8 +88,8 @@ apiElasticSearch.search = function (req, res) {
         if (!req.user.role.isAdmin && !req.user.role.isAgent)
           return groupSchema.getAllGroupsOfUserNoPopulate(req.user._id, next)
 
-        var Department = require('../../../models/department')
-        return Department.getDepartmentGroupsOfUser(req.user._id, next)
+        var DepartmentModel = Department
+        return DepartmentModel.getDepartmentGroupsOfUser(req.user._id, next)
       },
       function (groups, next) {
         var g = _.map(groups, function (i) {

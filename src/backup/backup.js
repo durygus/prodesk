@@ -12,22 +12,20 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs-extra'
 import os from 'os'
+import { spawn } from 'child_process'
+import archiver from 'archiver'
+import database from '../database/index.js'
+import winston from '../logger/index.js'
+import dayjs from 'dayjs'
+import pkg from '../../package.json' with { type: 'json' }
+import rimraf from 'rimraf'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-const spawn = require('child_process').spawn
-const archiver = require('archiver')
-const database = require('../database').default
-const winston = require('../logger').default
-const dayjs = require('dayjs')
-const pkg = require('../../package.json')
 
 global.env = process.env.NODE_ENV || 'production'
 
@@ -62,7 +60,7 @@ function createZip (callback) {
 }
 
 function cleanup (callback) {
-  const rimraf = require('rimraf')
+  const rimrafModule = rimraf
   rimraf(path.join(__dirname, '../../backups/dump'), callback)
 }
 
@@ -113,7 +111,7 @@ function runBackup (callback) {
         return callback(new Error('Unable to retrieve database name'))
       }
 
-      require('rimraf')(path.join(__dirname, '../../backups/dump/database', dbName, 'session*'), function (err) {
+      rimraf(path.join(__dirname, '../../backups/dump/database', dbName, 'session*'), function (err) {
         if (err) return callback(err)
 
         copyFiles(function (err) {

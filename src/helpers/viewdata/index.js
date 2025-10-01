@@ -18,6 +18,22 @@ import winston from '../../logger/index.js'
 import dayjs from 'dayjs'
 import settingSchema from '../../models/setting.js'
 import settingsUtil from '../../settings/settingsUtil.js'
+import buildsass from '../../sass/buildsass.js'
+import pkg from '../../../package.json' with { type: 'json' }
+import noticeSchema from '../../models/notice.js'
+import notificationsSchema from '../../models/notification.js'
+import conversationSchema from '../../models/chat/conversation.js'
+import messageSchema from '../../models/chat/message.js'
+import userSchema from '../../models/user.js'
+import groupSchema from '../../models/group.js'
+import Team from '../../models/team.js'
+import Department from '../../models/department.js'
+import permissions from '../../permissions/index.js'
+import typeSchema from '../../models/tickettype.js'
+import ticketPrioritySchema from '../../models/ticketpriority.js'
+import tagSchema from '../../models/tag.js'
+import dive from 'dive'
+import path from 'path'
 
 const viewController = {}
 const viewdata = {}
@@ -28,14 +44,13 @@ viewController.getData = function (request, cb) {
     [
       function (callback) {
         if (global.env === 'development') {
-          require('../../sass/buildsass').build(callback)
+          buildsass.build(callback)
         } else {
           return callback()
         }
       },
       function (callback) {
-        const packageJson = require('../../../package.json')
-        viewdata.version = packageJson.version
+        viewdata.version = pkg.version
         return callback()
       },
       function (callback) {
@@ -411,7 +426,6 @@ viewController.getData = function (request, cb) {
 }
 
 viewController.getActiveNotice = function (callback) {
-  const noticeSchema = require('../../models/notice')
   noticeSchema.getActive(function (err, notice) {
     if (err) {
       winston.warn(err.message)
@@ -423,7 +437,6 @@ viewController.getActiveNotice = function (callback) {
 }
 
 viewController.getUserNotifications = function (request, callback) {
-  const notificationsSchema = require('../../models/notification')
   notificationsSchema.findAllForUser(request.user._id, function (err, data) {
     if (err) {
       winston.warn(err.message)
@@ -435,7 +448,6 @@ viewController.getUserNotifications = function (request, callback) {
 }
 
 viewController.getUnreadNotificationsCount = function (request, callback) {
-  const notificationsSchema = require('../../models/notification')
   notificationsSchema.getUnreadCount(request.user._id, function (err, count) {
     if (err) {
       winston.warn(err.message)
@@ -447,8 +459,6 @@ viewController.getUnreadNotificationsCount = function (request, callback) {
 }
 
 viewController.getConversations = function (request, callback) {
-  const conversationSchema = require('../../models/chat/conversation')
-  const messageSchema = require('../../models/chat/message')
   conversationSchema.getConversationsWithLimit(request.user._id, 10, function (err, conversations) {
     if (err) {
       winston.warn(err.message)
@@ -506,7 +516,6 @@ viewController.getConversations = function (request, callback) {
 }
 
 viewController.getUsers = function (request, callback) {
-  const userSchema = require('../../models/user')
   if (request.user.role.isAdmin || request.user.role.isAgent) {
     userSchema.findAll(function (err, users) {
       if (err) {
@@ -531,7 +540,6 @@ viewController.getUsers = function (request, callback) {
       return callback(u)
     })
   } else {
-    const groupSchema = require('../../models/group')
     groupSchema.getAllGroupsOfUser(request.user._id, function (err, groups) {
       if (err) return callback(err)
 
@@ -565,7 +573,6 @@ viewController.getUsers = function (request, callback) {
 }
 
 viewController.loggedInAccount = function (request, callback) {
-  const userSchema = require('../../models/user')
   userSchema.getUser(request.user._id, function (err, data) {
     if (err) {
       return callback(err)
@@ -576,13 +583,10 @@ viewController.loggedInAccount = function (request, callback) {
 }
 
 viewController.getTeams = function (request, callback) {
-  const Team = require('../../models/team')
   return Team.getTeams(callback)
 }
 
 viewController.getGroups = function (request, callback) {
-  const groupSchema = require('../../models/group')
-  const Department = require('../../models/department')
   if (request.user.role.isAdmin || request.user.role.isAgent) {
     Department.getDepartmentGroupsOfUser(request.user._id, function (err, groups) {
       if (err) {
@@ -599,7 +603,6 @@ viewController.getGroups = function (request, callback) {
         return callback(err)
       }
 
-      const p = require('../../permissions')
       if (p.canThis(request.user.role, 'ticket:public')) {
         groupSchema.getAllPublicGroups(function (err, groups) {
           if (err) {
@@ -618,7 +621,6 @@ viewController.getGroups = function (request, callback) {
 }
 
 viewController.getTypes = function (request, callback) {
-  const typeSchema = require('../../models/tickettype')
 
   typeSchema.getTypes(function (err, data) {
     if (err) {
@@ -631,14 +633,12 @@ viewController.getTypes = function (request, callback) {
 }
 
 viewController.getDefaultTicketType = function (request, callback) {
-  const settingSchema = require('../../models/setting')
   settingSchema.getSetting('ticket:type:default', function (err, defaultType) {
     if (err) {
       winston.debug('Error viewController:getDefaultTicketType: ', err)
       return callback(err)
     }
 
-    const typeSchema = require('../../models/tickettype')
     typeSchema.getType(defaultType.value, function (err, type) {
       if (err) {
         winston.debug('Error viewController:getDefaultTicketType: ', err)
@@ -651,7 +651,6 @@ viewController.getDefaultTicketType = function (request, callback) {
 }
 
 viewController.getPriorities = function (request, callback) {
-  const ticketPrioritySchema = require('../../models/ticketpriority')
   ticketPrioritySchema.getPriorities(function (err, priorities) {
     if (err) {
       winston.debug('Error viewController:getPriorities: ' + err)
@@ -665,7 +664,6 @@ viewController.getPriorities = function (request, callback) {
 }
 
 viewController.getTags = function (request, callback) {
-  const tagSchema = require('../../models/tag')
 
   tagSchema.getTags(function (err, data) {
     if (err) {
@@ -680,7 +678,6 @@ viewController.getTags = function (request, callback) {
 }
 
 viewController.getOverdueSetting = function (request, callback) {
-  const settingSchema = require('../../models/setting')
   settingSchema.getSettingByName('showOverdueTickets:enable', function (err, data) {
     if (err) {
       winston.debug(err)
@@ -694,7 +691,6 @@ viewController.getOverdueSetting = function (request, callback) {
 viewController.getShowTourSetting = function (request, callback) {
   if (!request.user) return callback('Invalid User')
 
-  const settingSchema = require('../../models/setting')
   settingSchema.getSettingByName('showTour:enable', function (err, data) {
     if (err) {
       winston.debug(err)
@@ -705,7 +701,6 @@ viewController.getShowTourSetting = function (request, callback) {
       return callback(null, true)
     }
 
-    const userSchema = require('../../models/user')
     userSchema.getUser(request.user._id, function (err, user) {
       if (err) return callback(err)
 
@@ -726,9 +721,7 @@ viewController.getShowTourSetting = function (request, callback) {
 
 viewController.getPluginsInfo = function (request, callback) {
   // Load Plugin routes
-  const dive = require('dive')
-  const path = require('path')
-  const fs = require('fs')
+  const fs = await import('fs')
   const pluginDir = path.join(__dirname, '../../../plugins')
   if (!fs.existsSync(pluginDir)) fs.mkdirSync(pluginDir)
   const plugins = []
@@ -738,7 +731,7 @@ viewController.getPluginsInfo = function (request, callback) {
     function (err, dir) {
       if (err) throw err
       delete require.cache[require.resolve(path.join(dir, '/plugin.json'))]
-      const pluginPackage = require(path.join(dir, '/plugin.json'))
+      const pluginPackage = (await import(path.join(dir, '/plugin.json'))).default
       plugins.push(pluginPackage)
     },
     function () {

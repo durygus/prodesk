@@ -20,7 +20,20 @@ import winston from 'winston'
 import pkg from '../../package.json' with { type: 'json' }
 import xss from 'xss'
 import settingsUtil from '../settings/settingsUtil.js'
-const RateLimiterMemory = require('rate-limiter-flexible').RateLimiterMemory
+import { RateLimiterMemory } from 'rate-limiter-flexible'
+import pkgModule from '../../package.json' with { type: 'json' }
+import markedModule from 'marked'
+import settingsModule from '../models/setting.js'
+import userSchemaModule from '../models/user.js'
+import ChanceModule from 'chance'
+import mailerModule from '../mailer/index.js'
+import EmailModule from 'email-templates'
+import templateSchemaModule from '../models/template.js'
+import settingsSchemaModule from '../models/setting.js'
+import fsModule from 'fs'
+import settingUtilModule from '../settings/settingsUtil.js'
+import BusboyModule from 'busboy'
+import utilsModule from '../helpers/utils.js'
 
 const limiterSlowBruteByIP = new RateLimiterMemory({
   keyPrefix: 'login_fail_ip_per_day',
@@ -39,7 +52,6 @@ mainController.index = function (req, res) {
   content.layout = false
   content.flash = req.flash('loginMessage')
 
-  const settingsUtil = require('../settings/settingsUtil')
   settingsUtil.getSettings(function (err, s) {
     if (err) throw new Error(err)
     const settings = s.data.settings
@@ -64,9 +76,9 @@ mainController.index = function (req, res) {
 }
 
 mainController.about = function (req, res) {
-  const pkg = require('../../package.json')
-  const marked = require('marked')
-  const settings = require('../models/setting')
+  const pkg = pkgModule
+  const marked = markedModule
+  const settings = settingsModule
   settings.getSettingByName('legal:privacypolicy', function (err, privacyPolicy) {
     if (err)
       return res.render('error', {
@@ -211,7 +223,7 @@ mainController.forgotL2Auth = function (req, res) {
   }
 
   const email = data['forgotl2auth-email']
-  const userSchema = require('../models/user')
+  const userSchema = userSchemaModule
   userSchema.getUserByEmail(email, function (err, user) {
     if (err) {
       return res.status(400).send(err.message)
@@ -221,7 +233,7 @@ mainController.forgotL2Auth = function (req, res) {
       return res.status(400).send('Invalid Email: Account not found!')
     }
 
-    const Chance = require('chance')
+    const Chance = ChanceModule
     const chance = new Chance()
 
     user.resetL2AuthHash = chance.hash({ casing: 'upper' })
@@ -234,8 +246,8 @@ mainController.forgotL2Auth = function (req, res) {
         return res.status(400).send(err.message)
       }
 
-      const mailer = require('../mailer')
-      const Email = require('email-templates')
+      const mailer = mailerModule
+      const Email = EmailModule
       const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
 
       const email = new Email({
@@ -288,7 +300,7 @@ mainController.forgotPass = function (req, res) {
   }
 
   const email = data['forgotPass-email']
-  const userSchema = require('../models/user')
+  const userSchema = userSchemaModule
   userSchema.getUserByEmail(email, function (err, user) {
     if (err) {
       req.flash(err)
@@ -302,7 +314,7 @@ mainController.forgotPass = function (req, res) {
 
     // Found user send Password Reset Email.
     // Set User Reset Hash and Expire Date.
-    const Chance = require('chance')
+    const Chance = ChanceModule
     const chance = new Chance()
 
     user.resetPassHash = chance.hash({ casing: 'upper' })
@@ -317,10 +329,10 @@ mainController.forgotPass = function (req, res) {
       }
 
       // Send mail
-      const mailer = require('../mailer')
-      const Email = require('email-templates')
+      const mailer = mailerModule
+      const Email = EmailModule
       const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
-      const templateSchema = require('../models/template')
+      const templateSchema = templateSchemaModule
 
       let email = null
 
@@ -334,7 +346,7 @@ mainController.forgotPass = function (req, res) {
       async.waterfall(
         [
           function (next) {
-            const settingsSchema = require('../models/setting')
+            const settingsSchema = settingsSchemaModule
             settingsSchema.getSetting('beta:email', function (err, setting) {
               if (err) return next(err)
               const betaEnabled = !setting ? false : setting.value
@@ -425,7 +437,7 @@ mainController.resetl2auth = function (req, res) {
     return res.status(400).send('Invalid Link!')
   }
 
-  const userSchema = require('../models/user')
+  const userSchema = userSchemaModule
   userSchema.getUserByL2ResetHash(hash, function (err, user) {
     if (err) {
       return res.status(400).send('Invalid Link!')
@@ -448,8 +460,8 @@ mainController.resetl2auth = function (req, res) {
         }
 
         // Send mail
-        const mailer = require('../mailer')
-        const Email = require('email-templates')
+        const mailer = mailerModule
+        const Email = EmailModule
         const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
 
         const email = new Email({
@@ -503,7 +515,7 @@ mainController.resetPass = function (req, res) {
     return res.status(400).send('Invalid Link!')
   }
 
-  const userSchema = require('../models/user')
+  const userSchema = userSchemaModule
   userSchema.getUserByResetHash(hash, function (err, user) {
     if (err) {
       return res.status(400).send('Invalid Link!')
@@ -515,7 +527,7 @@ mainController.resetPass = function (req, res) {
 
     const now = new Date()
     if (now < user.resetPassExpire) {
-      const Chance = require('chance')
+      const Chance = ChanceModule
       const chance = new Chance()
       const gPass = chance.string({ length: 8 })
       user.password = gPass
@@ -529,8 +541,8 @@ mainController.resetPass = function (req, res) {
         }
 
         // Send mail
-        const mailer = require('../mailer')
-        const Email = require('email-templates')
+        const mailer = mailerModule
+        const Email = EmailModule
         const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
 
         const email = new Email({
@@ -610,9 +622,9 @@ mainController.l2authget = function (req, res) {
 }
 
 mainController.uploadFavicon = function (req, res) {
-  const fs = require('fs')
-  const settingUtil = require('../settings/settingsUtil')
-  const Busboy = require('busboy')
+  const fs = fsModule
+  const settingUtil = settingUtilModule
+  const Busboy = BusboyModule
   const busboy = Busboy({
     headers: req.headers,
     limit: {
@@ -668,7 +680,7 @@ mainController.uploadFavicon = function (req, res) {
 
     if (!fs.existsSync(object.filePath)) return res.status(400).send('File failed to save to disk')
     if (path.extname(object.filename) === '.jpg' || path.extname(object.filename) === '.jpeg') {
-      require('../helpers/utils').stripExifData(object.filePath)
+      utilsModule.stripExifData(object.filePath)
     }
 
     settingUtil.setSetting('gen:customfavicon', true, function (err) {
@@ -686,9 +698,9 @@ mainController.uploadFavicon = function (req, res) {
 }
 
 mainController.uploadLogo = function (req, res) {
-  const fs = require('fs')
-  const settingUtil = require('../settings/settingsUtil')
-  const Busboy = require('busboy')
+  const fs = fsModule
+  const settingUtil = settingUtilModule
+  const Busboy = BusboyModule
   const busboy = Busboy({
     headers: req.headers,
     limits: {
@@ -743,7 +755,7 @@ mainController.uploadLogo = function (req, res) {
 
     if (!fs.existsSync(object.filePath)) return res.status(400).send('File failed to save to disk')
     if (path.extname(object.filename) === '.jpg' || path.extname(object.filename) === '.jpeg') {
-      require('../helpers/utils').stripExifData(object.filePath)
+      utilsModule.stripExifData(object.filePath)
     }
 
     settingUtil.setSetting('gen:customlogo', true, function (err) {
@@ -761,9 +773,9 @@ mainController.uploadLogo = function (req, res) {
 }
 
 mainController.uploadPageLogo = function (req, res) {
-  const fs = require('fs')
-  const settingUtil = require('../settings/settingsUtil')
-  const Busboy = require('busboy')
+  const fs = fsModule
+  const settingUtil = settingUtilModule
+  const Busboy = BusboyModule
   const busboy = Busboy({
     headers: req.headers,
     limits: {
@@ -819,7 +831,7 @@ mainController.uploadPageLogo = function (req, res) {
 
     if (!fs.existsSync(object.filePath)) return res.status(400).send('File failed to save to disk')
     if (path.extname(object.filename) === '.jpg' || path.extname(object.filename) === '.jpeg') {
-      require('../helpers/utils').stripExifData(object.filePath)
+      utilsModule.stripExifData(object.filePath)
     }
 
     settingUtil.setSetting('gen:custompagelogo', true, function (err) {

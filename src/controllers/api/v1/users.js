@@ -12,19 +12,24 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const async = require('async')
-const _ = require('lodash')
-const winston = require('../../../logger')
-const permissions = require('../../../permissions')
-const emitter = require('../../../emitter')
-const UserSchema = require('../../../models/user')
-const groupSchema = require('../../../models/group')
-const notificationSchema = require('../../../models/notification')
-const SettingUtil = require('../../../settings/settingsUtil')
-const Chance = require('chance')
+import async from 'async'
+import _ from 'lodash'
+import winston from '../../../logger/index.js'
+import permissions from '../../../permissions/index.js'
+import emitter from '../../../emitter/index.js'
+import UserSchema from '../../../models/user.js'
+import groupSchema from '../../../models/group.js'
+import notificationSchema from '../../../models/notification.js'
+import SettingUtil from '../../../settings/settingsUtil.js'
+import Chance from 'chance'
+import passwordComplexityModule from '../../../settings/passwordComplexity.js'
+import settingsSchema from '../../../models/setting.js'
+import UserSchemaModule from '../../../models/user.js'
+import SettingUtilModule from '../../../settings/settingsUtil.js'
+import SessionModule from '../../../models/session.js'
+import ticketSchemaModule from '../../../models/ticket.js'
+import conversationSchemaModule from '../../../models/chat/conversation.js'
+import departmentSchemaModule from '../../../models/department.js'
 
 const apiUsers = {}
 
@@ -186,7 +191,7 @@ apiUsers.create = async function (req, res) {
           if (err) return next(err)
           const settings = content.data.settings
           if (settings.accountsPasswordComplexity.value) {
-            const passwordComplexity = require('../../../settings/passwordComplexity')
+            const passwordComplexity = passwordComplexityModule
             if (!passwordComplexity.validate(postData.aPass))
               return next({ message: 'Password does not meet minimum requirements.' })
 
@@ -293,7 +298,7 @@ apiUsers.create = async function (req, res) {
  }
  */
 apiUsers.createPublicAccount = function (req, res) {
-  const SettingSchema = require('../../../models/setting')
+  const SettingSchema = settingsSchema
 
   const response = {}
   response.success = true
@@ -330,7 +335,7 @@ apiUsers.createPublicAccount = function (req, res) {
         SettingSchema.getSetting('accountsPasswordComplexity:enable', function (err, passwordComplexitySetting) {
           if (err) return next(err)
           if (!passwordComplexitySetting || passwordComplexitySetting.value === true) {
-            const passwordComplexity = require('../../../settings/passwordComplexity')
+            const passwordComplexity = passwordComplexityModule
             if (!passwordComplexity.validate(postData.user.password))
               return next({ message: 'Password does not minimum requirements.' })
 
@@ -341,7 +346,7 @@ apiUsers.createPublicAccount = function (req, res) {
         })
       },
       function (roleDefault, next) {
-        const UserSchema = require('../../../models/user')
+        const UserSchema = UserSchemaModule
         user = new UserSchema({
           username: postData.user.email,
           password: postData.user.password,
@@ -357,7 +362,7 @@ apiUsers.createPublicAccount = function (req, res) {
         })
       },
       function (savedUser, next) {
-        const GroupSchema = require('../../../models/group')
+        const GroupSchema = groupSchema
         group = new GroupSchema({
           name: savedUser.email,
           members: [savedUser._id],
@@ -409,7 +414,7 @@ apiUsers.profileUpdate = function (req, res) {
   async.series(
     {
       settings: function (done) {
-        const SettingUtil = require('../../../settings/settingsUtil')
+        const SettingUtil = SettingUtilModule
         SettingUtil.getSettings(function (err, content) {
           if (err) return done(err)
 
@@ -435,7 +440,7 @@ apiUsers.profileUpdate = function (req, res) {
             if (obj.password === obj.passconfirm) {
               if (passwordComplexityEnabled) {
                 // check Password Complexity
-                const passwordComplexity = require('../../../settings/passwordComplexity')
+                const passwordComplexity = passwordComplexityModule
                 if (!passwordComplexity.validate(obj.password)) return done('Password does not meet requirements')
               }
 
@@ -476,7 +481,7 @@ apiUsers.profileUpdate = function (req, res) {
       })
 
       if (passwordUpdated) {
-        const Session = require('../../../models/session')
+        const Session = SessionModule
         await Session.destroy(user._id)
       }
 
@@ -545,7 +550,7 @@ apiUsers.update = function (req, res) {
   async.series(
     {
       settings: function (done) {
-        var SettingUtil = require('../../../settings/settingsUtil')
+        const SettingUtil = SettingUtilModule
         SettingUtil.getSettings(function (err, content) {
           if (err) return done(err)
           var settings = content.data.settings
@@ -570,7 +575,7 @@ apiUsers.update = function (req, res) {
             if (obj.password === obj.passconfirm) {
               if (passwordComplexityEnabled) {
                 // check Password Complexity
-                const passwordComplexity = require('../../../settings/passwordComplexity')
+                const passwordComplexity = passwordComplexityModule
                 if (!passwordComplexity.validate(obj.password)) return done('Password does not meet requirements')
               }
 
@@ -662,7 +667,7 @@ apiUsers.update = function (req, res) {
       })
 
       if (passwordUpdated) {
-        const Session = require('../../../models/session')
+        const Session = SessionModule
         await Session.destroy(user._id)
       }
 
@@ -783,7 +788,7 @@ apiUsers.deleteUser = function (req, res) {
         })
       },
       function (user, cb) {
-        const ticketSchema = require('../../../models/ticket')
+        const ticketSchema = ticketSchemaModule
         ticketSchema.find({ owner: user._id }, function (err, tickets) {
           if (err) return cb(err)
 
@@ -792,7 +797,7 @@ apiUsers.deleteUser = function (req, res) {
         })
       },
       function (hasTickets, user, cb) {
-        const conversationSchema = require('../../../models/chat/conversation')
+        const conversationSchema = conversationSchemaModule
         conversationSchema.getConversationsWithLimit(user._id, 10, function (err, conversations) {
           if (err) return cb(err)
 
@@ -801,7 +806,7 @@ apiUsers.deleteUser = function (req, res) {
         })
       },
       function (hasTickets, hasConversations, user, cb) {
-        const ticketSchema = require('../../../models/ticket')
+        const ticketSchema = ticketSchemaModule
         ticketSchema.find({ assignee: user._id }, function (err, tickets) {
           if (err) return cb(err)
 
@@ -1215,7 +1220,7 @@ apiUsers.getAssingees = function (req, res) {
 
 apiUsers.getGroups = function (req, res) {
   if (req.user.role.isAdmin || req.user.role.isAgent) {
-    const departmentSchema = require('../../../models/department')
+    const departmentSchema = departmentSchemaModule
     departmentSchema.getDepartmentGroupsOfUser(req.user._id, function (err, groups) {
       if (err) return res.status(400).json({ success: false, error: err.message })
 

@@ -12,23 +12,22 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const winston = require('./logger').default
-const async = require('async')
-const passportSocketIo = require('passport.socketio')
-const cookieparser = require('cookie-parser')
-const nconf = require('nconf')
+import winston from './logger/index.js'
+import async from 'async'
+import passportSocketIo from 'passport.socketio'
+import cookieparser from 'cookie-parser'
+import nconf from 'nconf'
 
 // Submodules
-const ticketSocket = require('./socketio/ticketSocket').default
-const chatSocket = require('./socketio/chatSocket').default
-const notificationSocket = require('./socketio/notificationSocket').default
-const noticeSocket = require('./socketio/noticeSocket').default
-const accountsImportSocket = require('./socketio/accountImportSocket').default
-const backupRestoreSocket = require('./socketio/backupRestoreSocket').default
-const logsSocket = require('./socketio/logsSocket').default
+import ticketSocket from './socketio/ticketSocket.js'
+import chatSocket from './socketio/chatSocket.js'
+import notificationSocket from './socketio/notificationSocket.js'
+import noticeSocket from './socketio/noticeSocket.js'
+import accountsImportSocket from './socketio/accountImportSocket.js'
+import backupRestoreSocket from './socketio/backupRestoreSocket.js'
+import logsSocket from './socketio/logsSocket.js'
+import { Server as SocketIO } from 'socket.io'
+import userSchema from './models/user.js'
 
 const socketServer = function (ws) {
   'use strict'
@@ -39,7 +38,7 @@ const socketServer = function (ws) {
     secret: nconf.get('tokens:secret') ? nconf.get('tokens:secret') : 'trudesk$1234#SessionKeY!2288'
   }
 
-  const io = require('socket.io')(ws.server, {
+  const io = new SocketIO(ws.server, {
     pingTimeout: socketConfig.pingTimeout,
     pingInterval: socketConfig.pingInterval
   })
@@ -53,8 +52,8 @@ const socketServer = function (ws) {
             return next(null, data)
           }
 
-          const userSchema = require('./models/user')
-          userSchema.getUserByAccessToken(data.request._query.token, (err, user) => {
+          const userSchemaModel = userSchema
+          userSchemaModel.getUserByAccessToken(data.request._query.token, (err, user) => {
             if (!err && user) {
               winston.debug('Authenticated socket ' + data.id + ' - ' + user.username)
               data.request.user = user

@@ -12,15 +12,12 @@
 
  **/
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash'),
-    async = require('async'),
-    winston = require('winston'),
-    es = require('../../../elasticsearch'),
-    ticketSchema = require('../../../models/ticket'),
-    groupSchema = require('../../../models/group');
+import _ from 'lodash'
+import async from 'async'
+import winston from 'winston'
+import es from '../../../elasticsearch/index.js'
+import ticketSchema from '../../../models/ticket.js'
+import groupSchema from '../../../models/group.js'
 
 var apiElasticSearch = {};
 

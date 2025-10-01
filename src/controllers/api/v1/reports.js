@@ -12,17 +12,14 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash')
-var async = require('async')
-var ticketSchema = require('../../../models/ticket')
-var groupSchema = require('../../../models/group')
-var csv = require('csv')
-var dayjs = require('dayjs')
-
-var settingsSchema = require('../../../models/setting')
+import _ from 'lodash'
+import async from 'async'
+import ticketSchema from '../../../models/ticket.js'
+import groupSchema from '../../../models/group.js'
+import csv from 'csv'
+import dayjs from 'dayjs'
+import settingsSchema from '../../../models/setting.js'
+import departmentSchemaModule from '../../../models/department.js'
 
 var apiReports = {
   generate: {}
@@ -92,7 +89,7 @@ apiReports.generate.ticketsByTeam = function (req, res) {
   if (!postData || !postData.startDate || !postData.endDate)
     return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  var departmentSchema = require('../../../models/department')
+  const departmentSchema = departmentSchemaModule
   departmentSchema.getDepartmentsByTeam(postData.teams, function (err, departments) {
     if (err) return res.status(500).json({ success: false, error: err.message })
 

@@ -12,12 +12,11 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
+import _ from 'lodash'
+import async from 'async'
+import TagSchema from '../../../models/tag.js'
+import ticketModelModule from '../../../models/ticket.js'
 
-var _ = require('lodash')
-var async = require('async')
-var TagSchema = require('../../../models/tag')
 var apiTags = {}
 
 /**
@@ -61,7 +60,7 @@ apiTags.getTagsWithLimit = function (req, res) {
   var limit = qs.limit ? qs.limit : 25
   var page = qs.page ? qs.page : 0
 
-  var tagSchema = require('../../../models/tag')
+  const tagSchema = TagSchema
   var result = { success: true }
 
   async.parallel(
@@ -117,7 +116,7 @@ apiTags.updateTag = function (req, res) {
     return res.status(400).json({ success: false, error: 'Invalid Put Data' })
   }
 
-  var tagSchema = require('../../../models/tag')
+  const tagSchema = TagSchema
   tagSchema.getTag(id, function (err, tag) {
     if (err) return res.status(400).json({ success: false, error: err.message })
 
@@ -152,7 +151,7 @@ apiTags.deleteTag = function (req, res) {
   async.series(
     [
       function (next) {
-        var ticketModel = require('../../../models/ticket')
+        const ticketModel = ticketModelModule
         ticketModel.getAllTicketsByTag(id, function (err, tickets) {
           if (err) return next(err)
           async.each(
@@ -175,7 +174,7 @@ apiTags.deleteTag = function (req, res) {
         })
       },
       function (next) {
-        var tagSchema = require('../../../models/tag')
+        const tagSchema = TagSchema
         tagSchema.findByIdAndRemove(id, function (err) {
           return next(err)
         })

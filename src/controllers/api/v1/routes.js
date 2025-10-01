@@ -12,10 +12,8 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const packagejson = require('../../../../package')
+import packagejson from '../../../../package.json' with { type: 'json' }
+import tagSchemaModule from '../../../models/tag.js'
 
 export default function (middleware, router, controllers) {
   // Shorten consts
@@ -102,7 +100,7 @@ export default function (middleware, router, controllers) {
 
   // Tags
   router.get('/api/v1/count/tags', middleware.api, function (req, res) {
-    const tagSchema = require('../../../models/tag')
+    const tagSchema = tagSchemaModule
     tagSchema.countDocuments({}, function (err, count) {
       if (err) return res.status(500).json({ success: false, error: err })
 

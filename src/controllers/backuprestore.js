@@ -17,6 +17,12 @@ import fs from 'fs-extra'
 import path from 'path'
 import async from 'async'
 import dayjs from 'dayjs'
+import database from '../database/index.js'
+import { fork } from 'child_process'
+import { platform } from 'os'
+import { exec } from 'child_process'
+import permissions from '../permissions/index.js'
+import Busboy from 'busboy'
 
 const backupRestore = {}
 
@@ -67,8 +73,7 @@ backupRestore.getBackups = function (req, res) {
 }
 
 backupRestore.runBackup = function (req, res) {
-  const database = require('../database')
-  const child = require('child_process').fork(path.join(__dirname, '../../src/backup/backup'), {
+  const child = fork(path.join(__dirname, '../../src/backup/backup'), {
     env: { FORK: 1, NODE_ENV: global.env, MONGOURI: database.connectionuri, PATH: process.env.PATH }
   })
   global.forks.push({ name: 'backup', fork: child })
@@ -119,22 +124,21 @@ backupRestore.deleteBackup = function (req, res) {
 }
 
 backupRestore.restoreBackup = function (req, res) {
-  const database = require('../database')
 
   const file = req.body.file
   if (!file) return res.status(400).json({ success: false, error: 'Invalid File' })
 
   // CHECK IF HAS TOOLS INSTALLED
-  // if (require('os').platform() === 'win32')
+  // if (platform() === 'win32')
   //     return res.json({success: true});
   //
-  // require('child_process').exec('mongodump --version', function(err) {
+  // exec('mongodump --version', function(err) {
   //     if (err) return res.status(400).json({success: false, error: err});
   //
   //     return res.json({success: true});
   // });
 
-  const child = require('child_process').fork(path.join(__dirname, '../../src/backup/restore'), {
+  const child = fork(path.join(__dirname, '../../src/backup/restore'), {
     env: {
       FORK: 1,
       NODE_ENV: global.env,
@@ -167,7 +171,7 @@ backupRestore.restoreBackup = function (req, res) {
         cache.fork.send({ name: 'cache:refresh:force' })
       }
 
-      require('../permissions').flushRoles(function () {})
+      permissions.flushRoles(function () {})
 
       result = { success: true }
     } else {
@@ -189,11 +193,11 @@ backupRestore.restoreBackup = function (req, res) {
 }
 
 backupRestore.hasBackupTools = function (req, res) {
-  if (require('os').platform() === 'win32') {
+  if (platform() === 'win32') {
     return res.json({ success: true })
   }
 
-  require('child_process').exec('mongodump --version', function (err) {
+  exec('mongodump --version', function (err) {
     if (err) return res.status(400).json({ success: false, error: err })
 
     return res.json({ success: true })
@@ -201,7 +205,6 @@ backupRestore.hasBackupTools = function (req, res) {
 }
 
 backupRestore.uploadBackup = function (req, res) {
-  const Busboy = require('busboy')
   const busboy = Busboy({
     headers: req.headers,
     limits: {

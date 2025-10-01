@@ -12,16 +12,15 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const logger = require('../../../logger')
-const apiUtils = require('../apiUtils')
-const Models = require('../../../models')
-const permissions = require('../../../permissions')
-const ticketStatusSchema = require('../../../models/ticketStatus')
+import _ from 'lodash'
+import async from 'async'
+import logger from '../../../logger/index.js'
+import apiUtils from '../apiUtils.js'
+import Models from '../../../models/index.js'
+import permissions from '../../../permissions/index.js'
+import ticketStatusSchema from '../../../models/ticketStatus.js'
+import request from 'axios'
+import nconf from 'nconf'
 
 const ticketsV2 = {}
 
@@ -234,9 +233,9 @@ ticketsV2.transferToThirdParty = async (req, res) => {
     ticket.status = 3
     await ticket.save()
 
-    const request = require('axios')
-    const nconf = require('nconf')
-    const thirdParty = nconf.get('thirdParty')
+    const requestModule = request
+    const nconfModule = nconf
+    const thirdParty = nconfModule.get('thirdParty')
     const url = thirdParty.url + '/api/v2/tickets'
 
     const ticketObj = {

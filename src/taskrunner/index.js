@@ -9,17 +9,14 @@
  ========================================================================
 */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const request = require('request')
-const ticketSchema = require('../models/ticket').default
-const userSchema = require('../models/user').default
-const groupSchema = require('../models/group').default
-const conversationSchema = require('../models/chat/conversation').default
-const settingSchema = require('../models/setting').default
+import _ from 'lodash'
+import async from 'async'
+import request from 'request'
+import ticketSchema from '../models/ticket.js'
+import userSchema from '../models/user.js'
+import groupSchema from '../models/group.js'
+import conversationSchema from '../models/chat/conversation.js'
+import settingSchema from '../models/setting.js'
 
 const taskRunner = {}
 

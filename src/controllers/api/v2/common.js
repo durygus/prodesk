@@ -12,11 +12,8 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const User = require('../../../models/user')
-const apiUtils = require('../apiUtils')
+import User from '../../../models/user.js'
+import apiUtils from '../apiUtils.js'
 
 const commonV2 = {}
 

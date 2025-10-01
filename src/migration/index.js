@@ -12,32 +12,39 @@
 
  **/
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
+import _ from 'lodash'
+import async from 'async'
+import winston from '../logger/index.js'
+import semver from 'semver'
+import dayjs from 'dayjs'
+import pkg from '../../package.json' with { type: 'json' }
+import SettingsSchema from '../models/setting.js'
+import userSchema from '../models/user.js'
+import roleSchema from '../models/role.js'
+import database from '../database/index.js'
+import Team from '../models/team.js'
+import Department from '../models/department.js'
+import groupSchema from '../models/group.js'
+import Status from '../models/ticketStatus.js'
+import counterSchema from '../models/counters.js'
+import path from 'path'
+import { fork } from 'child_process'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
 
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../logger').default
-const semver = require('semver')
-const dayjs = require('dayjs')
-const version = require('../../package.json').version
-
-var SettingsSchema = require('../models/setting').default
-var userSchema = require('../models/user').default
-var roleSchema = require('../models/role').default
-var database = require('../database').default
-const path = require('path')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 var migrations = {}
 
 function performBackup (dbVersion, callback) {
-  const child = require('child_process').fork(path.join(__dirname, '../../src/backup/backup'), {
+  const child = fork(path.join(__dirname, '../../src/backup/backup'), {
     env: {
       FORK: 1,
       NODE_ENV: global.env,
       MONGOURI: database.connectionuri,
       PATH: process.env.PATH,
-      FILENAME: 'PREUPGRADE--trudesk-v' + dbVersion + '-' + moment().format('MMDDYYYY_HHmm') + '.zip'
+      FILENAME: 'PREUPGRADE--trudesk-v' + dbVersion + '-' + dayjs().format('MMDDYYYY_HHmm') + '.zip'
     }
   })
   global.forks.push({ name: 'backup', fork: child })
@@ -96,7 +103,7 @@ function saveVersion (callback) {
         if (_.isFunction(callback)) return callback()
       })
     } else {
-      if (setting.value) setting.value = require('../../package').version
+      if (setting.value) setting.value = pkg.version
       setting.save(function (err) {
         if (err) {
           if (_.isFunction(callback)) return callback(err)
@@ -194,9 +201,9 @@ function migrateUserRoles (callback) {
 }
 
 function createAdminTeamDepartment (callback) {
-  const Team = require('../models/team').default
-  const Department = require('../models/department').default
-  const Account = require('../models/user').default
+  const TeamModel = Team
+  const DepartmentModel = Department
+  const Account = userSchema
 
   async.waterfall(
     [
@@ -208,7 +215,7 @@ function createAdminTeamDepartment (callback) {
           return admin._id.toString()
         })
 
-        Team.create(
+        TeamModel.create(
           {
             name: 'Support (Default)',
             members: adminsIds
@@ -234,8 +241,8 @@ function createAdminTeamDepartment (callback) {
 
 function removeAgentsFromGroups (callback) {
   // winston.debug('Migrating Agents from Groups...')
-  var groupSchema = require('../models/group').default
-  groupSchema.getAllGroups(function (err, groups) {
+  var groupSchemaModel = groupSchema
+  groupSchemaModel.getAllGroups(function (err, groups) {
     if (err) return callback(err)
     async.eachSeries(
       groups,
@@ -252,8 +259,8 @@ function removeAgentsFromGroups (callback) {
 }
 
 function createTicketStatus (callback) {
-  const Status = require('../models/ticketStatus').default
-  const counterSchema = require('../models/counters').default
+  const StatusModel = Status
+  const counterSchemaModel = counterSchema
   let newId = ''
   let openId = ''
   let pendingId = ''
@@ -261,10 +268,10 @@ function createTicketStatus (callback) {
   async.series(
     [
       function (next) {
-        Status.deleteMany({}, next)
+        StatusModel.deleteMany({}, next)
       },
       function (next) {
-        Status.create(
+        StatusModel.create(
           [
             {
               name: 'New',
@@ -347,7 +354,7 @@ function createTicketStatus (callback) {
       },
       function (next) {
         winston.info('Completed updating ticket status.')
-        counterSchema.setCounter('status', 4, next)
+        counterSchemaModel.setCounter('status', 4, next)
       }
     ],
     callback

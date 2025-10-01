@@ -12,23 +12,39 @@
 
  **/
 
-import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+import _ from 'lodash'
+import fs from 'fs-extra'
+import path from 'path'
+import async from 'async'
+import winston from '../logger/index.js'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const _ = require('lodash')
-const fs = require('fs-extra')
-const path = require('path')
-const async = require('async')
-const winston = require('../logger').default
-const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(utc)
 
-const SettingsSchema = require('../models/setting').default
-const PrioritySchema = require('../models/ticketpriority').default
+import SettingsSchema from '../models/setting.js'
+import PrioritySchema from '../models/ticketpriority.js'
+import roleSchema from '../models/role.js'
+import roleOrderSchema from '../models/roleorder.js'
+import http from 'http'
+import os from 'os'
+import semver from 'semver'
+import database from '../database/index.js'
+import unzipper from 'unzipper'
+import ticketTypeSchema from '../models/tickettype.js'
+import ticketStatusSchema from '../models/ticketStatus.js'
+import tagSchema from '../models/tag.js'
+import ticketSchema from '../models/ticket.js'
+import templateSchema from '../models/template.js'
+import nconf from 'nconf'
+import Chance from 'chance'
 
 const settingsDefaults = {}
 const roleDefaults = {}
@@ -62,16 +78,16 @@ roleDefaults.adminGrants = [
 settingsDefaults.roleDefaults = roleDefaults
 
 function rolesDefault (callback) {
-  const roleSchema = require('../models/role').default
+  const roleSchemaModel = roleSchema
 
   async.series(
     [
       function (done) {
-        roleSchema.getRoleByName('User', function (err, role) {
+        roleSchemaModel.getRoleByName('User', function (err, role) {
           if (err) return done(err)
           if (role) return done()
 
-          roleSchema.create(
+          roleSchemaModel.create(
             {
               name: 'User',
               description: 'Default role for users',
@@ -96,13 +112,13 @@ function rolesDefault (callback) {
         })
       },
       function (done) {
-        roleSchema.getRoleByName('Support', function (err, role) {
+        roleSchemaModel.getRoleByName('Support', function (err, role) {
           if (err) return done(err)
           if (role) {
             return done()
             // role.updateGrants(supportGrants, done);
           } else
-            roleSchema.create(
+            roleSchemaModel.create(
               {
                 name: 'Support',
                 description: 'Default role for agents',
@@ -113,12 +129,12 @@ function rolesDefault (callback) {
         })
       },
       function (done) {
-        roleSchema.getRoleByName('Admin', function (err, role) {
+        roleSchemaModel.getRoleByName('Admin', function (err, role) {
           if (err) return done(err)
           if (role) return done()
           // role.updateGrants(adminGrants, done);
           else {
-            roleSchema.create(
+            roleSchemaModel.create(
               {
                 name: 'Admin',
                 description: 'Default role for admins',
@@ -130,12 +146,12 @@ function rolesDefault (callback) {
         })
       },
       function (done) {
-        var roleOrderSchema = require('../models/roleorder').default
-        roleOrderSchema.getOrder(function (err, roleOrder) {
+        var roleOrderSchemaModel = roleOrderSchema
+        roleOrderSchemaModel.getOrder(function (err, roleOrder) {
           if (err) return done(err)
           if (roleOrder) return done()
 
-          roleSchema.getRoles(function (err, roles) {
+          roleSchemaModel.getRoles(function (err, roles) {
             if (err) return done(err)
 
             var roleOrder = []
@@ -162,8 +178,8 @@ function rolesDefault (callback) {
 }
 
 function defaultUserRole (callback) {
-  var roleOrderSchema = require('../models/roleorder').default
-  roleOrderSchema.getOrderLean(function (err, roleOrder) {
+  var roleOrderSchemaModel = roleOrderSchema
+  roleOrderSchemaModel.getOrderLean(function (err, roleOrder) {
     if (err) return callback(err)
     if (!roleOrder) return callback()
 
@@ -198,13 +214,13 @@ function createDirectories (callback) {
 }
 
 function downloadWin32MongoDBTools (callback) {
-  var http = require('http')
-  var os = require('os')
-  var semver = require('semver')
-  var dbVersion = require('../database').default.db.version || '5.0.6'
-  var fileVersion = semver.major(dbVersion) + '.' + semver.minor(dbVersion)
+  var httpModule = http
+  var osModule = os
+  var semverModule = semver
+  var dbVersion = database.db.version || '5.0.6'
+  var fileVersion = semverModule.major(dbVersion) + '.' + semverModule.minor(dbVersion)
 
-  if (os.platform() === 'win32') {
+  if (osModule.platform() === 'win32') {
     winston.debug('MongoDB version ' + fileVersion + ' detected.')
     var filename = 'mongodb-tools.' + fileVersion + '-win32x64.zip'
     var savePath = path.join(__dirname, '../backup/bin/win32/')
@@ -217,7 +233,7 @@ function downloadWin32MongoDBTools (callback) {
     ) {
       winston.debug('Windows platform detected. Downloading MongoDB Tools [' + filename + ']')
       fs.emptyDirSync(savePath)
-      var unzipper = require('unzipper')
+      var unzipperModule = unzipper
       var file = fs.createWriteStream(path.join(savePath, filename))
       http
         .get('http://storage.trudesk.io/tools/' + filename, function (response) {
@@ -227,7 +243,7 @@ function downloadWin32MongoDBTools (callback) {
           })
           file.on('close', function () {
             fs.createReadStream(path.join(savePath, filename))
-              .pipe(unzipper.Extract({ path: savePath }))
+              .pipe(unzipperModule.Extract({ path: savePath }))
               .on('close', function () {
                 fs.unlink(path.join(savePath, filename), callback)
               })
@@ -320,7 +336,7 @@ function ticketTypeSettingDefault (callback) {
     }
 
     if (!setting) {
-      var ticketTypeSchema = require('../models/tickettype').default
+      var ticketTypeSchemaModel = ticketTypeSchema
       ticketTypeSchema.getTypes(function (err, types) {
         if (err) {
           winston.warn(err)
@@ -378,8 +394,8 @@ function ticketStatusSettingDefault(callback) {
       return callback()
     }
 
-    const ticketStatusSchema = require('../models/ticketStatus').default
-    ticketStatusSchema.getStatus(function(err, statuses) {
+    const ticketStatusSchemaModel = ticketStatusSchema
+    ticketStatusSchemaModel.getStatus(function(err, statuses) {
       if (err) {
         winston.warn(err)
         return callback(err)
@@ -452,8 +468,8 @@ function ticketPriorityDefaults (callback) {
 }
 
 function normalizeTags (callback) {
-  var tagSchema = require('../models/tag').default
-  tagSchema.find({}, function (err, tags) {
+  var tagSchemaModel = tagSchema
+  tagSchemaModel.find({}, function (err, tags) {
     if (err) return callback(err)
     async.each(
       tags,
@@ -466,7 +482,7 @@ function normalizeTags (callback) {
 }
 
 function checkPriorities (callback) {
-  var ticketSchema = require('../models/ticket').default
+  var ticketSchemaModel = ticketSchema
   var migrateP1 = false
   var migrateP2 = false
   var migrateP3 = false
@@ -474,19 +490,19 @@ function checkPriorities (callback) {
   async.parallel(
     [
       function (done) {
-        ticketSchema.collection.countDocuments({ priority: 1 }).then(function (count) {
+        ticketSchemaModel.collection.countDocuments({ priority: 1 }).then(function (count) {
           migrateP1 = count > 0
           return done()
         })
       },
       function (done) {
-        ticketSchema.collection.countDocuments({ priority: 2 }).then(function (count) {
+        ticketSchemaModel.collection.countDocuments({ priority: 2 }).then(function (count) {
           migrateP2 = count > 0
           return done()
         })
       },
       function (done) {
-        ticketSchema.collection.countDocuments({ priority: 3 }).then(function (count) {
+        ticketSchemaModel.collection.countDocuments({ priority: 3 }).then(function (count) {
           migrateP3 = count > 0
           return done()
         })
@@ -500,7 +516,7 @@ function checkPriorities (callback) {
             PrioritySchema.getByMigrationNum(1, function (err, normal) {
               if (!err) {
                 winston.debug('Converting Priority: Normal')
-                ticketSchema.collection
+                ticketSchemaModel.collection
                   .updateMany({ priority: 1 }, { $set: { priority: normal._id } })
                   .then(function (res) {
                     if (res && res.result) {
@@ -523,7 +539,7 @@ function checkPriorities (callback) {
             PrioritySchema.getByMigrationNum(2, function (err, urgent) {
               if (!err) {
                 winston.debug('Converting Priority: Urgent')
-                ticketSchema.collection
+                ticketSchemaModel.collection
                   .updateMany({ priority: 2 }, { $set: { priority: urgent._id } })
                   .then(function (res) {
                     if (res && res.result) {
@@ -546,7 +562,7 @@ function checkPriorities (callback) {
             PrioritySchema.getByMigrationNum(3, function (err, critical) {
               if (!err) {
                 winston.debug('Converting Priority: Critical')
-                ticketSchema.collection
+                ticketSchemaModel.collection
                   .updateMany({ priority: 3 }, { $set: { priority: critical._id } })
                   .then(function (res) {
                     if (res && res.result) {
@@ -583,7 +599,7 @@ function addedDefaultPrioritiesToTicketTypes (callback) {
       },
       function (priorities, next) {
         priorities = _.sortBy(priorities, 'migrationNum')
-        var ticketTypeSchema = require('../models/tickettype').default
+        var ticketTypeSchemaModel = ticketTypeSchema
         ticketTypeSchema.getTypes(function (err, types) {
           if (err) return next(err)
 
@@ -615,26 +631,26 @@ function addedDefaultPrioritiesToTicketTypes (callback) {
 }
 
 function mailTemplates (callback) {
-  var newTicket = require('./json/mailer-new-ticket')
-  var passwordReset = require('./json/mailer-password-reset')
-  var templateSchema = require('../models/template').default
+  const newTicket = newTicketModule
+  const passwordReset = passwordResetModule
+  var templateSchemaModel = templateSchema
   async.parallel(
     [
       function (done) {
-        templateSchema.findOne({ name: newTicket.name }, function (err, templates) {
+        templateSchemaModel.findOne({ name: newTicket.name }, function (err, templates) {
           if (err) return done(err)
           if (!templates || templates.length < 1) {
-            return templateSchema.create(newTicket, done)
+            return templateSchemaModel.create(newTicket, done)
           }
 
           return done()
         })
       },
       function (done) {
-        templateSchema.findOne({ name: passwordReset.name }, function (err, templates) {
+        templateSchemaModel.findOne({ name: passwordReset.name }, function (err, templates) {
           if (err) return done(err)
           if (!templates || templates.length < 1) {
-            return templateSchema.create(passwordReset, done)
+            return templateSchemaModel.create(passwordReset, done)
           }
 
           return done()
@@ -646,19 +662,19 @@ function mailTemplates (callback) {
 }
 
 function elasticSearchConfToDB (callback) {
-  const nconf = require('nconf')
+  const nconfModule = nconf
   const elasticsearch = {
-    enable: nconf.get('elasticsearch:enable') || false,
-    host: nconf.get('elasticsearch:host') || "",
-    port: nconf.get('elasticsearch:port') || 9200
+    enable: nconfModule.get('elasticsearch:enable') || false,
+    host: nconfModule.get('elasticsearch:host') || "",
+    port: nconfModule.get('elasticsearch:port') || 9200
   }
 
-  nconf.set('elasticsearch', {})
+  nconfModule.set('elasticsearch', {})
 
   async.parallel(
     [
       function (done) {
-        nconf.save(done)
+        nconfModule.save(done)
       },
       function (done) {
         // if (!elasticsearch.enable) return done()
@@ -711,8 +727,8 @@ function elasticSearchConfToDB (callback) {
 }
 
 function installationID (callback) {
-  const Chance = require('chance')
-  const chance = new Chance()
+  const ChanceModule = Chance
+  const chance = new ChanceModule()
   SettingsSchema.getSettingByName('gen:installid', function (err, setting) {
     if (err) return callback(err)
     if (!setting) {

@@ -12,13 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var apiUtils = require('../apiUtils')
-var Ticket = require('../../../models/ticket')
-var Group = require('../../../models/group')
-var Department = require('../../../models/department')
+import apiUtils from '../apiUtils.js'
+import Ticket from '../../../models/ticket.js'
+import Group from '../../../models/group.js'
+import Department from '../../../models/department.js'
 
 var apiGroups = {}
 

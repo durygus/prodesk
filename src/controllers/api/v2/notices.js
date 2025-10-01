@@ -12,12 +12,9 @@
  *  Copyright (c) 2014-2022. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const winston = require('../../../logger')
-const apiUtils = require('../apiUtils')
-const Notice = require('../../../models/notice')
+import winston from '../../../logger/index.js'
+import apiUtils from '../apiUtils.js'
+import Notice from '../../../models/notice.js'
 
 const apiNotices = {}
 

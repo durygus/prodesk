@@ -10,11 +10,8 @@
  *  Updated:    1/15/20, 1:23 AM
  *  Copyright (c) 2014-2020 Trudesk, Inc. All rights reserved.
  */
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var mailCheck = require('../../../mailer/mailCheck')
-var apiUtils = require('../apiUtils')
+import mailCheck from '../../../mailer/mailCheck.js'
+import apiUtils from '../apiUtils.js'
 
 
 var mailerApi = {}

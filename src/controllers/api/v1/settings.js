@@ -12,17 +12,18 @@
 
  **/
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash')
-var async = require('async')
-var emitter = require('../../../emitter')
-var winston = require('winston')
-var sanitizeHtml = require('sanitize-html')
-var SettingsSchema = require('../../../models/setting')
-var settingsUtil = require('../../../settings/settingsUtil')
-const socketEventConsts = require('../../../socketio/socketEventConsts')
+import _ from 'lodash'
+import async from 'async'
+import emitter from '../../../emitter/index.js'
+import winston from 'winston'
+import sanitizeHtml from 'sanitize-html'
+import SettingsSchema from '../../../models/setting.js'
+import settingsUtil from '../../../settings/settingsUtil.js'
+import socketEventConsts from '../../../socketio/socketEventConsts.js'
+import mailerModule from '../../../mailer/index.js'
+import templateSchemaModule from '../../../models/template.js'
+import buildsassModule from '../../../sass/buildsass.js'
+import RoleOrderSchemaModule from '../../../models/roleorder.js'
 
 var apiSettings = {}
 
@@ -150,7 +151,7 @@ apiSettings.updateSetting = function (req, res) {
 }
 
 apiSettings.testMailer = function (req, res) {
-  var mailer = require('../../../mailer')
+  const mailer = mailerModule
   mailer.verify(function (err) {
     if (err) {
       winston.debug(err)
@@ -162,7 +163,7 @@ apiSettings.testMailer = function (req, res) {
 }
 
 apiSettings.updateTemplateSubject = function (req, res) {
-  var templateSchema = require('../../../models/template')
+  const templateSchema = templateSchemaModule
   var id = req.params.id
   var subject = req.body.subject
   if (!subject) return res.status(400).json({ sucess: false, error: 'Invalid PUT data' })
@@ -181,7 +182,7 @@ apiSettings.updateTemplateSubject = function (req, res) {
 }
 
 apiSettings.buildsass = function (req, res) {
-  var buildsass = require('../../../sass/buildsass')
+  const buildsass = buildsassModule
   buildsass.build(function (err) {
     return defaultApiResponse(err, res)
   })
@@ -189,7 +190,7 @@ apiSettings.buildsass = function (req, res) {
 
 apiSettings.updateRoleOrder = function (req, res) {
   if (!req.body.roleOrder) return res.status(400).json({ success: false, error: 'Invalid PUT Data' })
-  var RoleOrderSchema = require('../../../models/roleorder')
+  const RoleOrderSchema = RoleOrderSchemaModule
   RoleOrderSchema.getOrder(function (err, order) {
     if (err) return res.status(500).json({ success: false, error: err.message })
     if (!order) {

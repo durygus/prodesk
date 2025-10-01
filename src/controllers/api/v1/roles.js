@@ -12,20 +12,18 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash')
-var async = require('async')
-var userSchema = require('../../../models/user')
-var permissions = require('../../../permissions')
-const socketEventConsts = require('../../../socketio/socketEventConsts')
+import _ from 'lodash'
+import async from 'async'
+import userSchema from '../../../models/user.js'
+import permissions from '../../../permissions/index.js'
+import socketEventConsts from '../../../socketio/socketEventConsts.js'
+import roleSchemaModule from '../../../models/role.js'
+import roleOrderSchemaModule from '../../../models/roleorder.js'
+import emitter from '../../../emitter/index.js'
 
 var rolesV1 = {}
 
 rolesV1.get = function (req, res) {
-  var roleSchmea = require('../../../models/role')
-  var roleOrderSchema = require('../../../models/roleorder')
 
   var roles = []
   var roleOrder = {}
@@ -63,8 +61,8 @@ rolesV1.create = function (req, res) {
   var name = req.body.name
   if (!name) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  var roleSchema = require('../../../models/role')
-  var roleOrder = require('../../../models/roleorder')
+  const roleSchema = roleSchemaModule
+  const roleOrder = roleOrderSchema
 
   async.waterfall(
     [
@@ -104,17 +102,17 @@ rolesV1.update = function (req, res) {
   if (_.isUndefined(_id) || _.isUndefined(data))
     return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  var emitter = require('../../../emitter')
+  const emitterModule = emitter
   var hierarchy = data.hierarchy ? data.hierarchy : false
   var cleaned = _.omit(data, ['_id', 'hierarchy'])
   var k = permissions.buildGrants(cleaned)
-  var roleSchema = require('../../../models/role')
+  const roleSchema = roleSchemaModule
   roleSchema.get(data._id, function (err, role) {
     if (err) return res.status(400).json({ success: false, error: err })
     role.updateGrantsAndHierarchy(k, hierarchy, function (err) {
       if (err) return res.status(400).json({ success: false, error: err })
 
-      emitter.emit(socketEventConsts.ROLES_FLUSH)
+      emitterModule.emit(socketEventConsts.ROLES_FLUSH)
 
       return res.send('OK')
     })
@@ -126,8 +124,8 @@ rolesV1.delete = function (req, res) {
   var newRoleId = req.body.newRoleId
   if (!_id || !newRoleId) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  var roleSchema = require('../../../models/role')
-  var roleOrderSchema = require('../../../models/roleorder')
+  const roleSchema = roleSchemaModule
+  const roleOrderSchema = roleOrderSchemaModule
 
   async.series(
     [

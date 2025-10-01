@@ -15,31 +15,30 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 import _ from 'lodash'
-import { createRequire } from 'module'
+import logger from '../../logger/index.js'
+import Ticket from '../../models/ticket.js'
+import User from '../../models/user.js'
+import Setting from '../../models/setting.js'
+import Department from '../../models/department.js'
 
 const { head, filter, flattenDeep, concat, uniq, uniqBy, map, chain } = _
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+import Notification from '../../models/notification.js'
+import Template from '../../models/template.js'
+import Mailer from '../../mailer/index.js'
 
-const logger = require('../../logger')
-const Ticket = require('../../models/ticket').default
-const User = require('../../models/user').default
-const Setting = require('../../models/setting').default
-const Department = require('../../models/department').default
-const Notification = require('../../models/notification').default
-const Template = require('../../models/template').default
-const Mailer = require('../../mailer')
-
-const Email = require('email-templates')
+import Email from 'email-templates'
 const templateDir = path.resolve(__dirname, '../..', 'mailer', 'templates')
-const permissions = require('../../permissions')
+import permissions from '../../permissions/index.js'
 
-const socketUtils = require('../../helpers/utils')
-const sharedVars = require('../../socketio/index').default.shared
-const socketEvents = require('../../socketio/socketEventConsts').default
-const util = require('../../helpers/utils')
+import socketUtils from '../../helpers/utils.js'
+import socketio from '../../socketio/index.js'
+import socketEvents from '../../socketio/socketEventConsts.js'
+import util from '../../helpers/utils.js'
+
+const sharedVars = socketio.shared
 
 const sendSocketUpdateToUser = (user, ticket) => {
   socketUtils.sendToUser(

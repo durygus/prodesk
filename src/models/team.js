@@ -15,6 +15,7 @@
 import _ from 'lodash'
 import mongoose from 'mongoose'
 import utils from '../helpers/utils.js'
+import autopopulate from 'mongoose-autopopulate'
 
 // Refs
 import './user.js'
@@ -33,7 +34,7 @@ var teamSchema = mongoose.Schema({
   ]
 })
 
-teamSchema.plugin(require('mongoose-autopopulate'))
+teamSchema.plugin(autopopulate)
 
 teamSchema.pre('validate', function () {
   this.normalized = utils.sanitizeFieldPlainText(this.name.trim().toLowerCase())

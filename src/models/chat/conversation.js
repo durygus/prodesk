@@ -12,11 +12,8 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var mongoose = require('mongoose')
-var _ = require('lodash')
+import mongoose from 'mongoose'
+import _ from 'lodash'
 
 var COLLECTION = 'conversations'
 

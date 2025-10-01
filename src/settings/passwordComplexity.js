@@ -12,10 +12,7 @@
  *  Copyright (c) 2014-2022. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const { passwordStrength } = require('check-password-strength')
+import { passwordStrength } from 'check-password-strength'
 const passwordComplexityOptions = [
   {
     id: 0,

@@ -12,13 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash')
-var nodeMailer = require('nodemailer')
-
-var settings = require('../models/setting')
+import _ from 'lodash'
+import nodeMailer from 'nodemailer'
+import settings from '../models/setting.js'
 
 var mailer = {}
 

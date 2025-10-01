@@ -12,13 +12,11 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash')
-var async = require('async')
-var GroupSchema = require('../../../models/group')
-var ticketSchema = require('../../../models/ticket')
+import _ from 'lodash'
+import async from 'async'
+import GroupSchema from '../../../models/group.js'
+import ticketSchema from '../../../models/ticket.js'
+import permissionsModule from '../../../permissions/index.js'
 
 var apiGroups = {}
 
@@ -42,7 +40,7 @@ var apiGroups = {}
  */
 apiGroups.get = function (req, res) {
   var user = req.user
-  var permissions = require('../../../permissions')
+  const permissions = permissionsModule
   var hasPublic = permissions.canThis(user.role, 'tickets:public')
 
   if (user.role.isAgent || user.role.isAdmin) {

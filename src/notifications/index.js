@@ -12,11 +12,8 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var winston = require('winston')
-var request = require('request')
+import winston from 'winston'
+import request from 'request'
 
 export const pushNotification = function (tpsUsername, tpsApiKey, notification) {
   var body = {

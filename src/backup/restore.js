@@ -12,22 +12,20 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs-extra'
 import os from 'os'
+import _ from 'lodash'
+import { spawn } from 'child_process'
+import async from 'async'
+import AdmZip from 'adm-zip'
+import database from '../database/index.js'
+import winston from '../logger/index.js'
+import rimraf from 'rimraf'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-const _ = require('lodash')
-const spawn = require('child_process').spawn
-const async = require('async')
-const AdmZip = require('adm-zip')
-const database = require('../database').default
-const winston = require('../logger').default
 
 global.env = process.env.NODE_ENV || 'production'
 
@@ -35,13 +33,13 @@ let CONNECTION_URI = null
 let databaseName = null
 
 function cleanup (callback) {
-  const rimraf = require('rimraf')
-  rimraf(path.join(__dirname, '../../restores/restore_*'), callback)
+  const rimrafModule = rimraf
+  rimrafModule(path.join(__dirname, '../../restores/restore_*'), callback)
 }
 
 function cleanUploads (callback) {
-  const rimraf = require('rimraf')
-  rimraf(path.join(__dirname, '../../public/uploads/*'), callback)
+  const rimrafModule = rimraf
+  rimrafModule(path.join(__dirname, '../../public/uploads/*'), callback)
 }
 
 function copyUploads (file, callback) {

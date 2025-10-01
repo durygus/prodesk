@@ -12,22 +12,19 @@
 
  **/
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const path = require('path')
-const nconf = require('nconf')
-const winston = require('../logger').default
-const elasticsearch = require('@elastic/elasticsearch')
-const ESErrors = require('@elastic/elasticsearch').errors
-const emitter = require('../emitter').default
-const dayjs = require('dayjs')
-const timezone = require('dayjs/plugin/timezone')
-const utc = require('dayjs/plugin/utc')
+import _ from 'lodash'
+import path from 'path'
+import nconf from 'nconf'
+import winston from '../logger/index.js'
+import elasticsearch from '@elastic/elasticsearch'
+import { errors as ESErrors } from '@elastic/elasticsearch'
+import emitter from '../emitter/index.js'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
+import settingUtil from '../settings/settingsUtil.js'
 dayjs.extend(timezone)
 dayjs.extend(utc)
-const settingUtil = require('../settings/settingsUtil').default
 
 const ES = {}
 ES.indexName = process.env.ELASTICSEARCH_INDEX_NAME || 'trudesk'
@@ -83,7 +80,7 @@ ES.testConnection = async callback => {
 }
 
 ES.setupHooks = () => {
-  const ticketSchema = require('../models/ticket').default
+  const ticketSchema = (await import('../models/ticket.js')).default
 
   emitter.on('ticket:deleted', async _id => {
     if (_.isUndefined(_id)) return false
@@ -231,7 +228,7 @@ ES.rebuildIndex = async () => {
 
     global.esStatus = 'Rebuilding...'
 
-    const fork = require('child_process').fork
+    const { fork } = await import('child_process')
     const esFork = fork(path.join(__dirname, 'rebuildIndexChild.js'), {
       env: {
         FORK: 1,

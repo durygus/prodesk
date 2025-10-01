@@ -12,27 +12,39 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
 import path from 'path'
-
-const require = createRequire(import.meta.url)
 import { fileURLToPath } from 'url'
+import async from 'async'
+import _ from 'lodash'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
+import winston from '../../../logger/index.js'
+import permissionsModule from '../../../permissions/index.js'
+import emitter from '../../../emitter/index.js'
+import xss from 'xss'
+import sanitizeHtml from 'sanitize-html'
+import ticketSchema from '../../../models/ticket.js'
+import groupSchema from '../../../models/group.js'
+import departmentSchema from '../../../models/department.js'
+import UserSchemaModule from '../../../models/user.js'
+import TicketStatusSchemaModule from '../../../models/ticketStatus.js'
+import markedModule from 'marked'
+import ChanceModule from 'chance'
+import settingsSchemaModule from '../../../models/setting.js'
+import TicketTypeSchemaModule from '../../../models/tickettype.js'
+import ticketPrioritiesSchemaModule from '../../../models/ticketpriority.js'
+import settingsUtilModule from '../../../settings/settingsUtil.js'
+import fsModule from 'fs'
+import pathModule from 'path'
+import tagSchemaModule from '../../../models/tag.js'
+import groupSchemaModule from '../../../models/group.js'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-
-var async = require('async')
-var _ = require('lodash')
-const dayjs = require('dayjs')
-const timezone = require('dayjs/plugin/timezone')
-const utc = require('dayjs/plugin/utc')
 dayjs.extend(timezone)
 dayjs.extend(utc)
-var winston = require('../../../logger')
-var permissions = require('../../../permissions')
-var emitter = require('../../../emitter')
-var xss = require('xss')
-var sanitizeHtml = require('sanitize-html')
 
 var apiTickets = {}
 
@@ -166,9 +178,9 @@ apiTickets.get = function (req, res) {
     status: status
   }
 
-  var ticketModel = require('../../../models/ticket')
-  var groupModel = require('../../../models/group')
-  var departmentModel = require('../../../models/department')
+  const ticketModel = ticketSchema
+  const groupModel = groupSchema
+  const departmentModel = departmentSchema
 
   async.waterfall(
     [
@@ -255,7 +267,7 @@ apiTickets.getByGroup = function (req, res) {
     page: page
   }
 
-  var ticketSchema = require('../../../models/ticket')
+  const ticketSchemaModel = ticketSchema
   ticketSchema.getTicketsWithObject([groupId], obj, function (err, tickets) {
     if (err) return res.status(500).json({ success: false, error: err.message })
 
@@ -274,7 +286,7 @@ apiTickets.getCountByGroup = function (req, res) {
   // var limit = req.query.limit ? Number(req.query.limit) : -1
   // var page = req.query.page ? Number(req.query.page) : 0
 
-  var ticketSchema = require('../../../models/ticket')
+  const ticketSchemaModel = ticketSchema
 
   var obj = {
     // limit: limit,
@@ -329,9 +341,9 @@ apiTickets.getCountByGroup = function (req, res) {
 apiTickets.search = function (req, res) {
   var searchString = req.query.search
 
-  var ticketModel = require('../../../models/ticket')
-  var groupModel = require('../../../models/group')
-  var departmentModel = require('../../../models/department')
+  const ticketModel = ticketSchema
+  const groupModel = groupSchema
+  const departmentModel = departmentSchema
 
   async.waterfall(
     [
@@ -438,11 +450,11 @@ apiTickets.create = function (req, res) {
   async.waterfall(
     [
       function (done) {
-        var UserSchema = require('../../../models/user')
+        const UserSchema = UserSchemaModule
         UserSchema.findOne({ _id: req.user._id }, done)
       },
       function (user, done) {
-        var TicketStatusSchema = require('../../../models/ticketStatus')
+        const TicketStatusSchema = TicketStatusSchemaModule
         TicketStatusSchema.findOne({ order: 0 }, function (err, status) {
           return done(err, status, user)
         })
@@ -456,7 +468,7 @@ apiTickets.create = function (req, res) {
           owner: req.user._id
         }
 
-        var TicketSchema = require('../../../models/ticket')
+        const TicketSchema = ticketSchema
         var ticket = new TicketSchema(postData)
 
         ticket.status = status._id
@@ -469,7 +481,7 @@ apiTickets.create = function (req, res) {
 
         ticket.subject = sanitizeHtml(ticket.subject).trim()
 
-        var marked = require('marked')
+        const marked = markedModule
         var tIssue = ticket.issue
         tIssue = tIssue.replace(/(\r\n|\n\r|\r|\n)/g, '<br>')
         tIssue = sanitizeHtml(tIssue).trim()
@@ -542,7 +554,7 @@ apiTickets.create = function (req, res) {
  }
  */
 apiTickets.createPublicTicket = function (req, res) {
-  const Chance = require('chance')
+  const Chance = ChanceModule
 
   const chance = new Chance()
   const response = {}
@@ -553,7 +565,7 @@ apiTickets.createPublicTicket = function (req, res) {
   }
   let user, group, ticket, plainTextPass
 
-  const settingSchema = require('../../../models/setting')
+  const settingSchema = settingsSchema
 
   async.waterfall(
     [
@@ -580,7 +592,7 @@ apiTickets.createPublicTicket = function (req, res) {
         })
       },
       function (roleDefault, next) {
-        const UserSchema = require('../../../models/user')
+        const UserSchema = UserSchemaModule
         plainTextPass = chance.string({
           length: 6,
           pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
@@ -606,7 +618,7 @@ apiTickets.createPublicTicket = function (req, res) {
 
       function (savedUser, next) {
         // Group Creation
-        const GroupSchema = require('../../../models/group')
+        const GroupSchema = groupSchema
         group = new GroupSchema({
           name: savedUser.email,
           members: [savedUser._id],
@@ -621,7 +633,7 @@ apiTickets.createPublicTicket = function (req, res) {
         })
       },
       function (group, savedUser, next) {
-        const settingsSchema = require('../../../models/setting')
+        const settingsSchema = settingsSchemaModule
         settingsSchema.getSettingByName('ticket:type:default', function (err, defaultType) {
           if (err) return next(err)
 
@@ -633,7 +645,7 @@ apiTickets.createPublicTicket = function (req, res) {
         })
       },
       function(defaultTicketType, group, savedUser, next) {
-        const TicketTypeSchema = require('../../../models/tickettype')
+        const TicketTypeSchema = TicketTypeSchemaModule
         TicketTypeSchema.getType(defaultTicketType)
           .then(type => next(null, type, group, savedUser))
           .catch(next)
@@ -649,14 +661,14 @@ apiTickets.createPublicTicket = function (req, res) {
           .catch(next)
       },
       function(defaultTicketStatus, ticketType, group, savedUser, next) {
-        const TicketStatusSchema = require('../../../models/ticketStatus')
+        const TicketStatusSchema = TicketStatusSchemaModule
         TicketStatusSchema.getStatusById(defaultTicketStatus)
           .then(status => next(null, status, ticketType, group, savedUser))
           .catch(next)
       },
       function(ticketStatus, ticketType, group, savedUser, next) {
         // Create Ticket
-        const TicketSchema = require('../../../models/ticket')
+        const TicketSchema = ticketSchema
         const HistoryItem = {
           action: 'ticket:created',
           description: 'Ticket was created.',
@@ -674,7 +686,7 @@ apiTickets.createPublicTicket = function (req, res) {
           subscribers: [savedUser._id]
         })
 
-        const marked = require('marked')
+        const marked = markedModule
         let tIssue = ticket.issue
         tIssue = tIssue.replace(/(\r\n|\n\r|\r|\n)/g, '<br>')
         tIssue = sanitizeHtml(tIssue).trim()
@@ -735,7 +747,7 @@ apiTickets.single = function (req, res) {
   var uid = req.params.uid
   if (_.isUndefined(uid)) return res.status(200).json({ success: false, error: 'Invalid Ticket' })
 
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   ticketModel.getTicketByUid(uid, function (err, ticket) {
     if (err) return res.send(err)
 
@@ -780,14 +792,14 @@ apiTickets.single = function (req, res) {
 apiTickets.update = function (req, res) {
   var user = req.user
   if (!_.isUndefined(user) && !_.isNull(user)) {
-    var permissions = require('../../../permissions')
+    const permissions = permissionsModule
     if (!permissions.canThis(user.role, 'tickets:update')) {
       return res.status(401).json({ success: false, error: 'Invalid Permissions' })
     }
     var oId = req.params.id
     var reqTicket = req.body
     if (_.isUndefined(oId)) return res.status(400).json({ success: false, error: 'Invalid Ticket ObjectID.' })
-    var ticketModel = require('../../../models/ticket')
+    const ticketModel = ticketSchema
     ticketModel.getTicketById(oId, function (err, ticket) {
       if (err) return res.status(400).json({ success: false, error: err.message })
       if (!ticket) return res.status(400).json({ success: false, error: 'Unable to locate ticket. Aborting...' })
@@ -923,7 +935,7 @@ apiTickets.delete = function (req, res) {
   if (_.isUndefined(oId) || _.isUndefined(user))
     return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   ticketModel.softDelete(oId, function (err) {
     if (err) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
@@ -971,13 +983,13 @@ apiTickets.postComment = function (req, res) {
   var ticketId = commentJson._id
 
   if (_.isUndefined(ticketId)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   ticketModel.getTicketById(ticketId, function (err, t) {
     if (err) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
     if (_.isUndefined(comment)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-    var marked = require('marked')
+    const marked = markedModule
     marked.setOptions({
       breaks: true
     })
@@ -1048,13 +1060,13 @@ apiTickets.postComment = function (req, res) {
 apiTickets.postInternalNote = function (req, res) {
   var payload = req.body
   if (_.isUndefined(payload.ticketid)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   ticketModel.getTicketById(payload.ticketid, function (err, ticket) {
     if (err) return res.status(400).json({ success: false, error: err.message })
 
     if (_.isUndefined(payload.note)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-    var marked = require('marked')
+    const marked = markedModule
     // var note = payload.note.replace(/(\r\n|\n\r|\r|\n)/g, "<br>");
     var Note = {
       owner: payload.owner || req.user._id,
@@ -1100,7 +1112,7 @@ apiTickets.postInternalNote = function (req, res) {
  *
  */
 apiTickets.getTypes = function (req, res) {
-  var ticketType = require('../../../models/tickettype')
+  const ticketType = TicketTypeSchemaModule
   ticketType.getTypes(function (err, types) {
     if (err) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
@@ -1112,7 +1124,7 @@ apiTickets.getType = function (req, res) {
   var id = req.params.id
   if (!id) return res.status(400).json({ success: false, error: 'Invalid Type ID' })
 
-  var ticketType = require('../../../models/tickettype')
+  const ticketType = TicketTypeSchemaModule
   ticketType.getType(id, function (err, type) {
     if (err) return res.status(400).json({ success: false, error: 'Invalid Type ID' })
 
@@ -1140,8 +1152,8 @@ apiTickets.getType = function (req, res) {
  */
 apiTickets.createType = function (req, res) {
   var typeName = req.body.name
-  var ticketTypeSchema = require('../../../models/tickettype')
-  var ticketPrioritiesSchema = require('../../../models/ticketpriority')
+  const ticketTypeSchema = TicketTypeSchemaModule
+  const ticketPrioritiesSchema = ticketPrioritiesSchemaModule
 
   if (_.isUndefined(typeName) || typeName.length < 3)
     return res.status(400).json({ success: false, error: 'Invalid Type Name!' })
@@ -1178,7 +1190,7 @@ apiTickets.updateType = function (req, res) {
 
   var data = req.body
 
-  var ticketTypeSchema = require('../../../models/tickettype')
+  const ticketTypeSchema = TicketTypeSchemaModule
 
   if (_.isUndefined(id) || _.isNull(id) || _.isNull(data) || _.isUndefined(data)) {
     return res.status(400).json({ success: false, error: 'Invalid Put Data' })
@@ -1202,7 +1214,7 @@ apiTickets.typeAddPriority = function (req, res) {
 
   var data = req.body
 
-  var ticketTypeSchema = require('../../../models/tickettype')
+  const ticketTypeSchema = TicketTypeSchemaModule
 
   if (!id || !data || !data.priority) {
     return res.status(400).json({ success: false, error: 'Invalid request data' })
@@ -1232,7 +1244,7 @@ apiTickets.typeRemovePriority = function (req, res) {
 
   var data = req.body
 
-  var ticketTypeSchema = require('../../../models/tickettype')
+  const ticketTypeSchema = TicketTypeSchemaModule
 
   if (!id || !data || !data.priority) {
     return res.status(400).json({ success: false, error: 'Invalid request data' })
@@ -1283,9 +1295,9 @@ apiTickets.deleteType = function (req, res) {
     return res.status(400).json({ success: false, error: 'Invalid POST data.' })
   }
 
-  var ticketTypeSchema = require('../../../models/tickettype')
-  var ticketSchema = require('../../../models/ticket')
-  var settingsSchema = require('../../../models/setting')
+  const ticketTypeSchema = TicketTypeSchemaModule
+  const ticketSchemaModel = ticketSchema
+  const settingsSchema = settingsSchemaModule
 
   async.waterfall(
     [
@@ -1336,7 +1348,7 @@ apiTickets.createPriority = function (req, res) {
     return res.status(400).json({ success: false, error: 'Invalid Request Data.' })
   }
 
-  var TicketPrioritySchema = require('../../../models/ticketpriority')
+  const TicketPrioritySchema = ticketPrioritiesSchemaModule
 
   var P = new TicketPrioritySchema({
     name: pName,
@@ -1354,7 +1366,7 @@ apiTickets.createPriority = function (req, res) {
 }
 
 apiTickets.getPriorities = function (req, res) {
-  var ticketPrioritySchema = require('../../../models/ticketpriority')
+  const ticketPrioritySchema = ticketPrioritiesSchemaModule
   ticketPrioritySchema.find({}, function (err, priorities) {
     if (err) return res.status(400).json({ success: false, error: err.message })
 
@@ -1373,7 +1385,7 @@ apiTickets.updatePriority = function (req, res) {
     return res.status(400).json({ success: false, error: 'Invalid Request Data' })
   }
 
-  var ticketPrioritySchema = require('../../../models/ticketpriority')
+  const ticketPrioritySchema = ticketPrioritiesSchemaModule
   ticketPrioritySchema.findOne({ _id: id }, function (err, priority) {
     if (err) return res.status(400).json({ success: false, error: err.message })
 
@@ -1406,7 +1418,7 @@ apiTickets.createStatus = function (req, res) {
     return res.status(400).json({ success: false, error: 'Invalid Request Data.' })
   }
 
-  var TicketStatusSchema = require('../../../models/ticketStatus')
+  const TicketStatusSchema = TicketStatusSchemaModule
 
   var P = new TicketStatusSchema({
     name: pName,
@@ -1423,7 +1435,7 @@ apiTickets.createStatus = function (req, res) {
 }
 
 apiTickets.getStatus = function (req, res) {
-  var ticketStatusSchema = require('../../../models/ticketStatus')
+  const ticketStatusSchema = TicketStatusSchemaModule
   ticketStatusSchema.find({}, function (err, status) {
     if (err) return res.status(400).json({ success: false, error: err.message })
 
@@ -1441,7 +1453,7 @@ apiTickets.updateStatus = function (req, res) {
     return res.status(400).json({ success: false, error: 'Invalid Request Data' })
   }
 
-  var ticketStatusSchema = require('../../../models/ticketStatus')
+  const ticketStatusSchema = TicketStatusSchemaModule
   ticketStatusSchema.findOne({ _id: id }, function (err, status) {
     if (err) return res.status(400).json({ success: false, error: err.message })
 
@@ -1463,7 +1475,7 @@ apiTickets.updateStatusOrder = function (req, res) {
   if (!data || !data.order) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
   var order = data.order
-  var ticketStatusSchema = require('../../../models/ticketStatus')
+  const ticketStatusSchema = TicketStatusSchemaModule
   ticketStatusSchema.find({}, function (err, statuses) {
     if (err) return res.status(400).json({ success: false, error: err })
 
@@ -1496,11 +1508,11 @@ apiTickets.deleteStatus = function (req, res) {
   async.series(
     [
       function (next) {
-        var ticketSchema = require('../../../models/ticket')
+        const ticketSchemaModel = ticketSchema
         ticketSchema.updateMany({ status: id }, { status: newStatusId }, next)
       },
       function (next) {
-        var ticketStatusSchema = require('../../../models/ticketStatus')
+        const ticketStatusSchema = TicketStatusSchemaModule
         ticketStatusSchema.findOne({ _id: id }, function (err, status) {
           if (err) return next(err)
           if (status.isLocked) return next(`Unable to delete default status: ${status.name}`)
@@ -1529,11 +1541,11 @@ apiTickets.deletePriority = function (req, res) {
   async.series(
     [
       function (next) {
-        var ticketSchema = require('../../../models/ticket')
+        const ticketSchemaModel = ticketSchema
         ticketSchema.updateMany({ priority: id }, { priority: newPriority }, next)
       },
       function (next) {
-        var ticketPrioritySchema = require('../../../models/ticketpriority')
+        const ticketPrioritySchema = ticketPrioritiesSchemaModule
         ticketPrioritySchema.findOne({ _id: id }, function (err, priority) {
           if (err) return next(err)
 
@@ -1626,7 +1638,7 @@ apiTickets.getTicketStats = function (req, res) {
   obj.mostActiveTicket = cache.get('quickstats:mostActiveTicket')
 
   obj.lastUpdated = cache.get('tickets:overview:lastUpdated')
-  var settingsUtil = require('../../../settings/settingsUtil')
+  const settingsUtil = settingsUtilModule
   settingsUtil.getSettings(function (err, context) {
     if (err) {
       return res.send(obj)
@@ -1713,7 +1725,7 @@ apiTickets.getTicketStatsForGroup = function (req, res) {
   if (groupId === 0) return res.status(200).json({ success: false, error: 'Please Select Group.' })
   if (_.isUndefined(groupId)) return res.status(400).json({ success: false, error: 'Invalid Group Id.' })
 
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   var data = {}
   var tags = {}
   async.waterfall(
@@ -1796,7 +1808,7 @@ apiTickets.getTicketStatsForUser = function (req, res) {
   if (userId === 0) return res.status(200).json({ success: false, error: 'Please Select User.' })
   if (_.isUndefined(userId)) return res.status(400).json({ success: false, error: 'Invalid User Id.' })
 
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   var data = {}
   var tags = {}
   async.waterfall(
@@ -1908,7 +1920,7 @@ apiTickets.getTagCount = function (req, res) {
  }
  */
 apiTickets.getTopTicketGroups = function (req, res) {
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   var top = req.params.top
   var timespan = req.params.timespan
 
@@ -1946,19 +1958,19 @@ apiTickets.removeAttachment = function (req, res) {
   var user = req.user
   if (_.isUndefined(user)) return res.status(400).json({ error: 'Invalid User Auth.' })
 
-  var permissions = require('../../../permissions')
+  const permissions = permissionsModule
   if (!permissions.canThis(user.role, 'tickets:removeAttachment'))
     return res.status(401).json({ error: 'Invalid Permissions' })
 
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   ticketModel.getTicketById(ticketId, function (err, ticket) {
     if (err) return res.status(400).send('Invalid Ticket Id')
     ticket.getAttachment(attachmentId, function (a) {
       ticket.removeAttachment(user._id, attachmentId, function (err, ticket) {
         if (err) return res.status(400).json({ error: 'Invalid Request.' })
 
-        var fs = require('fs')
-        var path = require('path')
+        const fs = fsModule
+        const path = pathModule
         var dir = path.join(__dirname, '../../../../public', a.path)
         if (fs.existsSync(dir)) fs.unlinkSync(dir)
 
@@ -2001,14 +2013,14 @@ apiTickets.subscribe = function (req, res) {
 
   if (data.user.toString() !== req.user._id.toString()) return res.status(401).json({ error: 'Unauthorized!' })
 
-  var ticketModel = require('../../../models/ticket')
+  const ticketModel = ticketSchema
   ticketModel.getTicketById(ticketId, function (err, ticket) {
     if (err) return res.status(400).json({ error: 'Invalid Ticket Id' })
 
     async.series(
       [
         function (callback) {
-          require('../../../models/user').find({ _id: data.user }, function (err, user) {
+          UserSchemaModule.find({ _id: data.user }, function (err, user) {
             if (err) return callback(err)
 
             if (!user) return callback(new Error('Unauthorized!'))
@@ -2062,7 +2074,7 @@ apiTickets.subscribe = function (req, res) {
  *
  */
 apiTickets.getTags = function (req, res) {
-  var tagSchema = require('../../../models/tag')
+  const tagSchema = tagSchemaModule
   tagSchema.getTags(function (err, tags) {
     if (err) return res.status(400).json({ success: false, error: err })
 
@@ -2089,7 +2101,7 @@ apiTickets.getTags = function (req, res) {
  *
  */
 apiTickets.getOverdue = function (req, res) {
-  var settingSchema = require('../../../models/setting')
+  const settingSchema = settingsSchemaModule
   settingSchema.getSettingByName('showOverdueTickets:enable', function (err, setting) {
     if (err) return res.status(400).json({ success: false, error: err.message })
 
@@ -2100,9 +2112,9 @@ apiTickets.getOverdue = function (req, res) {
       })
     }
 
-    var ticketSchema = require('../../../models/ticket')
-    var departmentSchema = require('../../../models/department')
-    var groupSchema = require('../../../models/group')
+    const ticketSchemaModel = ticketSchema
+    const departmentSchema = departmentSchemaModule
+    const groupSchema = groupSchemaModule
 
     async.waterfall(
       [
@@ -2137,7 +2149,7 @@ apiTickets.getOverdue = function (req, res) {
 }
 
 apiTickets.getDeletedTickets = function (req, res) {
-  var ticketSchema = require('../../../models/ticket')
+  const ticketSchemaModel = ticketSchema
   ticketSchema.getDeleted(function (err, tickets) {
     if (err) return res.status(500).json({ success: false, error: err })
 
@@ -2148,7 +2160,7 @@ apiTickets.getDeletedTickets = function (req, res) {
 apiTickets.restoreDeleted = function (req, res) {
   var postData = req.body
   if (!postData || !postData._id) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-  var ticketSchema = require('../../../models/ticket')
+  const ticketSchemaModel = ticketSchema
   ticketSchema.restoreDeleted(postData._id, function (err) {
     if (err) return res.status(500).json({ success: false, error: err })
 

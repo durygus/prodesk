@@ -20,6 +20,9 @@ import mongoose from 'mongoose'
 import winston from '../logger/index.js'
 import csrf from '../dependencies/csrf-td/index.js'
 import viewdata from '../helpers/viewdata/index.js'
+import userSchema from '../models/user.js'
+import passport from 'passport'
+import permissions from '../permissions/index.js'
 
 var middleware = {}
 
@@ -173,7 +176,6 @@ middleware.checkOrigin = function (req, res, next) {
 middleware.api = function (req, res, next) {
   var accessToken = req.headers.accesstoken
 
-  var userSchema = require('../models/user')
 
   if (_.isUndefined(accessToken) || _.isNull(accessToken)) {
     var user = req.user
@@ -198,7 +200,6 @@ middleware.apiv2 = function (req, res, next) {
   // ByPass auth for now if user is set through session
   if (req.user) return next()
 
-  var passport = require('passport')
   passport.authenticate('jwt', { session: true }, function (err, user) {
     if (err || !user) return res.status(401).json({ success: false, error: 'Invalid Authentication Token' })
     if (user) {
@@ -213,7 +214,6 @@ middleware.apiv2 = function (req, res, next) {
 middleware.canUser = function (action) {
   return function (req, res, next) {
     if (!req.user) return res.status(401).json({ success: false, error: 'Not Authorized for this API call.' })
-    const permissions = require('../permissions')
     const perm = permissions.canThis(req.user.role, action)
     if (perm) return next()
 

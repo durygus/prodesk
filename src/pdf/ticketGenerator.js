@@ -12,18 +12,20 @@
  *  Copyright (c) 2014-2022. All rights reserved.
  */
 
-import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
 import path from 'path'
+import PDFDocument from 'pdfkit'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
+import marked from 'marked'
+import { convert } from 'html-to-text'
 
-const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const PDFDocument = require('pdfkit')
-const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
-const marked = require('marked')
-const convert = require('html-to-text').convert
+dayjs.extend(timezone)
+dayjs.extend(utc)
 
 class TicketPDFGenerator {
   constructor (ticket) {

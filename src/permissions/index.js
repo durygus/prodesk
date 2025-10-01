@@ -12,13 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const winston = require('../logger').default
-const roleSchema = require('../models/role').default
-const roleOrder = require('../models/roleorder').default
+import _ from 'lodash'
+import winston from '../logger/index.js'
+import roleSchema from '../models/role.js'
+import roleOrder from '../models/roleorder.js'
 
 const register = function (callback) {
   // Register Roles

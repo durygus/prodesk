@@ -12,8 +12,6 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
 
 export default function (middleware, router, controllers) {
   // Shorten Vars
