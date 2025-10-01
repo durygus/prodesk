@@ -13,11 +13,8 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const permissions = require('../permissions')
-const settingsUtil = require('../settings/settingsUtil')
+import permissions from '../permissions/index.js'
+import settingsUtil from '../settings/settingsUtil.js'
 
 const settingsController = {}
 
