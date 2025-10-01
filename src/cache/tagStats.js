@@ -12,21 +12,17 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const dayjs = require('dayjs')
-
-const ticketSchema = require('../models/ticket').default
+import _ from 'lodash'
+import async from 'async'
+import dayjs from 'dayjs'
+import ticketSchema from '../models/ticket.js'
 
 const init = function (tickets, timespan, callback) {
   let tags = []
   let $tickets = []
   if (_.isUndefined(timespan) || _.isNaN(timespan) || timespan === 0) timespan = 365
 
-  let today = dayjs()
+  let today = moment()
     .hour(23)
     .minute(59)
     .second(59)
