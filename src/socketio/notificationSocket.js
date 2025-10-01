@@ -11,14 +11,11 @@
  *  Updated:    1/20/19 4:43 PM
  *  Copyright (c) 2014-2019. All rights reserved.
  */
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../logger').default
-const utils = require('../helpers/utils')
-const socketEvents = require('./socketEventConsts').default
+import _ from 'lodash'
+import async from 'async'
+import winston from '../logger/index.js'
+import utils from '../helpers/utils.js'
+import socketEvents from './socketEventConsts.js'
 
 var events = {}
 
