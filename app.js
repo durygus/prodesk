@@ -227,8 +227,9 @@ async function launchServer (db) {
               }
             }
 
-            cache.init()
-            return next()
+            cache.init(function() {
+              return next()
+            })
           })
         },
         function (next) {

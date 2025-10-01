@@ -219,7 +219,7 @@ truCache.refreshCache = function (callback) {
       cache.flushAll()
 
       if (_.isFunction(callback)) {
-        return callback(err)
+        return callback()
       }
     }
   )
