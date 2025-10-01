@@ -13,11 +13,14 @@
  **/
 
 import { createRequire } from 'module'
+import { fileURLToPath } from 'url'
 const require = createRequire(import.meta.url)
+const path = require('path')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const _ = require('lodash')
 const fs = require('fs-extra')
-const path = require('path')
 const async = require('async')
 const winston = require('../logger').default
 const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
