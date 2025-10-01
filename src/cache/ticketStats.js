@@ -12,15 +12,11 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const async = require('async')
-const dayjs = require('dayjs')
-const winston = require('winston')
-
-const ticketSchema = require('../models/ticket').default
+import _ from 'lodash'
+import async from 'async'
+import dayjs from 'dayjs'
+import winston from 'winston'
+import ticketSchema from '../models/ticket.js'
 
 const ex = {}
 
@@ -29,7 +25,7 @@ function buildGraphData (arr, days, callback) {
   if (arr.length < 1) {
     return callback(graphData)
   }
-  const today = dayjs()
+  const today = moment()
     .hour(23)
     .minute(59)
     .second(59)
@@ -39,7 +35,7 @@ function buildGraphData (arr, days, callback) {
   }
 
   arr = _.map(arr, function (i) {
-    return dayjs(i.date).format('YYYY-MM-DD')
+    return moment(i.date).format('YYYY-MM-DD')
   })
 
   let counted = _.countBy(arr)
@@ -67,8 +63,8 @@ function buildAvgResponse (ticketArray, callback) {
     const ticket = ticketArray[i]
     if (ticket.comments === undefined || ticket.comments.length < 1) continue
 
-    const ticketDate = dayjs(ticket.date)
-    const firstCommentDate = dayjs(ticket.comments[0].date)
+    const ticketDate = moment(ticket.date)
+    const firstCommentDate = moment(ticket.comments[0].date)
 
     const diff = firstCommentDate.diff(ticketDate, 'seconds')
     $ticketAvg.push(diff)
@@ -82,7 +78,7 @@ function buildAvgResponse (ticketArray, callback) {
     0
   )
 
-  const tvt = dayjs.duration(Math.round(ticketAvgTotal / _.size($ticketAvg)), 'seconds').asHours()
+  const tvt = moment.duration(Math.round(ticketAvgTotal / _.size($ticketAvg)), 'seconds').asHours()
   cbObj.avgResponse = Math.floor(tvt)
 
   return callback(cbObj)
@@ -96,8 +92,8 @@ const init = function (tickets, callback) {
   ex.e180 = {}
   ex.e365 = {}
   ex.lifetime = {}
-  ex.lastUpdated = dayjs.utc()
-  const today = dayjs()
+  ex.lastUpdated = moment.utc()
+  const today = moment()
     .hour(23)
     .minute(59)
     .second(59)
