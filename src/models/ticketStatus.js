@@ -12,10 +12,6 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-// var _               = require('lodash');
 import mongoose from 'mongoose'
 import * as utils from '../helpers/utils/index.js'
 import _ from 'lodash'
