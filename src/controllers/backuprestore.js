@@ -13,13 +13,10 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const fs = require('fs-extra')
+import fs from 'fs-extra'
 import path from 'path'
 import async from 'async'
-const dayjs = require('dayjs')
+import dayjs from 'dayjs'
 
 const backupRestore = {}
 
