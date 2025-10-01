@@ -12,13 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const winston = require('winston')
-const utils = require('../helpers/utils')
-const noticeSchema = require('../models/notice').default
-const socketEventConst = require('../socketio/socketEventConsts').default
+import winston from 'winston'
+import utils from '../helpers/utils.js'
+import noticeSchema from '../models/notice.js'
+import socketEventConst from '../socketio/socketEventConsts.js'
 
 const events = {}
 
