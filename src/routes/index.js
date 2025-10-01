@@ -360,9 +360,9 @@ function mainRoutes (router, middleware, controllers) {
 
   // API
   // v1
-  require('../controllers/api/v1/routes')(middleware, router, controllers)
+  require('../controllers/api/v1/routes').default(middleware, router, controllers)
   // v2
-  require('../controllers/api/v2/routes')(middleware, router, controllers)
+  require('../controllers/api/v2/routes').default(middleware, router, controllers)
 
   router.get('/api/v1/plugins/list/installed', middleware.api, function (req, res) {
     return res.json({ success: true, loadedPlugins: global.plugins })
