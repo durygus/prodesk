@@ -251,7 +251,7 @@ truCache.refreshCache = function (callback) {
   })
 
   loadConfig()
-  const db = require('../database')
+  const db = require('../database').default
   db.init(function (err) {
     if (err) return winston.error(err)
     truCache.init(function (err) {
