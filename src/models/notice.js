@@ -9,11 +9,8 @@
  ========================================================================
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var mongoose = require('mongoose')
-var utils = require('../helpers/utils')
+import mongoose from 'mongoose'
+import utils from '../helpers/utils.js'
 
 var COLLECTION = 'notices'
 
