@@ -12,7 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const permissions = require('../permissions')
 const settingsUtil = require('../settings/settingsUtil')
 
@@ -170,7 +173,6 @@ settingsController.logs = function (req, res) {
 
   const fs = require('fs')
 
-  const path = require('path')
 
   const AnsiUp = require('ansi_up')
 
@@ -191,4 +193,4 @@ settingsController.logs = function (req, res) {
   })
 }
 
-module.exports = settingsController
+export default settingsController

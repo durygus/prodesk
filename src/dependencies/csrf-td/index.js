@@ -15,10 +15,10 @@
  * @private
  */
 
-const Cookie = require('cookie')
-const createError = require('http-errors')
-const sign = require('cookie-signature').sign
-const Tokens = require('csrf')
+import Cookie from 'cookie'
+import createError from 'http-errors'
+import { sign } from 'cookie-signature'
+import Tokens from 'csrf'
 
 /**
  * Module exports.
@@ -311,4 +311,4 @@ function verifyConfiguration (req, sessionKey, cookie) {
   return true
 }
 
-module.exports = csurf
+export default csurf

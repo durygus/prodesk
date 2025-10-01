@@ -10,8 +10,12 @@
  *  Updated:    1/15/20, 1:23 AM
  *  Copyright (c) 2014-2020 Trudesk, Inc. All rights reserved.
  */
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mailCheck = require('../../../mailer/mailCheck')
 var apiUtils = require('../apiUtils')
+
 
 var mailerApi = {}
 
@@ -20,4 +24,4 @@ mailerApi.check = function (req, res) {
   return apiUtils.sendApiSuccess(res)
 }
 
-module.exports = mailerApi
+export default mailerApi

@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var mongoose = require('mongoose')
 var utils = require('../helpers/utils')
@@ -300,4 +303,4 @@ function isMember (arr, id) {
   return matches.length > 0
 }
 
-module.exports = mongoose.model(COLLECTION, groupSchema)
+export default mongoose.model(COLLECTION, groupSchema)

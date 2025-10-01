@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const Department = require('../../../models/department')
 const apiUtils = require('../apiUtils')
 
@@ -79,4 +82,4 @@ apiDepartments.delete = async (req, res) => {
   }
 }
 
-module.exports = apiDepartments
+export default apiDepartments

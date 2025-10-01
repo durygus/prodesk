@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 
 const apiUtils = {}
@@ -73,4 +76,4 @@ apiUtils.stripUserFields = function (user) {
   return user
 }
 
-module.exports = apiUtils
+export default apiUtils

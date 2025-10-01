@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mongoose = require('mongoose')
 var _ = require('lodash')
 
@@ -93,4 +96,4 @@ notificationSchema.statics.clearNotifications = function (oId, callback) {
   return this.model(COLLECTION).deleteMany({ owner: oId }, callback)
 }
 
-module.exports = mongoose.model(COLLECTION, notificationSchema)
+export default mongoose.model(COLLECTION, notificationSchema)

@@ -12,15 +12,20 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 // var _               = require('lodash');
-var mongoose = require('mongoose')
-var moment = require('moment')
-require('moment-duration-format')
-var utils = require('../helpers/utils')
+import mongoose from 'mongoose'
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration.js'
+import * as utils from '../helpers/utils/index.js'
 
-var COLLECTION = 'priorities'
+dayjs.extend(duration)
 
-var prioritySchema = mongoose.Schema(
+const COLLECTION = 'priorities'
+
+const prioritySchema = mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     overdueIn: { type: Number, required: true, default: 2880 }, // Minutes until overdue (48 Hours)
@@ -44,9 +49,21 @@ prioritySchema.pre('save', function (next) {
 
 prioritySchema.virtual('durationFormatted').get(function () {
   var priority = this
-  return moment
-    .duration(priority.overdueIn, 'minutes')
-    .format('Y [year], M [month], d [day], h [hour], m [min]', { trim: 'both' })
+  const dur = dayjs.duration(priority.overdueIn, 'minutes')
+  const years = dur.years()
+  const months = dur.months()
+  const days = dur.days()
+  const hours = dur.hours()
+  const minutes = dur.minutes()
+  
+  const parts = []
+  if (years > 0) parts.push(`${years} year`)
+  if (months > 0) parts.push(`${months} month`)
+  if (days > 0) parts.push(`${days} day`)
+  if (hours > 0) parts.push(`${hours} hour`)
+  if (minutes > 0) parts.push(`${minutes} min`)
+  
+  return parts.join(', ')
 })
 
 prioritySchema.statics.getPriority = function (_id, callback) {
@@ -67,4 +84,4 @@ prioritySchema.statics.getByMigrationNum = function (num, callback) {
   return q.exec(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, prioritySchema)
+export default mongoose.model(COLLECTION, prioritySchema)

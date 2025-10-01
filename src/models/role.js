@@ -12,14 +12,14 @@
 
  **/
 
-var mongoose = require('mongoose')
-var mongooseLeanVirtuals = require('mongoose-lean-virtuals')
-var _ = require('lodash')
-var utils = require('../helpers/utils')
+import mongoose from 'mongoose'
+import mongooseLeanVirtuals from 'mongoose-lean-virtuals'
+import _ from 'lodash'
+import * as utils from '../helpers/utils/index.js'
 
-var COLLECTION = 'roles'
+const COLLECTION = 'roles'
 
-var roleSchema = mongoose.Schema(
+const roleSchema = mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     normalized: String,
@@ -110,4 +110,4 @@ roleSchema.statics.getAgentRoles = function (callback) {
 // Alias
 roleSchema.statics.get = roleSchema.statics.getRole
 
-module.exports = mongoose.model(COLLECTION, roleSchema)
+export default mongoose.model(COLLECTION, roleSchema)

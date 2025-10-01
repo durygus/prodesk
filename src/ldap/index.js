@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var ldap = require('ldapjs')
 
@@ -81,4 +84,4 @@ ldapClient.unbind = function (callback) {
   return ldapClient.client.unbind(callback)
 }
 
-module.exports = ldapClient
+export default ldapClient

@@ -9,12 +9,19 @@
  ========================================================================
  **/
 
-const express = require('express')
+import express from 'express'
+import controllers from '../controllers/index.js'
+import path from 'path'
+import winston from '../logger/index.js'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const packagejson = JSON.parse(readFileSync(path.join(__dirname, '../../package.json'), 'utf8'))
 const router = express.Router()
-const controllers = require('../controllers')
-const path = require('path')
-const winston = require('../logger')
-const packagejson = require('../../package.json')
 
 function mainRoutes (router, middleware, controllers) {
   router.get('/', middleware.redirectToDashboardIfLoggedIn, controllers.main.index)
@@ -433,7 +440,7 @@ function mainRoutes (router, middleware, controllers) {
   }
 }
 
-module.exports = function (app, middleware) {
+export default function (app, middleware) {
   mainRoutes(router, middleware, controllers)
   app.use('/', router)
 

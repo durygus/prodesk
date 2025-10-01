@@ -12,7 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const permissions = require('../permissions')
 
 const reportsController = {}
@@ -123,4 +126,4 @@ reportsController.breakdownUser = function (req, res) {
 //     }
 // }
 
-module.exports = reportsController
+export default reportsController

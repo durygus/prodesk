@@ -14,12 +14,12 @@
 
 'use strict'
 
-var _ = require('lodash')
-var db = require('../database')
-var mongoose = require('mongoose')
-var winston = require('../logger')
-const csrf = require('../dependencies/csrf-td')
-const viewdata = require('../helpers/viewdata')
+import _ from 'lodash'
+import db from '../database/index.js'
+import mongoose from 'mongoose'
+import winston from '../logger/index.js'
+import csrf from '../dependencies/csrf-td/index.js'
+import viewdata from '../helpers/viewdata/index.js'
 
 var middleware = {}
 
@@ -257,6 +257,6 @@ middleware.csrfCheck = function (req, res, next) {
   return csrf.middleware(req, res, next)
 }
 
-module.exports = function () {
+export default function () {
   return middleware
 }

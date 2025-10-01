@@ -12,19 +12,24 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const path = require('path')
-const async = require('async')
-const winston = require('../logger')
-const emitter = require('../emitter')
-const NotificationSchema = require('../models/notification')
-const settingsSchema = require('../models/setting')
-const Email = require('email-templates')
-const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
-const socketEvents = require('../socketio/socketEventConsts')
-const notifications = require('../notifications') // Load Push Events
+import _ from 'lodash'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import async from 'async'
+import winston from '../logger/index.js'
+import emitter from '../emitter/index.js'
+import NotificationSchema from '../models/notification.js'
+import settingsSchema from '../models/setting.js'
+import Email from 'email-templates'
+import socketEvents from '../socketio/socketEventConsts.js'
+import * as notifications from '../notifications/index.js'
+import eventTicketCreated from './events/event_ticket_created.js'
+import { createRequire } from 'module'
 
-const eventTicketCreated = require('./events/event_ticket_created')
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
 
 ;(function () {
   notifications.init(emitter)

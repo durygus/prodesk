@@ -12,16 +12,16 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const passport = require('passport')
-const Local = require('passport-local').Strategy
-const TotpStrategy = require('passport-totp').Strategy
-const JwtStrategy = require('passport-jwt').Strategy
-const ExtractJwt = require('passport-jwt').ExtractJwt
-const base32 = require('thirty-two')
-const User = require('../models/user')
-const nconf = require('nconf')
+import passport from 'passport'
+import { Strategy as Local } from 'passport-local'
+import { Strategy as TotpStrategy } from 'passport-totp'
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 
-module.exports = function () {
+import base32 from 'thirty-two'
+import User from '../models/user.js'
+import nconf from 'nconf'
+
+export default function () {
   passport.serializeUser(function (user, done) {
     done(null, user._id)
   })

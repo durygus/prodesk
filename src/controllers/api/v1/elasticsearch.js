@@ -12,6 +12,9 @@
 
  **/
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash'),
     async = require('async'),
     winston = require('winston'),
@@ -114,4 +117,4 @@ apiElasticSearch.search = function(req, res) {
     });
 };
 
-module.exports = apiElasticSearch;
+export default apiElasticSearch;

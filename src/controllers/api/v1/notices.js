@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 
 var winston = require('../../../logger')
@@ -175,4 +178,4 @@ apiNotices.deleteNotice = function (req, res) {
   })
 }
 
-module.exports = apiNotices
+export default apiNotices

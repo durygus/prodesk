@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mongoose = require('mongoose')
 
 var COLLECTION = 'templates'
@@ -36,4 +39,4 @@ templateSchema.statics.get = function (name, callback) {
     .exec(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, templateSchema)
+export default mongoose.model(COLLECTION, templateSchema)

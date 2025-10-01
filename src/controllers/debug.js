@@ -12,10 +12,13 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const async = require('async')
-const path = require('path')
-const winston = require('../logger')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+import async from 'async'
+import path from 'path'
+import winston from '../logger/index.js'
 
 const debugController = {}
 
@@ -536,7 +539,6 @@ debugController.sendmail = function (req, res) {
 
 debugController.uploadPlugin = function (req, res) {
   const fs = require('fs')
-  const path = require('path')
   const Busboy = require('busboy')
   const busboy = new Busboy({
     headers: req.headers,
@@ -949,4 +951,4 @@ function getSampleTags () {
   return tags
 }
 
-module.exports = debugController
+export default debugController

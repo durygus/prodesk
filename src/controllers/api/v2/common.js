@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const User = require('../../../models/user')
 const apiUtils = require('../apiUtils')
 
@@ -57,4 +60,4 @@ commonV2.viewData = async (req, res) => {
   return apiUtils.sendApiSuccess(res, { viewdata: req.viewdata })
 }
 
-module.exports = commonV2
+export default commonV2

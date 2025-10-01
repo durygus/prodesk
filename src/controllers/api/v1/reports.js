@@ -12,12 +12,15 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var async = require('async')
 var ticketSchema = require('../../../models/ticket')
 var groupSchema = require('../../../models/group')
 var csv = require('csv')
-var moment = require('moment')
+var dayjs = require('dayjs')
 
 var settingsSchema = require('../../../models/setting')
 
@@ -674,4 +677,4 @@ function processResponse (res, input) {
   })
 }
 
-module.exports = apiReports
+export default apiReports

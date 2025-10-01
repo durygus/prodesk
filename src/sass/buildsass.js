@@ -12,10 +12,15 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-var _ = require('lodash')
-var path = require('path')
-var sass = require('sass')
-var settingUtil = require('../settings/settingsUtil')
+import _ from 'lodash'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import sass from 'sass'
+import settingUtil from '../settings/settingsUtil.js'
+import fs from 'fs'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 var buildsass = {}
 
@@ -56,7 +61,6 @@ function dynamicSass (entry, vars, success, error) {
 }
 
 function save (result) {
-  var fs = require('fs')
   var themeCss = path.join(__dirname, '../../public/css/app.min.css')
   fs.writeFileSync(themeCss, result)
 }
@@ -109,4 +113,4 @@ buildsass.build = function (callback) {
   })
 }
 
-module.exports = buildsass
+export default buildsass

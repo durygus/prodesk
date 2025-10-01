@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var nodeMailer = require('nodemailer')
 
@@ -102,4 +105,4 @@ function createTransporter (callback) {
   })
 }
 
-module.exports = mailer
+export default mailer

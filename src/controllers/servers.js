@@ -27,4 +27,4 @@ serversController.get = function (req, res) {
   res.render('servers', content)
 }
 
-module.exports = serversController
+export default serversController

@@ -12,9 +12,12 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const async = require('async')
-const winston = require('../logger')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+import async from 'async'
+import winston from '../logger/index.js'
 const conversationSchema = require('../models/chat/conversation')
 const messageSchema = require('../models/chat/message')
 const messagesController = {}
@@ -249,4 +252,4 @@ function handleError (res, err) {
   }
 }
 
-module.exports = messagesController
+export default messagesController

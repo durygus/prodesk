@@ -12,14 +12,17 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const async = require('async')
-const _ = require('lodash')
-const winston = require('../logger')
+import async from 'async'
+import _ from 'lodash'
+import winston from '../logger/index.js'
+import path from 'path'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
 const userSchema = require('../models/user')
 const permissions = require('../permissions')
 const emitter = require('../emitter')
 const xss = require('xss')
-const path = require('path')
 
 const accountsController = {}
 
@@ -453,7 +456,6 @@ accountsController.uploadJSON = function (req, res) {
 
 accountsController.uploadImage = function (req, res) {
   const fs = require('fs')
-  const path = require('path')
   const Busboy = require('busboy')
   const busboy = Busboy({
     headers: req.headers,
@@ -552,4 +554,4 @@ accountsController.uploadImage = function (req, res) {
   req.pipe(busboy)
 }
 
-module.exports = accountsController
+export default accountsController

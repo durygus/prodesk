@@ -12,9 +12,12 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const async = require('async')
-const path = require('path')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+import async from 'async'
+import path from 'path'
 const passport = require('passport')
 const winston = require('winston')
 const pkg = require('../../package')
@@ -836,4 +839,4 @@ mainController.uploadPageLogo = function (req, res) {
   req.pipe(busboy)
 }
 
-module.exports = mainController
+export default mainController

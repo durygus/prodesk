@@ -1,7 +1,7 @@
 const async = require('async')
 const elasticsearch = require('@elastic/elasticsearch')
 const winston = require('../logger')
-const moment = require('moment-timezone')
+const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
 const database = require('../database')
 
 global.env = process.env.NODE_ENV || 'production'

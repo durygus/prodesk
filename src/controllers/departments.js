@@ -12,7 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const permissions = require('../permissions')
 const Department = require('../models/department')
 
@@ -36,4 +39,4 @@ departmentController.get = function (req, res) {
   return res.render('departments', content)
 }
 
-module.exports = departmentController
+export default departmentController

@@ -1,4 +1,4 @@
-const Winston = require('winston')
+import Winston from 'winston'
 
 const logger = Winston.createLogger({
   format: Winston.format.errors({ stack: true }),
@@ -25,4 +25,4 @@ const logger = Winston.createLogger({
   ]
 })
 
-module.exports = logger
+export default logger

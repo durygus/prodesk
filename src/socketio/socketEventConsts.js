@@ -87,4 +87,4 @@ exported.BACKUP_RESTORE_UI_SHOW_OVERLAY = '$trudesk:backup_restore:ui:show_overl
 exported.BACKUP_RESTORE_COMPLETE = '$trudesk:backup_restore:complete'
 exported.BACKUP_RESTORE_UI_COMPLETE = '$trudesk:backup_restore:ui:complete'
 
-module.exports = exported
+export default exported

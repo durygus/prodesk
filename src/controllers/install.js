@@ -12,14 +12,14 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const async = require('async')
-const path = require('path')
-const _ = require('lodash')
-const winston = require('../logger')
-const pkg = require('../../package')
-const Chance = require('chance')
-const Status = require('../models/ticketStatus')
-const counterSchema = require('../models/counters')
+import async from 'async'
+import path from 'path'
+import _ from 'lodash'
+import winston from '../logger/index.js'
+import pkg from '../../package.json' with { type: 'json' }
+import Chance from 'chance'
+import Status from '../models/ticketStatus.js'
+import counterSchema from '../models/counters.js'
 
 const installController = {}
 installController.content = {}
@@ -79,6 +79,12 @@ installController.mongotest = function (req, res) {
   })
 
   global.forks.push({ name: 'mongotest', fork: child })
+  
+  child.on('error', function (err) {
+    winston.error('MongoTest process error:', err)
+    return res.status(400).json({ success: false, error: err.message || err })
+  })
+  
   child.on('message', function (data) {
     if (data.error) return res.status(400).json({ success: false, error: data.error })
 
@@ -561,4 +567,4 @@ installController.restart = function (req, res) {
   })
 }
 
-module.exports = installController
+export default installController

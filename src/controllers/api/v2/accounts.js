@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const async = require('async')
 const winston = require('../../../logger')
@@ -509,4 +512,4 @@ accountsApi.updatePassword = async (req, res) => {
   }
 }
 
-module.exports = accountsApi
+export default accountsApi

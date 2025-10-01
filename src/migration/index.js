@@ -16,7 +16,7 @@ var _ = require('lodash')
 var async = require('async')
 var winston = require('../logger')
 var semver = require('semver')
-var moment = require('moment')
+var dayjs = require('dayjs')
 var version = require('../../package.json').version
 
 var SettingsSchema = require('../models/setting')

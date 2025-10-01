@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var async = require('async')
 var userSchema = require('../../../models/user')
@@ -154,4 +157,4 @@ rolesV1.delete = function (req, res) {
   )
 }
 
-module.exports = rolesV1
+export default rolesV1

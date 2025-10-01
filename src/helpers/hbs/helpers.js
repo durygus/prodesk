@@ -20,12 +20,12 @@
 'use strict'
 
 // node_modules
-const _ = require('lodash')
-const dayjs = require('dayjs')
-const timezone = require('dayjs/plugin/timezone')
-const utc = require('dayjs/plugin/utc')
-const duration = require('dayjs/plugin/duration')
-const relativeTime = require('dayjs/plugin/relativeTime')
+import _ from 'lodash'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
+import duration from 'dayjs/plugin/duration.js'
+import relativeTime from 'dayjs/plugin/relativeTime.js'
 
 dayjs.extend(timezone)
 dayjs.extend(utc)
@@ -834,11 +834,13 @@ helpers.hasPluginPerm = helpers.checkPlugin
 helpers.inArray = helpers.hasGroup
 
 // Export helpers
-module.exports.helpers = helpers
-module.exports.register = function (Handlebars) {
-  for (var helper in helpers) {
-    if (helpers.hasOwnProperty(helper)) {
-      Handlebars.registerHelper(helper, helpers[helper])
+export default {
+  helpers,
+  register: function (Handlebars) {
+    for (var helper in helpers) {
+      if (helpers.hasOwnProperty(helper)) {
+        Handlebars.registerHelper(helper, helpers[helper])
+      }
     }
   }
 }

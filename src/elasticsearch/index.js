@@ -12,6 +12,9 @@
 
  **/
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const path = require('path')
 const nconf = require('nconf')
@@ -19,7 +22,11 @@ const winston = require('../logger')
 const elasticsearch = require('@elastic/elasticsearch')
 const ESErrors = require('@elastic/elasticsearch').errors
 const emitter = require('../emitter')
-const moment = require('moment-timezone')
+const dayjs = require('dayjs')
+const timezone = require('dayjs/plugin/timezone')
+const utc = require('dayjs/plugin/utc')
+dayjs.extend(timezone)
+dayjs.extend(utc)
 const settingUtil = require('../settings/settingsUtil')
 
 const ES = {}
@@ -154,7 +161,7 @@ ES.setupHooks = () => {
         subject: ticket.subject,
         issue: ticket.issue,
         date: ticket.date,
-        dateFormatted: moment
+        dateFormatted: dayjs
           .utc(ticket.date)
           .tz(ES.timezone)
           .format('MMMM D YYYY'),
@@ -325,4 +332,4 @@ ES.checkConnection = async callback => {
   }
 }
 
-module.exports = ES
+export default ES

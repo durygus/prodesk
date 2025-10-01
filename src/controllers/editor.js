@@ -12,8 +12,11 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const path = require('path')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+import path from 'path'
 const fs = require('fs-extra')
 const Busboy = require('busboy')
 const templateSchema = require('../models/template')
@@ -179,4 +182,4 @@ editor.save = function (req, res) {
   )
 }
 
-module.exports = editor
+export default editor

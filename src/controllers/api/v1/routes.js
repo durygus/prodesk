@@ -12,9 +12,12 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const packagejson = require('../../../../package')
 
-module.exports = function (middleware, router, controllers) {
+export default function (middleware, router, controllers) {
   // Shorten consts
   const apiv1 = middleware.api
   const isAdmin = middleware.isAdmin

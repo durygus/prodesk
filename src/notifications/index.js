@@ -12,10 +12,13 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var winston = require('winston')
 var request = require('request')
 
-module.exports.pushNotification = function (tpsUsername, tpsApiKey, notification) {
+export const pushNotification = function (tpsUsername, tpsApiKey, notification) {
   var body = {
     title: notification.title,
     content: notification.content,
@@ -55,7 +58,7 @@ module.exports.pushNotification = function (tpsUsername, tpsApiKey, notification
   )
 }
 
-module.exports.init = function () {
+export const init = function () {
   // emitter.on('ticket:created', onTicketCreate);
   // emitter.on('notification:count:update', onNotificationCountUpdate);
 }

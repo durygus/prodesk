@@ -28,4 +28,4 @@ pluginsController.get = function (req, res) {
   res.render('plugins', content)
 }
 
-module.exports = pluginsController
+export default pluginsController

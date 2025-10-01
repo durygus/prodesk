@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 'use strict'
 
 const eventEmitter = new (require('events').EventEmitter)()
@@ -54,4 +57,4 @@ eventEmitter.any = function (events, callback) {
   }
 }
 
-module.exports = eventEmitter
+export default eventEmitter

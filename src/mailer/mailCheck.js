@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const async = require('async')
 const Imap = require('imap')
@@ -20,11 +23,11 @@ const simpleParser = require('mailparser').simpleParser
 const cheerio = require('cheerio')
 
 const emitter = require('../emitter')
-const userSchema = require('../models/user')
-const groupSchema = require('../models/group')
-const ticketTypeSchema = require('../models/tickettype')
-const statusSchema = require('../models').Status
-const Ticket = require('../models/ticket')
+const userSchema = require('../models/user').default
+const groupSchema = require('../models/group').default
+const ticketTypeSchema = require('../models/tickettype').default
+const statusSchema = require('../models').default.Status
+const Ticket = require('../models/ticket').default
 
 const mailCheck = {}
 mailCheck.inbox = []
@@ -413,4 +416,4 @@ function handleMessages (messages, done) {
 function openInbox (cb) {
   mailCheck.Imap.openBox('INBOX', cb)
 }
-module.exports = mailCheck
+export default mailCheck

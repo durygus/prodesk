@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const async = require('async')
 const logger = require('../../../logger')
@@ -275,4 +278,4 @@ ticketsV2.info.tags = async (req, res) => {
   }
 }
 
-module.exports = ticketsV2
+export default ticketsV2

@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const async = require('async')
 const mongoose = require('mongoose')
 const winston = require('winston')
@@ -701,4 +704,4 @@ userSchema.statics.getAdmins = function (obj, callback) {
     })
 }
 
-module.exports = mongoose.model(COLLECTION, userSchema)
+export default mongoose.model(COLLECTION, userSchema)

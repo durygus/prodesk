@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mongoose = require('mongoose')
 var _ = require('lodash')
 
@@ -121,4 +124,4 @@ conversationSchema.statics.getConversationsWithLimit = function (userId, limit, 
   })
 }
 
-module.exports = mongoose.model(COLLECTION, conversationSchema)
+export default mongoose.model(COLLECTION, conversationSchema)

@@ -12,9 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const nconf = require('nconf')
-const mongoose = require('mongoose')
-const winston = require('../logger')
+import nconf from 'nconf'
+import mongoose from 'mongoose'
+import winston from '../logger/index.js'
 
 const db = {}
 const mongoConnectionUri = {
@@ -65,7 +65,7 @@ let options = {
   connectTimeoutMS: 30000
 }
 
-module.exports.init = async function (callback, connectionString, opts) {
+const init = async function (callback, connectionString, opts) {
   if (connectionString) CONNECTION_URI = connectionString
   if (opts) options = opts
   options.dbName = mongoConnectionUri.database
@@ -99,5 +99,8 @@ module.exports.init = async function (callback, connectionString, opts) {
     })
 }
 
-module.exports.db = db
-module.exports.connectionuri = CONNECTION_URI
+export default {
+  init,
+  db,
+  connectionuri: CONNECTION_URI
+}

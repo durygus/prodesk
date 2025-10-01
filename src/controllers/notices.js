@@ -12,7 +12,10 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const noticeSchema = require('../models/notice')
 const permissions = require('../permissions')
 
@@ -87,4 +90,4 @@ noticesController.edit = function (req, res) {
   })
 }
 
-module.exports = noticesController
+export default noticesController

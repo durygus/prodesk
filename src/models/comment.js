@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mongoose = require('mongoose')
 
 var commentsSchema = mongoose.Schema({
@@ -21,4 +24,4 @@ var commentsSchema = mongoose.Schema({
   deleted: { type: Boolean, default: false, required: true }
 })
 
-module.exports = commentsSchema
+export default commentsSchema

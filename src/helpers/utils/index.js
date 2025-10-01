@@ -12,29 +12,29 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const xss = require('xss')
-const fs = require('fs')
-const winston = require('../../logger')
-const piexifjs = require('piexifjs')
+import _ from 'lodash'
+import xss from 'xss'
+import fs from 'fs'
+import winston from '../../logger/index.js'
+import piexifjs from 'piexifjs'
 
 const MAX_FIELD_TEXT_LENGTH = 255
 const MAX_SHORT_FIELD_TEXT_LENGTH = 25
 const MAX_EXTREME_TEXT_LENGTH = 2000
 
-module.exports.applyMaxTextLength = function (text) {
+export const applyMaxTextLength = function (text) {
   return text.toString().substring(0, MAX_FIELD_TEXT_LENGTH)
 }
 
-module.exports.applyMaxShortTextLength = function (text) {
+export const applyMaxShortTextLength = function (text) {
   return text.toString().substring(0, MAX_SHORT_FIELD_TEXT_LENGTH)
 }
 
-module.exports.applyExtremeTextLength = function (text) {
+export const applyExtremeTextLength = function (text) {
   return text.toString().substring(0, MAX_EXTREME_TEXT_LENGTH)
 }
 
-module.exports.sanitizeFieldPlainText = function (text) {
+export const sanitizeFieldPlainText = function (text) {
   return xss(text, {
     whileList: {},
     stripIgnoreTag: true,
@@ -42,7 +42,7 @@ module.exports.sanitizeFieldPlainText = function (text) {
   })
 }
 
-module.exports.stripExifData = function (path) {
+export const stripExifData = function (path) {
   try {
     const imgData = fs.readFileSync(path).toString('binary')
     const newImgData = piexifjs.remove(imgData)
@@ -52,11 +52,11 @@ module.exports.stripExifData = function (path) {
   }
 }
 
-module.exports.sendToSelf = function (socket, method, data) {
+export const sendToSelf = function (socket, method, data) {
   socket.emit(method, data)
 }
 
-module.exports._sendToSelf = function (io, socketId, method, data) {
+export const _sendToSelf = function (io, socketId, method, data) {
   _.each(io.sockets.sockets, function (socket) {
     if (socket.id === socketId) {
       socket.emit(method, data)
@@ -64,15 +64,15 @@ module.exports._sendToSelf = function (io, socketId, method, data) {
   })
 }
 
-module.exports.sendToAllConnectedClients = function (io, method, data) {
+export const sendToAllConnectedClients = function (io, method, data) {
   io.sockets.emit(method, data)
 }
 
-module.exports.sendToAllClientsInRoom = function (io, room, method, data) {
+export const sendToAllClientsInRoom = function (io, room, method, data) {
   io.sockets.in(room).emit(method, data)
 }
 
-module.exports.sendToUser = function (socketList, userList, username, method, data) {
+export const sendToUser = function (socketList, userList, username, method, data) {
   let userOnline = null
   _.forEach(userList, function (v, k) {
     if (k.toLowerCase() === username.toLowerCase()) {
@@ -91,7 +91,7 @@ module.exports.sendToUser = function (socketList, userList, username, method, da
   })
 }
 
-module.exports.sendToAllExcept = function (io, exceptSocketId, method, data) {
+export const sendToAllExcept = function (io, exceptSocketId, method, data) {
   _.each(io.sockets.sockets, function (socket) {
     if (socket.id !== exceptSocketId) {
       socket.emit(method, data)
@@ -99,7 +99,7 @@ module.exports.sendToAllExcept = function (io, exceptSocketId, method, data) {
   })
 }
 
-module.exports.disconnectAllClients = function (io) {
+export const disconnectAllClients = function (io) {
   Object.keys(io.sockets.sockets).forEach(function (sock) {
     io.sockets.sockets[sock].disconnect(true)
   })

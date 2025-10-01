@@ -12,14 +12,14 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const nconf = require('nconf')
-const jsStringEscape = require('js-string-escape')
-const settingSchema = require('../models/setting')
-const ticketTypeSchema = require('../models/tickettype')
-const roleSchema = require('../models/role')
-const roleOrderSchema = require('../models/roleorder')
-const statusSchema = require('../models/ticketStatus')
+import _ from 'lodash'
+import nconf from 'nconf'
+import jsStringEscape from 'js-string-escape'
+import settingSchema from '../models/setting.js'
+import ticketTypeSchema from '../models/tickettype.js'
+import roleSchema from '../models/role.js'
+import roleOrderSchema from '../models/roleorder.js'
+import statusSchema from '../models/ticketStatus.js'
 
 const util = {}
 
@@ -172,4 +172,4 @@ util.getSettings = async callback => {
   })
 }
 
-module.exports = util
+export default util

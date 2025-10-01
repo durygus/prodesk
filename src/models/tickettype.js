@@ -12,14 +12,14 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-var _ = require('lodash')
-var mongoose = require('mongoose')
-var utils = require('../helpers/utils')
+import _ from 'lodash'
+import mongoose from 'mongoose'
+import * as utils from '../helpers/utils/index.js'
 
-var COLLECTION = 'tickettypes'
+const COLLECTION = 'tickettypes'
 
 // Needed for Population
-require('./ticketpriority')
+import './ticketpriority.js'
 
 /**
  * TicketType Schema
@@ -122,4 +122,4 @@ ticketTypeSchema.methods.removePriority = function (priorityId, callback) {
   return callback(null, self)
 }
 
-module.exports = mongoose.model(COLLECTION, ticketTypeSchema)
+export default mongoose.model(COLLECTION, ticketTypeSchema)

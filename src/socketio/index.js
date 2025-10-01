@@ -12,7 +12,7 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-var _ = require('lodash')
+import _ from 'lodash'
 
 function sortByKeys (obj) {
   var keys = Object.keys(obj)
@@ -24,7 +24,7 @@ function sortByKeys (obj) {
   )
 }
 
-module.exports = {
+export default {
   utils: {
     sortByKeys: sortByKeys
   },

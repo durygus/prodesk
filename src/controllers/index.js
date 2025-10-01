@@ -12,25 +12,42 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const Controllers = {
-  install: require('./install'),
-  main: require('./main'),
-  tickets: require('./tickets'),
-  messages: require('./messages'),
-  servers: require('./servers'),
-  accounts: require('./accounts'),
-  groups: require('./groups'),
-  teams: require('./teams'),
-  departments: require('./departments'),
-  reports: require('./reports'),
-  notices: require('./notices'),
-  plugins: require('./plugins'),
-  settings: require('./settings'),
-  editor: require('./editor'),
-  backuprestore: require('./backuprestore'),
-  api: require('./api'),
+import install from './install.js'
+import main from './main.js'
+import tickets from './tickets.js'
+import messages from './messages.js'
+import servers from './servers.js'
+import accounts from './accounts.js'
+import groups from './groups.js'
+import teams from './teams.js'
+import departments from './departments.js'
+import reports from './reports.js'
+import notices from './notices.js'
+import plugins from './plugins.js'
+import settings from './settings.js'
+import editor from './editor.js'
+import backuprestore from './backuprestore.js'
+import api from './api.js'
+import debug from './debug.js'
 
-  debug: require('./debug')
+const Controllers = {
+  install,
+  main,
+  tickets,
+  messages,
+  servers,
+  accounts,
+  groups,
+  teams,
+  departments,
+  reports,
+  notices,
+  plugins,
+  settings,
+  editor,
+  backuprestore,
+  api,
+  debug
 }
 
-module.exports = Controllers
+export default Controllers

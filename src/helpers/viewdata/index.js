@@ -12,12 +12,12 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const async = require('async')
-const _ = require('lodash')
-const winston = require('../../logger')
-const moment = require('moment')
-const settingSchema = require('../../models/setting')
-const settingsUtil = require('../../settings/settingsUtil')
+import async from 'async'
+import _ from 'lodash'
+import winston from '../../logger/index.js'
+import dayjs from 'dayjs'
+import settingSchema from '../../models/setting.js'
+import settingsUtil from '../../settings/settingsUtil.js'
 
 const viewController = {}
 const viewdata = {}
@@ -242,7 +242,7 @@ viewController.getData = function (request, cb) {
           viewdata.noticeCookieName = undefined
 
           if (!_.isUndefined(data) && !_.isNull(data)) {
-            viewdata.noticeCookieName = data.name + '_' + moment(data.activeDate).format('MMMDDYYYY_HHmmss')
+            viewdata.noticeCookieName = data.name + '_' + dayjs(data.activeDate).format('MMMDDYYYY_HHmmss')
           }
 
           return callback()
@@ -747,4 +747,4 @@ viewController.getPluginsInfo = function (request, callback) {
   )
 }
 
-module.exports = viewController
+export default viewController

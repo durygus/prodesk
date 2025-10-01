@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const mongoose = require('mongoose')
 const _ = require('lodash')
 const utils = require('../../helpers/utils')
@@ -149,4 +152,4 @@ messageSchema.statics.getMostRecentMessage = function (convoId, callback) {
   })
 }
 
-module.exports = mongoose.model(COLLECTION, messageSchema)
+export default mongoose.model(COLLECTION, messageSchema)

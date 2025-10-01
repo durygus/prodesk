@@ -9,11 +9,14 @@
  ========================================================================
  **/
 
+import async from 'async'
+import path from 'path'
+import _ from 'lodash'
+import winston from '../logger/index.js'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
 const ticketSchema = require('../models/ticket')
-const async = require('async')
-const path = require('path')
-const _ = require('lodash')
-const winston = require('../logger')
 const groupSchema = require('../models/group')
 const departmentSchema = require('../models/department')
 const permissions = require('../permissions')
@@ -852,4 +855,4 @@ function handleError (res, err) {
   }
 }
 
-module.exports = ticketsController
+export default ticketsController

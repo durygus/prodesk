@@ -12,9 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-var mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
-var COLLECTION = 'counters'
+const COLLECTION = 'counters'
 
 var countersSchema = mongoose.Schema({
   _id: String,
@@ -29,4 +29,4 @@ countersSchema.statics.setCounter = function (counter, count, callback) {
   return this.collection.findOneAndUpdate({ _id: counter }, { $set: { next: count } },{upsert: true }, callback)
 }
 
-module.exports = mongoose.model(COLLECTION, countersSchema)
+export default mongoose.model(COLLECTION, countersSchema)

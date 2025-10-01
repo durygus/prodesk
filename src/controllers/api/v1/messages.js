@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const async = require('async')
 const _ = require('lodash')
 const winston = require('../../../logger')
@@ -346,4 +349,4 @@ apiMessages.deleteConversation = function (req, res) {
   })
 }
 
-module.exports = apiMessages
+export default apiMessages

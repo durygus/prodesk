@@ -12,6 +12,9 @@
 
  **/
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var async = require('async')
 var mongoose = require('mongoose')
@@ -127,4 +130,4 @@ departmentSchema.statics.getDepartmentsByGroup = function (groupId, callback) {
     .exec(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, departmentSchema)
+export default mongoose.model(COLLECTION, departmentSchema)

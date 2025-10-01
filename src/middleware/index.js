@@ -12,29 +12,44 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const path = require('path')
-const async = require('async')
-const express = require('express')
-const expressStaticGzip = require('express-static-gzip')
-const mongoose = require('mongoose')
-const APC = require('@handlebars/allow-prototype-access')
-const HandleBars = require('handlebars')
+import path from 'path'
+import { fileURLToPath } from 'url'
+import async from 'async'
+import express from 'express'
+import expressStaticGzip from 'express-static-gzip'
+import mongoose from 'mongoose'
+import APC from '@handlebars/allow-prototype-access'
+import HandleBars from 'handlebars'
 const insecureHandlebars = APC.allowInsecurePrototypeAccess(HandleBars)
-const hbs = require('express-hbs')
-const hbsHelpers = require('../helpers/hbs/helpers')
-const winston = require('../logger')
-const nconf = require('nconf')
-const flash = require('connect-flash')
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const session = require('express-session')
-const MongoStore = require('connect-mongo')
-const passportConfig = require('../passport')()
+import hbs from 'express-hbs'
+import hbsHelpers from '../helpers/hbs/helpers.js'
+import winston from '../logger/index.js'
+import nconf from 'nconf'
+import flash from 'connect-flash'
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import session from 'express-session'
+import MongoStore from 'connect-mongo'
+import { createRequire } from 'module'
+import middlewareModule from './middleware.js'
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+let passportConfig = null
+async function getPassportConfig() {
+  if (!passportConfig) {
+    const { default: passportModule } = await import('../passport/index.js')
+    passportConfig = passportModule()
+  }
+  return passportConfig
+}
 
 let middleware = {}
 
-module.exports = function (app, db, callback) {
-  middleware = require('./middleware')(app)
+export default function (app, db, callback) {
+  middleware = middlewareModule(app)
   app.disable('x-powered-by')
 
   app.set('views', path.join(__dirname, '../views/'))

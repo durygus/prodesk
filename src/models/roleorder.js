@@ -12,12 +12,12 @@
 
  **/
 
-var _ = require('lodash')
-var mongoose = require('mongoose')
+import _ from 'lodash'
+import mongoose from 'mongoose'
 
-var COLLECTION = 'role_order'
+const COLLECTION = 'role_order'
 
-var roleOrder = mongoose.Schema({
+const roleOrder = mongoose.Schema({
   order: [mongoose.Schema.Types.ObjectId]
 })
 
@@ -56,4 +56,4 @@ roleOrder.methods.removeFromOrder = function (_id, callback) {
   this.save(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, roleOrder, COLLECTION)
+export default mongoose.model(COLLECTION, roleOrder, COLLECTION)

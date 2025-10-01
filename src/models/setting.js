@@ -12,7 +12,7 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 const COLLECTION = 'settings'
 
@@ -68,4 +68,4 @@ settingSchema.statics.getSettingsByName = async function (names, callback) {
 
 settingSchema.statics.getSetting = settingSchema.statics.getSettingByName
 
-module.exports = mongoose.model(COLLECTION, settingSchema)
+export default mongoose.model(COLLECTION, settingSchema)

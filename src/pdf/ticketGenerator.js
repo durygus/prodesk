@@ -15,7 +15,7 @@
 const path = require('path')
 const PDFDocument = require('pdfkit')
 
-const moment = require('moment-timezone')
+const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
 const marked = require('marked')
 const convert = require('html-to-text').convert
 

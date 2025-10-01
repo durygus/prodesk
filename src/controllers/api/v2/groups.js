@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var apiUtils = require('../apiUtils')
 var Ticket = require('../../../models/ticket')
 var Group = require('../../../models/group')
@@ -105,4 +108,4 @@ apiGroups.delete = function (req, res) {
   })
 }
 
-module.exports = apiGroups
+export default apiGroups

@@ -14,7 +14,7 @@
 
 const _ = require('lodash')
 const async = require('async')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const winston = require('winston')
 
 const ticketSchema = require('../models/ticket')

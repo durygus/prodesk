@@ -12,9 +12,22 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+import path from 'path'
+
+const require = createRequire(import.meta.url)
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+
 var async = require('async')
 var _ = require('lodash')
-var moment = require('moment-timezone')
+const dayjs = require('dayjs')
+const timezone = require('dayjs/plugin/timezone')
+const utc = require('dayjs/plugin/utc')
+dayjs.extend(timezone)
+dayjs.extend(utc)
 var winston = require('../../../logger')
 var permissions = require('../../../permissions')
 var emitter = require('../../../emitter')
@@ -25,7 +38,7 @@ var apiTickets = {}
 
 function buildGraphData (arr, days, callback) {
   var graphData = []
-  var today = moment()
+  var today = dayjs()
     .hour(23)
     .minute(59)
     .second(59)
@@ -68,8 +81,8 @@ function buildAvgResponse (ticketArray, callback) {
   _.each(ticketArray, function (ticket) {
     if (_.isUndefined(ticket.comments) || _.size(ticket.comments) < 1) return
 
-    var ticketDate = moment(ticket.date)
-    var firstCommentDate = moment(ticket.comments[0].date)
+    var ticketDate = dayjs(ticket.date)
+    var firstCommentDate = dayjs(ticket.comments[0].date)
 
     var diff = firstCommentDate.diff(ticketDate, 'seconds')
     $ticketAvg.push(diff)
@@ -1718,7 +1731,7 @@ apiTickets.getTicketStatsForGroup = function (req, res) {
       },
       function (tickets, callback) {
         if (_.isEmpty(tickets)) return callback('Group has no tickets to report.')
-        var today = moment()
+        var today = dayjs()
           .hour(23)
           .minute(59)
           .second(59)
@@ -1730,7 +1743,7 @@ apiTickets.getTicketStatsForGroup = function (req, res) {
           return v.status === 3
         })
 
-        var firstDate = moment(_.first(tickets).date).subtract(30, 'd')
+        var firstDate = dayjs(_.first(tickets).date).subtract(30, 'd')
         var diffDays = today.diff(firstDate, 'days')
 
         buildGraphData(tickets, diffDays, function (graphData) {
@@ -1800,7 +1813,7 @@ apiTickets.getTicketStatsForUser = function (req, res) {
       },
       function (tickets, callback) {
         if (_.isEmpty(tickets)) return callback('User has no tickets to report.')
-        var today = moment()
+        var today = dayjs()
           .hour(23)
           .minute(59)
           .second(59)
@@ -1812,7 +1825,7 @@ apiTickets.getTicketStatsForUser = function (req, res) {
           return v.status === 3
         })
 
-        var firstDate = moment(_.first(tickets).date).subtract(30, 'd')
+        var firstDate = dayjs(_.first(tickets).date).subtract(30, 'd')
         var diffDays = today.diff(firstDate, 'days')
 
         buildGraphData(tickets, diffDays, function (graphData) {
@@ -2143,4 +2156,4 @@ apiTickets.restoreDeleted = function (req, res) {
   })
 }
 
-module.exports = apiTickets
+export default apiTickets

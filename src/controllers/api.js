@@ -13,6 +13,9 @@
  */
 
 // Sub APIs
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const apiTicketsV1 = require('./api/v1/tickets')
 const apiTagsV1 = require('./api/v1/tags')
 const apiNoticesV1 = require('./api/v1/notices')
@@ -54,4 +57,4 @@ apiController.v2.elasticsearch = require('./api/v2/elasticsearch')
 apiController.v2.mailer = require('./api/v2/mailer')
 apiController.v2.messages = require('./api/v2/messages')
 
-module.exports = apiController
+export default apiController

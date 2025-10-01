@@ -12,15 +12,24 @@
  *  Copyright (c) 2014-2022. All rights reserved.
  */
 
-const path = require('path')
-const { head, filter, flattenDeep, concat, uniq, uniqBy, map, chain } = require('lodash')
+import path from 'path'
+import { fileURLToPath } from 'url'
+import _ from 'lodash'
+import { createRequire } from 'module'
+
+const { head, filter, flattenDeep, concat, uniq, uniqBy, map, chain } = _
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const logger = require('../../logger')
-const Ticket = require('../../models/ticket')
-const User = require('../../models/user')
-const Setting = require('../../models/setting')
-const Department = require('../../models/department')
-const Notification = require('../../models/notification')
-const Template = require('../../models/template')
+const Ticket = require('../../models/ticket').default
+const User = require('../../models/user').default
+const Setting = require('../../models/setting').default
+const Department = require('../../models/department').default
+const Notification = require('../../models/notification').default
+const Template = require('../../models/template').default
 const Mailer = require('../../mailer')
 
 const Email = require('email-templates')
@@ -28,8 +37,8 @@ const templateDir = path.resolve(__dirname, '../..', 'mailer', 'templates')
 const permissions = require('../../permissions')
 
 const socketUtils = require('../../helpers/utils')
-const sharedVars = require('../../socketio/index').shared
-const socketEvents = require('../../socketio/socketEventConsts')
+const sharedVars = require('../../socketio/index').default.shared
+const socketEvents = require('../../socketio/socketEventConsts').default
 const util = require('../../helpers/utils')
 
 const sendSocketUpdateToUser = (user, ticket) => {
@@ -185,7 +194,7 @@ const saveNotification = async (user, ticket) => {
   await notification.save()
 }
 
-module.exports = async data => {
+export default async data => {
   const ticketObject = data.ticket
   const hostname = data.hostname
 

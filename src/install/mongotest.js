@@ -12,7 +12,7 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const database = require('../database')
+import database from '../database/index.js'
 
 global.env = process.env.NODE_ENV || 'production'
 ;(function () {

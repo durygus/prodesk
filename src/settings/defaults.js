@@ -12,12 +12,15 @@
 
  **/
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const fs = require('fs-extra')
 const path = require('path')
 const async = require('async')
 const winston = require('../logger')
-const moment = require('moment-timezone')
+const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
 
 const SettingsSchema = require('../models/setting')
 const PrioritySchema = require('../models/ticketpriority')

@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const _ = require('lodash')
 const winston = require('../logger')
 const roleSchema = require('../models/role')
@@ -177,7 +180,7 @@ function buildGrants (obj) {
   })
 }
 
-module.exports = {
+export default {
   register,
   flushRoles: register,
   canThis,

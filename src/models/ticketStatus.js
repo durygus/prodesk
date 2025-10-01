@@ -12,15 +12,17 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 // var _               = require('lodash');
-var mongoose = require('mongoose')
-require('moment-duration-format')
-var utils = require('../helpers/utils')
-const _ = require('lodash')
+import mongoose from 'mongoose'
+import * as utils from '../helpers/utils/index.js'
+import _ from 'lodash'
 
-var COLLECTION = 'statuses'
+const COLLECTION = 'statuses'
 
-var statusSchema = mongoose.Schema(
+const statusSchema = mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     htmlColor: { type: String, default: '#29b955' },
@@ -37,14 +39,14 @@ var statusSchema = mongoose.Schema(
   }
 )
 
-statusSchema.pre('save', function (next) {
+statusSchema.pre('save', async function (next) {
   this.name = utils.sanitizeFieldPlainText(this.name.trim())
 
   if (!_.isUndefined(this.uid) || this.uid) {
     return next()
   }
 
-  const c = require('./counters')
+  const { default: c } = await import('./counters.js')
 
   const self = this
   c.increment('status', function (err, res) {
@@ -80,4 +82,4 @@ statusSchema.statics.getStatusByUID = function (uid, callback) {
     .exec(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, statusSchema)
+export default mongoose.model(COLLECTION, statusSchema)

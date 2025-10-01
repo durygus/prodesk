@@ -12,9 +12,16 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-var winston = require('winston')
+import { createRequire } from 'module'
+import path from 'path'
 
-var path = require('path')
+const require = createRequire(import.meta.url)
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+
+var winston = require('winston')
 
 var fs = require('fs')
 
@@ -143,4 +150,4 @@ function restartServer () {
   })
 }
 
-module.exports = apiPlugins
+export default apiPlugins

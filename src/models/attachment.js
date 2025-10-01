@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mongoose = require('mongoose')
 var utils = require('../helpers/utils')
 
@@ -29,4 +32,4 @@ attachmentSchema.pre('save', function (next) {
   return next()
 })
 
-module.exports = attachmentSchema
+export default attachmentSchema

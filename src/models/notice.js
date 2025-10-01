@@ -9,6 +9,9 @@
  ========================================================================
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mongoose = require('mongoose')
 var utils = require('../helpers/utils')
 
@@ -72,4 +75,4 @@ noticeSchema.statics.getActive = function (callback) {
     .exec(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, noticeSchema)
+export default mongoose.model(COLLECTION, noticeSchema)

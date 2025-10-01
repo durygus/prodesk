@@ -9,6 +9,9 @@
  ========================================================================
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var mongoose = require('mongoose')
 var _ = require('lodash')
 
@@ -118,4 +121,4 @@ reportSchema.statics.getReportByStatus = function (status, callback) {
     .exec(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, reportSchema)
+export default mongoose.model(COLLECTION, reportSchema)

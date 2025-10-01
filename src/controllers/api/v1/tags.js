@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var async = require('async')
 var TagSchema = require('../../../models/tag')
@@ -186,4 +189,4 @@ apiTags.deleteTag = function (req, res) {
   )
 }
 
-module.exports = apiTags
+export default apiTags

@@ -12,13 +12,16 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const NodeCache = require('node-cache')
 const async = require('async')
 const path = require('path')
 const nconf = require('nconf')
 const _ = require('lodash')
 const winston = require('../logger')
-const moment = require('moment-timezone')
+const dayjs = require('dayjs'); const timezone = require('dayjs/plugin/timezone'); const utc = require('dayjs/plugin/utc'); dayjs.extend(timezone); dayjs.extend(utc)
 
 const truCache = {}
 let cache
@@ -259,4 +262,4 @@ truCache.refreshCache = function (callback) {
   })
 })()
 
-module.exports = truCache
+export default truCache

@@ -12,8 +12,11 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const async = require('async')
-const _ = require('lodash')
+import async from 'async'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+import _ from 'lodash'
 const userSchema = require('../models/user')
 const groupSchema = require('../models/group')
 const permissions = require('../permissions')
@@ -136,4 +139,4 @@ function handleError (res, err) {
   }
 }
 
-module.exports = groupsController
+export default groupsController

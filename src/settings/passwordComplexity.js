@@ -12,6 +12,9 @@
  *  Copyright (c) 2014-2022. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const { passwordStrength } = require('check-password-strength')
 const passwordComplexityOptions = [
   {
@@ -47,4 +50,4 @@ passwordComplexity.validate = password => {
   return !(response.id === 0 || response.id === 1)
 }
 
-module.exports = passwordComplexity
+export default passwordComplexity

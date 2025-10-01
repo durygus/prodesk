@@ -1,5 +1,5 @@
-var elasticsearch = require('../elasticsearch')
-var winston = require('../logger')
+import elasticsearch from '../elasticsearch/index.js'
+import winston from '../logger/index.js'
 
 global.env = process.env.NODE_ENV || 'production'
 ;(function () {

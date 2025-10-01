@@ -12,121 +12,133 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
-const nconf = require('nconf')
-  .argv()
-  .env()
+import _ from 'lodash'
+import nconf from 'nconf'
+nconf.argv().env()
 
-const express = require('express')
+import express from 'express'
+import http from 'http'
+import winston from './logger/index.js'
+import middleware from './middleware/index.js'
+import routes from './routes/index.js'
+
 const WebServer = express()
-const winston = require('./logger')
-const middleware = require('./middleware')
-const routes = require('./routes')
-const server = require('http').createServer(WebServer)
+const server = http.createServer(WebServer)
 let port = nconf.get('port') || 8118
 
-;(app => {
-  'use strict'
+let sessionStore
 
-  // Load Events
-  require('./emitter/events')
+const webserverInit = async (db, callback, p) => {
+  if (p !== undefined) port = p
+  middleware(WebServer, db, function (middlewareResult, store) {
+    sessionStore = store
+    routes(WebServer, middlewareResult)
 
-  module.exports.server = server
-  module.exports.app = app
-  module.exports.init = async (db, callback, p) => {
-    if (p !== undefined) port = p
-    middleware(app, db, function (middleware, store) {
-      module.exports.sessionStore = store
-      routes(app, middleware)
+    if (typeof callback === 'function') callback()
+  })
+}
 
-      if (typeof callback === 'function') callback()
+const webserverListen = (callback, p) => {
+  if (!_.isUndefined(p)) port = p
+
+  server.on('error', err => {
+    if (err.code === 'EADDRINUSE') {
+      winston.error('Address in use, exiting...')
+      server.close()
+    } else {
+      winston.error(err.message)
+      throw err
+    }
+  })
+
+  server.listen(port, '0.0.0.0', () => {
+    winston.info('Trudesk is now listening on port: ' + port)
+
+    if (_.isFunction(callback)) return callback()
+  })
+}
+
+const installServer = async function (callback) {
+  const controllers = (await import('./controllers/index.js')).default
+  const path = (await import('path')).default
+  const hbs = (await import('express-hbs')).default
+  const hbsHelpers = (await import('./helpers/hbs/helpers.js')).default
+  const bodyParser = (await import('body-parser')).default
+  const favicon = (await import('serve-favicon')).default
+  const { readFileSync } = await import('fs')
+  const { fileURLToPath } = await import('url')
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+  const pkg = JSON.parse(readFileSync(path.join(__dirname, '../package.json'), 'utf8'))
+  const routeMiddleware = (await import('./middleware/middleware.js')).default(WebServer)
+
+  WebServer.set('views', path.join(__dirname, './views/'))
+  WebServer.engine(
+    'hbs',
+    hbs.express3({
+      defaultLayout: path.join(__dirname, './views/layout/main.hbs'),
+      partialsDir: [path.join(__dirname, './views/partials/')]
     })
-  }
+  )
+  WebServer.set('view engine', 'hbs')
+  hbsHelpers.register(hbs.handlebars)
 
-  module.exports.listen = (callback, p) => {
-    if (!_.isUndefined(p)) port = p
+  WebServer.use('/assets', express.static(path.join(__dirname, '../public/uploads/assets')))
 
-    server.on('error', err => {
-      if (err.code === 'EADDRINUSE') {
-        winston.error('Address in use, exiting...')
-        server.close()
-      } else {
-        winston.error(err.message)
-        throw err
-      }
-    })
+  WebServer.use(express.static(path.join(__dirname, '../public')))
+  WebServer.use(favicon(path.join(__dirname, '../public/img/favicon.ico')))
+  WebServer.use(bodyParser.urlencoded({ extended: false }))
+  WebServer.use(bodyParser.json())
 
-    server.listen(port, '0.0.0.0', () => {
-      winston.info('Trudesk is now listening on port: ' + port)
+  const router = express.Router()
+  router.get('/healthz', (req, res) => {
+    res.status(200).send('OK')
+  })
+  router.get('/version', (req, res) => {
+    return res.json({ version: pkg.version })
+  })
 
-      if (_.isFunction(callback)) return callback()
-    })
-  }
+  router.get('/install', controllers.install.index)
+  router.post('/install', routeMiddleware.checkOrigin, controllers.install.install)
+  router.post('/install/elastictest', routeMiddleware.checkOrigin, controllers.install.elastictest)
+  router.post('/install/mongotest', routeMiddleware.checkOrigin, controllers.install.mongotest)
+  router.post('/install/existingdb', routeMiddleware.checkOrigin, controllers.install.existingdb)
+  router.post('/install/restart', routeMiddleware.checkOrigin, controllers.install.restart)
 
-  module.exports.installServer = function (callback) {
-    const router = express.Router()
-    const controllers = require('./controllers/index.js')
-    const path = require('path')
-    const hbs = require('express-hbs')
-    const hbsHelpers = require('./helpers/hbs/helpers')
-    const bodyParser = require('body-parser')
-    const favicon = require('serve-favicon')
-    const pkg = require('../package.json')
-    const routeMiddleware = require('./middleware/middleware')(app)
+  WebServer.use('/', router)
 
-    app.set('views', path.join(__dirname, './views/'))
-    app.engine(
-      'hbs',
-      hbs.express3({
-        defaultLayout: path.join(__dirname, './views/layout/main.hbs'),
-        partialsDir: [path.join(__dirname, './views/partials/')]
-      })
-    )
-    app.set('view engine', 'hbs')
-    hbsHelpers.register(hbs.handlebars)
+  WebServer.use((req, res) => {
+    return res.redirect('/install')
+  })
 
-    app.use('/assets', express.static(path.join(__dirname, '../public/uploads/assets')))
+  const { Server: SocketIO } = await import('socket.io')
+  new SocketIO(server)
 
-    app.use(express.static(path.join(__dirname, '../public')))
-    app.use(favicon(path.join(__dirname, '../public/img/favicon.ico')))
-    app.use(bodyParser.urlencoded({ extended: false }))
-    app.use(bodyParser.json())
+  const buildsass = (await import('./sass/buildsass.js')).default
+  buildsass.buildDefault(err => {
+    if (err) {
+      winston.error(err)
+      return callback(err)
+    }
 
-    router.get('/healthz', (req, res) => {
-      res.status(200).send('OK')
-    })
-    router.get('/version', (req, res) => {
-      return res.json({ version: pkg.version })
-    })
-
-    router.get('/install', controllers.install.index)
-    router.post('/install', routeMiddleware.checkOrigin, controllers.install.install)
-    router.post('/install/elastictest', routeMiddleware.checkOrigin, controllers.install.elastictest)
-    router.post('/install/mongotest', routeMiddleware.checkOrigin, controllers.install.mongotest)
-    router.post('/install/existingdb', routeMiddleware.checkOrigin, controllers.install.existingdb)
-    router.post('/install/restart', routeMiddleware.checkOrigin, controllers.install.restart)
-
-    app.use('/', router)
-
-    app.use((req, res) => {
-      return res.redirect('/install')
-    })
-
-    require('socket.io')(server)
-
-    require('./sass/buildsass').buildDefault(err => {
-      if (err) {
-        winston.error(err)
-        return callback(err)
-      }
-
-      if (!server.listening) {
-        server.listen(port, '0.0.0.0', () => {
-          return callback()
-        })
-      } else {
+    if (!server.listening) {
+      server.listen(port, '0.0.0.0', () => {
         return callback()
-      }
-    })
-  }
-})(WebServer)
+      })
+    } else {
+      return callback()
+    }
+  })
+}
+
+// Load Events
+await import('./emitter/events.js')
+
+export default {
+  server,
+  app: WebServer,
+  init: webserverInit,
+  listen: webserverListen,
+  installServer,
+  get sessionStore() { return sessionStore }
+}

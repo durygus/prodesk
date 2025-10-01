@@ -12,11 +12,14 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-const _ = require('lodash')
+import _ from 'lodash'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const fs = require('fs-extra')
-const path = require('path')
-const async = require('async')
-const moment = require('moment')
+import path from 'path'
+import async from 'async'
+const dayjs = require('dayjs')
 
 const backupRestore = {}
 
@@ -58,7 +61,7 @@ backupRestore.getBackups = function (req, res) {
       function (err) {
         if (err) return res.status(400).json({ success: false, error: err })
         fileWithStats = _.sortBy(fileWithStats, function (o) {
-          return new moment(o.time)
+          return dayjs(o.time)
         }).reverse()
         return res.json({ success: true, files: fileWithStats })
       }
@@ -269,4 +272,4 @@ backupRestore.uploadBackup = function (req, res) {
   req.pipe(busboy)
 }
 
-module.exports = backupRestore
+export default backupRestore

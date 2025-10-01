@@ -12,24 +12,27 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 const async = require('async')
 const mongoose = require('mongoose')
 const winston = require('../logger')
 const _ = require('lodash')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const sanitizeHtml = require('sanitize-html')
 // const redisCache          = require('../cache/rediscache');
 const xss = require('xss')
 const utils = require('../helpers/utils')
 
 // Needed - For Population
-const groupSchema = require('./group')
-const userSchema = require('./user')
-const commentSchema = require('./comment')
-const noteSchema = require('./note')
-const attachmentSchema = require('./attachment')
-const historySchema = require('./history')
-const statusSchema = require('./ticketStatus')
+const groupSchema = require('./group').default
+const userSchema = require('./user').default
+const commentSchema = require('./comment').default
+const noteSchema = require('./note').default
+const attachmentSchema = require('./attachment').default
+const historySchema = require('./history').default
+const statusSchema = require('./ticketStatus').default
 require('./tag')
 require('./ticketpriority')
 require('./tickettype')
@@ -743,7 +746,7 @@ ticketSchema.statics.getForCache = function (callback) {
   return new Promise((resolve, reject) => {
     ;(async () => {
       try {
-        const t365 = moment
+        const t365 = dayjs
           .utc()
           .hour(23)
           .minute(59)
@@ -1559,7 +1562,7 @@ ticketSchema.statics.getTopTicketGroups = function (timespan, top, callback) {
 
   const self = this
 
-  const today = moment
+  const today = dayjs
     .utc()
     .hour(23)
     .minute(59)
@@ -1710,4 +1713,4 @@ ticketSchema.statics.getDeleted = function (callback) {
     .exec(callback)
 }
 
-module.exports = mongoose.model(COLLECTION, ticketSchema)
+export default mongoose.model(COLLECTION, ticketSchema)

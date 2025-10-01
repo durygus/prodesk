@@ -12,6 +12,9 @@
 
  **/
 
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
 var _ = require('lodash')
 var async = require('async')
 var emitter = require('../../../emitter')
@@ -212,4 +215,4 @@ apiSettings.updateRoleOrder = function (req, res) {
   })
 }
 
-module.exports = apiSettings
+export default apiSettings
