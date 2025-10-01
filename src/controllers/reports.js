@@ -13,10 +13,7 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const permissions = require('../permissions')
+import permissions from '../permissions/index.js'
 
 const reportsController = {}
 
