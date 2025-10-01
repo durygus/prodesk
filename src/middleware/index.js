@@ -124,13 +124,13 @@ export default function (app, db, callback) {
 
         // CORS
         app.use(allowCrossDomain)
-        const csrf = require('../dependencies/csrf-td')
+        const csrf = require('../dependencies/csrf-td').default
         csrf.init()
         app.use(csrf.generateToken)
 
         // Maintenance Mode
         app.use(function (req, res, next) {
-          var settings = require('../settings/settingsUtil')
+          var settings = require('../settings/settingsUtil').default
           settings.getSettings(function (err, setting) {
             if (err) return winston.warn(err)
             var maintenanceMode = setting.data.settings.maintenanceMode
