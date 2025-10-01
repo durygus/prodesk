@@ -210,7 +210,9 @@ truCache.refreshCache = function (callback) {
     function (err) {
       if (err) return winston.warn(err)
       // Send to parent
-      process.send({ cache: cache })
+      if (process.send) {
+        process.send({ cache: cache })
+      }
 
       cache.flushAll()
 
