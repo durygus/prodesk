@@ -12,15 +12,12 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var _ = require('lodash')
-var mongoose = require('mongoose')
-var utils = require('../helpers/utils')
+import _ from 'lodash'
+import mongoose from 'mongoose'
+import utils from '../helpers/utils.js'
 
 // Refs
-require('./user')
+import './user.js'
 
 var COLLECTION = 'teams'
 
