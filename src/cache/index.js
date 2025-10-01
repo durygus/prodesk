@@ -123,7 +123,7 @@ truCache.refreshCache = function (callback) {
               })
             },
             function (done) {
-              const tagStats = require('./tagStats')
+              const tagStats = require('./tagStats').default
               async.parallel(
                 [
                   function (c) {
