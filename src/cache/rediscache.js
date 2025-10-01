@@ -12,12 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const _ = require('lodash')
-const redis = require('redis')
-const winston = require('winston')
+import _ from 'lodash'
+import redis from 'redis'
+import winston from 'winston'
 
 // const REDIS_PORT = process.env.REDIS_PORT || 6379;
 // const REDIS_HOST = process.env.REDIS_HOST || 'localhost';
