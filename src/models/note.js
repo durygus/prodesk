@@ -12,10 +12,7 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-var mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 var noteSchema = mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'accounts' },
