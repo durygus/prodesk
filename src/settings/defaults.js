@@ -318,7 +318,7 @@ function ticketTypeSettingDefault (callback) {
     }
 
     if (!setting) {
-      var ticketTypeSchema = require('../models/tickettype')
+      var ticketTypeSchema = require('../models/tickettype').default
       ticketTypeSchema.getTypes(function (err, types) {
         if (err) {
           winston.warn(err)
@@ -581,7 +581,7 @@ function addedDefaultPrioritiesToTicketTypes (callback) {
       },
       function (priorities, next) {
         priorities = _.sortBy(priorities, 'migrationNum')
-        var ticketTypeSchema = require('../models/tickettype')
+        var ticketTypeSchema = require('../models/tickettype').default
         ticketTypeSchema.getTypes(function (err, types) {
           if (err) return next(err)
 
