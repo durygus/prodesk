@@ -33,10 +33,10 @@ import Email from 'email-templates'
 const templateDir = path.resolve(__dirname, '../..', 'mailer', 'templates')
 import permissions from '../../permissions/index.js'
 
-import socketUtils from '../../helpers/utils.js'
+import * as socketUtils from '../../helpers/utils/index.js'
 import socketio from '../../socketio/index.js'
 import socketEvents from '../../socketio/socketEventConsts.js'
-import util from '../../helpers/utils.js'
+import * as util from '../../helpers/utils/index.js'
 
 const sharedVars = socketio.shared
 

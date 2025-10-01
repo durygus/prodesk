@@ -14,7 +14,7 @@
 
 import mongoose from 'mongoose'
 import _ from 'lodash'
-import utils from '../../helpers/utils.js'
+import * as utils from '../../helpers/utils/index.js'
 
 const COLLECTION = 'messages'
 

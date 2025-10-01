@@ -79,7 +79,7 @@ ES.testConnection = async callback => {
   })
 }
 
-ES.setupHooks = () => {
+ES.setupHooks = async () => {
   const ticketSchema = (await import('../models/ticket.js')).default
 
   emitter.on('ticket:deleted', async _id => {
@@ -296,7 +296,7 @@ ES.init = async callback => {
     global.esStatus = 'Initializing'
     ES.timezone = settings.timezone.value
 
-    ES.setupHooks()
+    await ES.setupHooks()
 
     if (process.env.ELATICSEARCH_URI) ES.host = process.env.ELATICSEARCH_URI
     else ES.host = settings.elasticSearchHost.value + ':' + settings.elasticSearchPort.value

@@ -25,7 +25,7 @@ function buildGraphData (arr, days, callback) {
   if (arr.length < 1) {
     return callback(graphData)
   }
-  const today = moment()
+  const today = dayjs()
     .hour(23)
     .minute(59)
     .second(59)
@@ -35,7 +35,7 @@ function buildGraphData (arr, days, callback) {
   }
 
   arr = _.map(arr, function (i) {
-    return moment(i.date).format('YYYY-MM-DD')
+    return dayjs(i.date).format('YYYY-MM-DD')
   })
 
   let counted = _.countBy(arr)
@@ -63,8 +63,8 @@ function buildAvgResponse (ticketArray, callback) {
     const ticket = ticketArray[i]
     if (ticket.comments === undefined || ticket.comments.length < 1) continue
 
-    const ticketDate = moment(ticket.date)
-    const firstCommentDate = moment(ticket.comments[0].date)
+    const ticketDate = dayjs(ticket.date)
+    const firstCommentDate = dayjs(ticket.comments[0].date)
 
     const diff = firstCommentDate.diff(ticketDate, 'seconds')
     $ticketAvg.push(diff)
@@ -78,7 +78,7 @@ function buildAvgResponse (ticketArray, callback) {
     0
   )
 
-  const tvt = moment.duration(Math.round(ticketAvgTotal / _.size($ticketAvg)), 'seconds').asHours()
+  const tvt = dayjs.duration(Math.round(ticketAvgTotal / _.size($ticketAvg)), 'seconds').asHours()
   cbObj.avgResponse = Math.floor(tvt)
 
   return callback(cbObj)
@@ -92,8 +92,8 @@ const init = function (tickets, callback) {
   ex.e180 = {}
   ex.e365 = {}
   ex.lifetime = {}
-  ex.lastUpdated = moment.utc()
-  const today = moment()
+  ex.lastUpdated = dayjs.utc()
+  const today = dayjs()
     .hour(23)
     .minute(59)
     .second(59)

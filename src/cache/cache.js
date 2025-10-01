@@ -31,8 +31,8 @@ cache.forceRefresh = function() {
   spawnCache()
 }
 
-function spawnCache () {
-  const fork = require('child_process').fork
+async function spawnCache () {
+  const { fork } = await import('child_process')
 
   const n = fork(path.join(__dirname, './index.js'), {
     execArgv: ['--max-old-space-size=' + cache.memLimit],

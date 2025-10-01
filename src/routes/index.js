@@ -455,13 +455,17 @@ export default function (app, middleware) {
   const fsModule = fs
   const pluginDir = path.join(__dirname, '../../plugins')
   if (!fsModule.existsSync(pluginDir)) fsModule.mkdirSync(pluginDir)
-  diveModule(pluginDir, { directories: true, files: false, recursive: false }, function (err, dir) {
+  diveModule(pluginDir, { directories: true, files: false, recursive: false }, async function (err, dir) {
     if (err) throw err
-    const pluginRoutes = (await import(path.join(dir, '/routes'))).default
-    if (pluginRoutes) {
-      pluginRoutes(router, middleware)
-    } else {
-      winston.warn('Unable to load plugin: ' + pluginDir)
+    try {
+      const pluginRoutes = (await import(path.join(dir, '/routes'))).default
+      if (pluginRoutes) {
+        pluginRoutes(router, middleware)
+      } else {
+        winston.warn('Unable to load plugin: ' + pluginDir)
+      }
+    } catch (error) {
+      winston.warn('Error loading plugin: ' + error.message)
     }
   })
 

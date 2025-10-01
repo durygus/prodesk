@@ -14,9 +14,11 @@
 import _ from 'lodash'
 import async from 'async'
 import winston from '../logger/index.js'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 import userSchema from '../models/user.js'
-import { shared as sharedVars, utils as sharedUtils } from './index.js'
+import socketio from './index.js'
+const sharedVars = socketio.shared
+const sharedUtils = socketio.utils
 import socketEventConst from './socketEventConsts.js'
 
 const events = {}
@@ -84,13 +86,13 @@ events.onSetUserOnlineStatus = function (socket) {
   })
 }
 
-function updateUsers () {
+async function updateUsers () {
   const sortedUserList = sharedUtils.sortByKeys(sharedVars.usersOnline)
-  _.forEach(sortedUserList, function (v) {
+  for (const v of sortedUserList) {
     const user = v.user
     const sockets = v.sockets
     if (user && sockets.length > 0) {
-      _.forEach(sockets, function (sock) {
+      for (const sock of sockets) {
         const socket = _.find(sharedVars.sockets, function (s) {
           return s.id === sock
         })
@@ -99,7 +101,7 @@ function updateUsers () {
           if (user.role.isAdmin || user.role.isAgent) {
             socket.emit('updateUsers', sortedUserList)
           } else {
-            const groupSchema = require('../models/group')
+            const groupSchema = (await import('../models/group.js')).default
             groupSchema.getAllGroupsOfUser(user._id, function (err, groups) {
               if (!err) {
                 let usersOfGroups = _.map(groups, function (g) {
@@ -154,9 +156,9 @@ function updateUsers () {
             })
           }
         }
-      })
+      }
     }
-  })
+  }
   // utils.sendToAllConnectedClients(io, 'updateUsers', sortedUserList)
 }
 
@@ -187,8 +189,8 @@ events.updateOnlineBubbles = function (socket) {
 async function updateConversationsNotifications (socket) {
   if (socket && socket.request && socket.request.user) {
     const user = socket.request.user
-    const Message = require('../models/chat/message')
-    const Conversation = require('../models/chat/conversation')
+    const Message = (await import('../models/chat/message.js')).default
+    const Conversation = (await import('../models/chat/conversation.js')).default
 
     Conversation.getConversationsWithLimit(user._id, null, (err, conversations) => {
       if (err) {
@@ -254,10 +256,10 @@ events.updateConversationsNotifications = function (socket) {
   })
 }
 
-function spawnOpenChatWindows (socket) {
+async function spawnOpenChatWindows (socket) {
   const loggedInAccountId = socket.request.user._id
-  const userSchema = require('../models/user')
-  const conversationSchema = require('../models/chat/conversation')
+  const userSchema = (await import('../models/user.js')).default
+  const conversationSchema = (await import('../models/chat/conversation.js')).default
   userSchema.getUser(loggedInAccountId, function (err, user) {
     if (err) return true
 
@@ -295,11 +297,11 @@ events.getOpenChatWindows = function (socket) {
   })
 }
 
-events.spawnChatWindow = function (socket) {
-  socket.on(socketEventConst.MESSAGES_SPAWN_CHAT_WINDOW, function ({ convoId }) {
+events.spawnChatWindow = async function (socket) {
+  socket.on(socketEventConst.MESSAGES_SPAWN_CHAT_WINDOW, async function ({ convoId }) {
     if (!socket.request.user || !convoId) return true
 
-    const User = require('../models/user')
+    const User = (await import('../models/user.js')).default
     User.getUser(socket.request.user._id, function (err, user) {
       if (err) return true
       if (user !== null) {
@@ -317,11 +319,11 @@ events.spawnChatWindow = function (socket) {
   })
 }
 
-events.saveChatWindow = function (socket) {
-  socket.on(socketEventConst.MESSAGES_SAVE_CHAT_WINDOW, function (data) {
+events.saveChatWindow = async function (socket) {
+  socket.on(socketEventConst.MESSAGES_SAVE_CHAT_WINDOW, async function (data) {
     const { userId, convoId, remove } = data
 
-    const User = require('../models/user')
+    const User = (await import('../models/user.js')).default
     User.getUser(userId, function (err, user) {
       if (err) return true
       if (user !== null) {
@@ -342,12 +344,12 @@ events.saveChatWindow = function (socket) {
   })
 }
 
-events.onChatMessage = function (socket) {
-  socket.on(socketEventConst.MESSAGES_SEND, function (data) {
+events.onChatMessage = async function (socket) {
+  socket.on(socketEventConst.MESSAGES_SEND, async function (data) {
     const to = data.to
     const from = data.from
 
-    const User = require('../models/user')
+    const User = (await import('../models/user.js')).default
 
     data.message.owner = {
       _id: data.message.owner._id,

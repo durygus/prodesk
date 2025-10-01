@@ -41,7 +41,7 @@ reportsController.overview = function (req, res) {
   return res.render('subviews/reports/overview', content)
 }
 
-reportsController.generate = function (req, res) {
+reportsController.generate = async function (req, res) {
   const user = req.user
   if (_.isUndefined(user) || !permissions.canThis(user.role, 'reports:create')) {
     req.flash('message', 'Permission Denied.')
@@ -57,7 +57,7 @@ reportsController.generate = function (req, res) {
   content.data.user = req.user
   content.data.common = req.viewdata
 
-  const prioritySchema = require('../models/ticketpriority')
+  const prioritySchema = (await import('../models/ticketpriority.js')).default
   prioritySchema.getPriorities(function (err, priorities) {
     if (err) {
       return res.render('error', {

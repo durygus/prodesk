@@ -14,7 +14,7 @@
 
 import _ from 'lodash'
 import mongoose from 'mongoose'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 import autopopulate from 'mongoose-autopopulate'
 
 var COLLECTION = 'groups'

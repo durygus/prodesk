@@ -19,14 +19,14 @@ import path from 'path'
 import userSchema from '../models/user.js'
 import permissions from '../permissions/index.js'
 import emitter from '../emitter/index.js'
-import xss from 'xss'
-import marked from 'marked'
+import { filterXSS as xss } from 'xss'
+import { marked } from 'marked'
 import settings from '../models/setting.js'
 import ldapModule from '../ldap/index.js'
-import csvModule from 'fast-csv'
+import * as csvModule from 'fast-csv'
 import BusboyModule from 'busboy'
 import fsModule from 'fs'
-import utilsModule from '../helpers/utils.js'
+import * as utilsModule from '../helpers/utils/index.js'
 
 const accountsController = {}
 

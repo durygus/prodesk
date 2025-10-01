@@ -163,15 +163,15 @@ settingsController.legal = function (req, res) {
   renderView(res, content)
 }
 
-settingsController.logs = function (req, res) {
+settingsController.logs = async function (req, res) {
   if (!checkPerms(req, 'settings:logs')) return res.redirect('/settings')
 
   const content = initViewContent('logs', req)
 
-  const fs = require('fs')
+  const fs = await import('fs')
 
 
-  const AnsiUp = require('ansi_up')
+  const AnsiUp = (await import('ansi_up')).default
 
   const ansiUp = new AnsiUp.default()
 

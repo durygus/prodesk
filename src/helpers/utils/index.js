@@ -13,7 +13,7 @@
  */
 
 import _ from 'lodash'
-import xss from 'xss'
+import { filterXSS as xss } from 'xss'
 import fs from 'fs'
 import winston from '../../logger/index.js'
 import piexifjs from 'piexifjs'

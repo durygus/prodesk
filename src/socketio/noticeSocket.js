@@ -13,7 +13,7 @@
  */
 
 import winston from 'winston'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 import noticeSchema from '../models/notice.js'
 import socketEventConst from '../socketio/socketEventConsts.js'
 

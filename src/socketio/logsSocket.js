@@ -14,14 +14,14 @@
 
 import { fileURLToPath } from 'url'
 import path from 'path'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 import AnsiUp from 'ansi_up'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const ansiUp = new AnsiUp.default()
-const Tail = require('tail').Tail
-const fs = require('fs-extra')
+import { Tail } from 'tail'
+import fs from 'fs-extra'
 
 const logFile = path.join(__dirname, '../../logs/error.log')
 

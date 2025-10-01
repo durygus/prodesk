@@ -17,7 +17,7 @@ import { Strategy as Local } from 'passport-local'
 import { Strategy as TotpStrategy } from 'passport-totp'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 
-import base32 from 'thirty-two'
+import { encode as base32Encode, decode as base32Decode } from 'thirty-two'
 import User from '../models/user.js'
 import nconf from 'nconf'
 
@@ -77,7 +77,7 @@ export default function () {
             user.tOTPPeriod = 30
           }
 
-          return done(null, base32.decode(user.tOTPKey).toString(), user.tOTPPeriod)
+          return done(null, base32Decode(user.tOTPKey).toString(), user.tOTPPeriod)
         })
       }
     )
@@ -93,7 +93,7 @@ export default function () {
         if (!user.tOTPKey) return done(false)
         if (!user.tOTPPeriod) user.tOTPPeriod = 30
 
-        return done(null, base32.decode(user.tOTPKey).toString(), user.tOTPPeriod)
+        return done(null, base32Decode(user.tOTPKey).toString(), user.tOTPPeriod)
       }
     )
   )

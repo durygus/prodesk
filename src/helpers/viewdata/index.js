@@ -34,6 +34,7 @@ import ticketPrioritySchema from '../../models/ticketpriority.js'
 import tagSchema from '../../models/tag.js'
 import dive from 'dive'
 import path from 'path'
+import fs from 'fs'
 
 const viewController = {}
 const viewdata = {}
@@ -721,18 +722,21 @@ viewController.getShowTourSetting = function (request, callback) {
 
 viewController.getPluginsInfo = function (request, callback) {
   // Load Plugin routes
-  const fs = await import('fs')
   const pluginDir = path.join(__dirname, '../../../plugins')
   if (!fs.existsSync(pluginDir)) fs.mkdirSync(pluginDir)
   const plugins = []
   dive(
     pluginDir,
     { directories: true, files: false, recursive: false },
-    function (err, dir) {
+    async function (err, dir) {
       if (err) throw err
-      delete require.cache[require.resolve(path.join(dir, '/plugin.json'))]
-      const pluginPackage = (await import(path.join(dir, '/plugin.json'))).default
-      plugins.push(pluginPackage)
+      try {
+        // В ES6 модулях нет require.cache, поэтому просто импортируем
+        const pluginPackage = (await import(path.join(dir, '/plugin.json'))).default
+        plugins.push(pluginPackage)
+      } catch (error) {
+        winston.warn('Error loading plugin package: ' + error.message)
+      }
     },
     function () {
       return callback(null, _.sortBy(plugins, 'name'))

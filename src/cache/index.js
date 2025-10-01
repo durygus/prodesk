@@ -30,19 +30,19 @@ let cache
 
 global.env = process.env.NODE_ENV || 'production'
 
-function loadConfig () {
+async function loadConfig () {
   nconf.file({
-    file: path.join(__dirname, '/../../config.yml'),
-    format: require('nconf-yaml')
+    file: path.join(path.dirname(new URL(import.meta.url).pathname), '/../../config.yml'),
+    format: (await import('nconf-yaml')).default
   })
 
   nconf.defaults({
-    base_dir: __dirname
+    base_dir: path.dirname(new URL(import.meta.url).pathname)
   })
 }
 
 let refreshTimer
-let lastUpdated = moment.utc().tz(process.env.TIMEZONE || 'America/New_York')
+let lastUpdated = dayjs.utc().tz(process.env.TIMEZONE || 'America/New_York')
 
 truCache.init = function (callback) {
   cache = new NodeCache({
@@ -53,7 +53,9 @@ truCache.init = function (callback) {
     winston.debug('Cache Loaded')
     // restartRefreshClock()
 
-    return callback()
+    if (_.isFunction(callback)) {
+      return callback()
+    }
   })
 }
 
@@ -70,11 +72,11 @@ function restartRefreshClock () {
   }, 55 * 60 * 1000)
 }
 
-truCache.refreshCache = function (callback) {
+truCache.refreshCache = async function (callback) {
   async.waterfall(
     [
-      function (done) {
-        const ticketSchema = require('../models/ticket').default
+      async function (done) {
+        const ticketSchema = (await import('../models/ticket.js')).default
         ticketSchema.getForCache(function (e, tickets) {
           if (e) return done(e)
           winston.debug('Pulled ' + tickets.length)
@@ -87,7 +89,8 @@ truCache.refreshCache = function (callback) {
         async.parallel(
           [
             function (done) {
-              const ticketStats = require('./ticketStats')
+              import('./ticketStats.js').then((ticketStatsModule) => {
+                const ticketStats = ticketStatsModule.default
               ticketStats(tickets, function (err, stats) {
                 if (err) return done(err)
                 const expire = 3600 // 1 hour
@@ -120,9 +123,11 @@ truCache.refreshCache = function (callback) {
 
                 return done()
               })
+              }).catch(done)
             },
             function (done) {
-              const tagStats = require('./tagStats')
+              import('./tagStats.js').then((tagStatsModule) => {
+                const tagStats = tagStatsModule.default
               async.parallel(
                 [
                   function (c) {
@@ -184,9 +189,11 @@ truCache.refreshCache = function (callback) {
                   return done(err)
                 }
               )
+              }).catch(done)
             },
             function (done) {
-              const quickStats = require('./quickStats')
+              import('./quickStats.js').then((quickStatsModule) => {
+                const quickStats = quickStatsModule.default
               quickStats(tickets, function (err, stats) {
                 if (err) return done(err)
 
@@ -197,6 +204,7 @@ truCache.refreshCache = function (callback) {
 
                 return done()
               })
+              }).catch(done)
             }
           ],
           function (err) {
@@ -209,7 +217,9 @@ truCache.refreshCache = function (callback) {
     function (err) {
       if (err) return winston.warn(err)
       // Send to parent
-      process.send({ cache: cache })
+      if (process.send) {
+        process.send({ cache: cache })
+      }
 
       cache.flushAll()
 
@@ -225,8 +235,8 @@ truCache.refreshCache = function (callback) {
   process.on('message', function (message) {
     if (message.name === 'cache:refresh') {
       winston.debug('Refreshing Cache....')
-      const now = moment()
-      const timeSinceLast = Math.round(moment.duration(now.diff(lastUpdated)).asMinutes())
+      const now = dayjs()
+      const timeSinceLast = Math.round(dayjs.duration(now.diff(lastUpdated)).asMinutes())
       if (timeSinceLast < 5) {
         const i = 5 - timeSinceLast
         winston.debug('Cannot refresh cache for another ' + i + ' minutes')
@@ -249,8 +259,9 @@ truCache.refreshCache = function (callback) {
     }
   })
 
-  loadConfig()
-  const db = require('../database').default
+  ;(async function () {
+    loadConfig()
+    const db = (await import('../database/index.js')).default
   db.init(function (err) {
     if (err) return winston.error(err)
     truCache.init(function (err) {
@@ -262,6 +273,7 @@ truCache.refreshCache = function (callback) {
       return process.exit(0)
     })
   })
+  })()
 })()
 
 export default truCache

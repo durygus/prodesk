@@ -14,7 +14,7 @@
 import _ from 'lodash'
 import async from 'async'
 import winston from '../logger/index.js'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 import socketEvents from './socketEventConsts.js'
 
 var events = {}
@@ -30,8 +30,8 @@ function eventLoop () {
   updateNotifications()
 }
 
-function updateNotifications () {
-  const notificationSchema = require('../models/notification')
+async function updateNotifications () {
+  const notificationSchema = (await import('../models/notification.js')).default
   // eslint-disable-next-line no-unused-vars
   for (const [_, socket] of io.of('/').sockets) {
     const notifications = {}
@@ -67,9 +67,9 @@ function updateNotifications () {
   }
 }
 
-function updateAllNotifications (socket) {
+async function updateAllNotifications (socket) {
   var notifications = {}
-  var notificationSchema = require('../models/notification')
+  var notificationSchema = (await import('../models/notification.js')).default
   notificationSchema.findAllForUser(socket.request.user._id, function (err, items) {
     if (err) return false
 
@@ -91,10 +91,10 @@ events.updateAllNotifications = function (socket) {
   })
 }
 
-events.markNotificationRead = function (socket) {
-  socket.on(socketEvents.NOTIFICATIONS_MARK_READ, function (_id) {
+events.markNotificationRead = async function (socket) {
+  socket.on(socketEvents.NOTIFICATIONS_MARK_READ, async function (_id) {
     if (_.isUndefined(_id)) return true
-    var notificationSchema = require('../models/notification')
+    var notificationSchema = (await import('../models/notification.js')).default
     notificationSchema.getNotification(_id, function (err, notification) {
       if (err) return true
 
@@ -109,15 +109,15 @@ events.markNotificationRead = function (socket) {
   })
 }
 
-events.clearNotifications = function (socket) {
-  socket.on(socketEvents.NOTIFICATIONS_CLEAR, function () {
+events.clearNotifications = async function (socket) {
+  socket.on(socketEvents.NOTIFICATIONS_CLEAR, async function () {
     var userId = socket.request.user._id
     if (_.isUndefined(userId)) return true
     var notifications = {}
     notifications.items = []
     notifications.count = 0
 
-    var notificationSchema = require('../models/notification')
+    var notificationSchema = (await import('../models/notification.js')).default
     notificationSchema.clearNotifications(userId, function (err) {
       if (err) return true
 

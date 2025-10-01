@@ -18,11 +18,11 @@ import path from 'path'
 import passport from 'passport'
 import winston from 'winston'
 import pkg from '../../package.json' with { type: 'json' }
-import xss from 'xss'
+import { filterXSS as xss } from 'xss'
 import settingsUtil from '../settings/settingsUtil.js'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
 import pkgModule from '../../package.json' with { type: 'json' }
-import markedModule from 'marked'
+import { marked as markedModule } from 'marked'
 import settingsModule from '../models/setting.js'
 import userSchemaModule from '../models/user.js'
 import ChanceModule from 'chance'
@@ -33,7 +33,7 @@ import settingsSchemaModule from '../models/setting.js'
 import fsModule from 'fs'
 import settingUtilModule from '../settings/settingsUtil.js'
 import BusboyModule from 'busboy'
-import utilsModule from '../helpers/utils.js'
+import * as utilsModule from '../helpers/utils/index.js'
 
 const limiterSlowBruteByIP = new RateLimiterMemory({
   keyPrefix: 'login_fail_ip_per_day',

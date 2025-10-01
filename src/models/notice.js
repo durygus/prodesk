@@ -10,7 +10,7 @@
  */
 
 import mongoose from 'mongoose'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 
 var COLLECTION = 'notices'
 

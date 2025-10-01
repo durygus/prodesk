@@ -14,7 +14,7 @@
 import _ from 'lodash'
 import async from 'async'
 import winston from '../logger/index.js'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 import UserSchema from '../models/user.js'
 import Role from '../models/role.js'
 import permissions from '../permissions/index.js'
@@ -250,7 +250,7 @@ events.onImportJSON = function (socket) {
   })
 }
 
-events.onImportLDAP = function (socket) {
+events.onImportLDAP = async function (socket) {
   socket.on('$trudesk:accounts:import:ldap', function (data) {
     const authUser = socket.request.user
     if (!permissions.canThis(authUser.role, 'accounts:import')) {
@@ -269,8 +269,8 @@ events.onImportLDAP = function (socket) {
 
     async.series(
       [
-        function (next) {
-          var settingSchema = require('../models/setting')
+        async function (next) {
+          var settingSchema = (await import('../models/setting.js')).default
           settingSchema.getSetting('role:user:default', function (err, setting) {
             if (err || !setting) {
               utils.sendToSelf(socket, '$trudesk:accounts:import:error', {

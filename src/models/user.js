@@ -18,8 +18,8 @@ import winston from 'winston'
 import bcrypt from 'bcrypt'
 import _ from 'lodash'
 import Chance from 'chance'
-import utils from '../helpers/utils.js'
-import base32 from 'thirty-two'
+import * as utils from '../helpers/utils/index.js'
+import { encode as base32Encode, decode as base32Decode } from 'thirty-two'
 import settingSchema from './setting.js'
 import GroupSchema from './group.js'
 import path from 'path'
@@ -159,7 +159,7 @@ userSchema.methods.generateL2Auth = function (callback) {
     ;(async () => {
       if (_.isUndefined(user.tOTPKey) || _.isNull(user.tOTPKey)) {
         const chance = new Chance()
-        const base32Module = base32
+        const base32Module = { encode: base32Encode, decode: base32Decode }
 
         const genOTPKey = chance.string({
           length: 7,

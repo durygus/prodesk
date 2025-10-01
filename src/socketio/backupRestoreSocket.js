@@ -12,8 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import utils from '../helpers/utils.js'
-import { shared as sharedVars } from './index.js'
+import * as utils from '../helpers/utils/index.js'
+import socketio from './index.js'
+const sharedVars = socketio.shared
 import socketEvents from './socketEventConsts.js'
 
 const events = {}

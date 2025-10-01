@@ -14,17 +14,17 @@
 import _ from 'lodash'
 import async from 'async'
 import winston from '../logger/index.js'
-import marked from 'marked'
+import { marked } from 'marked'
 import sanitizeHtml from 'sanitize-html'
-import utils from '../helpers/utils.js'
+import * as utils from '../helpers/utils/index.js'
 import emitter from '../emitter/index.js'
 import socketEvents from './socketEventConsts.js'
 import ticketSchema from '../models/ticket.js'
-const prioritySchema = require('../models/ticketpriority').default
-const userSchema = require('../models/user').default
-const roleSchema = require('../models/role').default
-const permissions = require('../permissions').default
-const xss = require('xss')
+import prioritySchema from '../models/ticketpriority.js'
+import userSchema from '../models/user.js'
+import roleSchema from '../models/role.js'
+import permissions from '../permissions/index.js'
+import { filterXSS as xss } from 'xss'
 
 var events = {}
 
