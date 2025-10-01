@@ -128,7 +128,7 @@ function rolesDefault (callback) {
         })
       },
       function (done) {
-        var roleOrderSchema = require('../models/roleorder')
+        var roleOrderSchema = require('../models/roleorder').default.default
         roleOrderSchema.getOrder(function (err, roleOrder) {
           if (err) return done(err)
           if (roleOrder) return done()
@@ -160,7 +160,7 @@ function rolesDefault (callback) {
 }
 
 function defaultUserRole (callback) {
-  var roleOrderSchema = require('../models/roleorder')
+  var roleOrderSchema = require('../models/roleorder').default
   roleOrderSchema.getOrderLean(function (err, roleOrder) {
     if (err) return callback(err)
     if (!roleOrder) return callback()
