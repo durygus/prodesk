@@ -13,11 +13,8 @@
  */
 
 import _ from 'lodash'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const permissions = require('../permissions')
-const Team = require('../models/team')
+import permissions from '../permissions/index.js'
+import Team from '../models/team.js'
 
 const teamController = {}
 
