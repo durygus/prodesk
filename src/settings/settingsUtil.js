@@ -20,6 +20,9 @@ import ticketTypeSchema from '../models/tickettype.js'
 import roleSchema from '../models/role.js'
 import roleOrderSchema from '../models/roleorder.js'
 import statusSchema from '../models/ticketStatus.js'
+import ticketPrioritySchema from '../models/ticketpriority.js'
+import templateSchema from '../models/template.js'
+import tagSchema from '../models/tag.js'
 
 const util = {}
 
@@ -133,18 +136,15 @@ util.getSettings = async callback => {
           type.priorities = _.sortBy(type.priorities, ['migrationNum', 'name'])
         })
 
-        const ticketPrioritySchema = require('../models/ticketpriority').default
         const priorities = await ticketPrioritySchema.getPriorities()
         content.data.priorities = _.sortBy(priorities, ['migrationNum', 'name'])
 
         const status = await statusSchema.getStatus()
         content.data.status = _.sortBy(status, 'order')
 
-        const templateSchema = require('../models/template')
         const templates = await templateSchema.find({})
         content.data.mailTemplates = _.sortBy(templates, 'name')
 
-        const tagSchema = require('../models/tag')
         const tagCount = await tagSchema.getTagCount()
         content.data.tags = { count: tagCount }
 
