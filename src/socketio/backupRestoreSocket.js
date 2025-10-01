@@ -12,12 +12,9 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-const utils = require('../helpers/utils')
-const sharedVars = require('./index').shared
-const socketEvents = require('./socketEventConsts').default
+import utils from '../helpers/utils.js'
+import { shared as sharedVars } from './index.js'
+import socketEvents from './socketEventConsts.js'
 
 const events = {}
 
