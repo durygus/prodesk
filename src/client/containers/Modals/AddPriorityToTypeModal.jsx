@@ -17,7 +17,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import some from 'lodash/some'
 import $ from 'jquery'
-import velocity from 'velocity'
+const velocity = require('velocity')
 
 import BaseModal from './BaseModal'
 import Button from 'components/Button'

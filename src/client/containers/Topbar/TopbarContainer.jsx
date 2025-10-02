@@ -25,14 +25,14 @@ import Avatar from 'components/Avatar/Avatar'
 import PDropdownTrigger from 'components/PDropdown/PDropdownTrigger'
 import OffCanvasTrigger from 'components/OffCanvas/OffCanvasTrigger'
 import NoticeBanner from 'components/NoticeBanner'
-import NotificationsDropdownPartial from './notificationsDropdown'
+import NotificationsDropdownPartial from './notificationsDropdown.jsx'
 
 import ProfileDropdownPartial from 'containers/Topbar/profileDropdown'
 import ConversationsDropdownPartial from 'containers/Topbar/conversationsDropdown'
 import OnlineUserListPartial from 'containers/Topbar/onlineUserList'
 
 import helpers from 'lib/helpers'
-import Cookies from 'jscookie'
+const Cookies = require('jscookie')
 import { NOTIFICATIONS_UPDATE, USERS_UPDATE, NOTICE_UI_SHOW, NOTICE_UI_CLEAR } from 'serverSocket/socketEventConsts'
 
 @observer

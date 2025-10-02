@@ -1,6 +1,6 @@
-const _ = require('lodash')
-const async = require('async')
-const axios = require('axios').default
+import _ from 'lodash'
+import async from 'async'
+import axios from 'axios'
 
 const SessionService = {}
 let instance = null
@@ -108,4 +108,5 @@ SessionService.forceUpdate = callback => {
 if (_.isUndefined(window.trudeskSessionService) || window.trudeskSessionService === null)
   window.trudeskSessionService = SessionService
 
-module.exports = SessionService
+// ES6 export
+export default SessionService

@@ -24,7 +24,16 @@ import PeityLine from 'components/Peity/peity-line'
 import MGraph from 'components/MGraph'
 import D3Pie from 'components/D3/d3pie'
 
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+// Настраиваем dayjs для работы с timezone
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+// Совместимость с moment
+const moment = dayjs
 import helpers from 'lib/helpers'
 
 @observer

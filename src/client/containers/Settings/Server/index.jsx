@@ -26,7 +26,7 @@ import Log from '../../../logger'
 import EnableSwitch from 'components/Settings/EnableSwitch'
 import { observer } from 'mobx-react'
 import { makeObservable, observable } from 'mobx'
-import UIKit from 'uikit'
+const UIKit = require('uikit')
 
 @observer
 class ServerSettingsController extends React.Component {

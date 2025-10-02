@@ -13,7 +13,7 @@
  */
 
 import { defineAction } from 'redux-define'
-import { PENDING, ERROR, SUCCESS } from './stateConstants'
+import { PENDING, ERROR, SUCCESS } from './stateConstants.js'
 
 // Shared
 export const INIT_SOCKET = defineAction('INIT_SOCKET', [SUCCESS, ERROR])

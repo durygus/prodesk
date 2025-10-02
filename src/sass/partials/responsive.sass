@@ -1,0 +1,143 @@
+/*!
+ /       .                             .o8                     oooo
+ /    .o8                             "888                     `888
+ /  .o888oo oooo d8b oooo  oooo   .oooo888   .ooooo.   .oooo.o  888  oooo
+ /    888   `888""8P `888  `888  d88' `888  d88' `88b d88(  "8  888 .8P'
+ /    888    888      888   888  888   888  888ooo888 `"Y88b.   888888.
+ /    888 .  888      888   888  888   888  888    .o o.  )88b  888 `88b.
+ /    "888" d888b     `V88V"V8P' `Y8bod88P" `Y8bod8P' 8""888P' o888o o888o
+ /  ========================================================================
+ /  Author:     AI Assistant
+ /  Updated:    26/09/25
+ /  Copyright (c) 2014-2019. All rights reserved.
+ /  Responsive design for mobile devices
+ /
+
+@import "../_settings.sass"
+
+// Mobile breakpoints
+$mobile-small: 480px
+$mobile-medium: 768px
+$tablet: 1024px
+
+// Responsive wrapper - always visible
+.responsive-wrapper
+  display: block !important
+
+// Mobile styles (phones)
+@media only screen and (max-width: #{$mobile-small})
+  
+  // Hide sidebar on small mobile
+  #sidebar
+    transform: translateX(-100%)
+    transition: transform 0.3s ease
+    z-index: 10000
+    
+    &.mobile-open
+      transform: translateX(0)
+  
+  // Adjust page content for mobile
+  #page-content
+    margin-left: 0 !important
+    padding: 10px
+    
+  // Make topbar mobile-friendly
+  #topbar
+    height: auto
+    min-height: 60px
+    padding: 10px
+    
+    .topbar-items
+      flex-direction: column
+      gap: 10px
+      
+  // Mobile tables
+  .uk-table
+    font-size: 12px
+    
+    th, td
+      padding: 8px 4px
+      
+  // Mobile forms
+  .uk-form
+    .uk-form-row
+      margin-bottom: 15px
+      
+    input, textarea, select
+      width: 100% !important
+      
+  // Mobile modals
+  .uk-modal-dialog
+    width: 95% !important
+    margin: 20px auto
+    
+  // Mobile cards
+  .truCard
+    margin: 10px 0
+    
+    .truCardHeader
+      padding: 15px
+      
+    .truCardContent
+      padding: 15px
+
+// Tablet styles
+@media only screen and (min-width: #{$mobile-small}) and (max-width: #{$mobile-medium})
+  
+  // Collapsible sidebar on tablets
+  #sidebar
+    width: 57px
+    
+    .sidebar-item-text
+      display: none
+      
+  #page-content
+    margin-left: 57px !important
+    
+  // Tablet tables
+  .uk-table
+    font-size: 13px
+
+// Large mobile / small tablet
+@media only screen and (min-width: #{$mobile-medium}) and (max-width: #{$tablet})
+  
+  #sidebar
+    width: 57px
+    
+  #page-content
+    margin-left: 57px !important
+
+// Mobile menu toggle button
+.mobile-menu-toggle
+  display: none
+  position: fixed
+  top: 15px
+  left: 15px
+  z-index: 10001
+  background: $accent_color
+  color: white
+  border: none
+  padding: 10px
+  border-radius: 4px
+  cursor: pointer
+  
+  @media only screen and (max-width: #{$mobile-small})
+    display: block
+
+// Responsive utilities
+.hide-mobile
+  @media only screen and (max-width: #{$mobile-small})
+    display: none !important
+    
+.show-mobile
+  display: none !important
+  @media only screen and (max-width: #{$mobile-small})
+    display: block !important
+    
+.mobile-full-width
+  @media only screen and (max-width: #{$mobile-small})
+    width: 100% !important
+    
+.mobile-center
+  @media only screen and (max-width: #{$mobile-small})
+    text-align: center !important

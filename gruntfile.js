@@ -1,4 +1,5 @@
-module.exports = function (grunt) {
+// Rename to .cjs for CommonJS compatibility
+// module.exports = function (grunt) {
   require('matchdep')
     .filterAll('grunt-*')
     .forEach(grunt.loadNpmTasks)

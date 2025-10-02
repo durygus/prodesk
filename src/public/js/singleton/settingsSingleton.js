@@ -1,5 +1,5 @@
-const _ = require('lodash')
-const axios = require('axios').default
+import _ from 'lodash'
+import axios from 'axios'
 
 const SettingsService = {}
 
@@ -37,4 +37,5 @@ SettingsService.refresh = callback => {
 if (_.isUndefined(window.trudeskSettingsService) || window.trudeskSettingsService === null)
   window.trudeskSettingsService = SettingsService
 
-module.exports = SettingsService
+// ES6 export
+export default SettingsService

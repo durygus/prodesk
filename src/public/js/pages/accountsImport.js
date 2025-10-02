@@ -12,18 +12,18 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-define('pages/accountsImport', [
-  'jquery',
-  'underscore',
-  'modules/helpers',
-  'velocity',
-  'uikit',
-  'modules/socket',
+// ES6 imports
+import $ from 'jquery'
+import _ from 'underscore'
+import helpers from 'modules/helpers.js'
+import velocity from 'velocity'
+import UIkit from 'uikit'
+import socket from 'modules/socket.js'
+import 'jquery_steps'
+import 'jquery_actual'
+import History from 'history'
 
-  'jquery_steps',
-  'jquery_actual',
-  'history'
-], function ($, _, helpers, velocity, UIkit, socket) {
+// Main accountsImportPage object
   var accountsImportPage = {}
   var state = {}
   accountsImportPage.init = function (callback) {
@@ -581,3 +581,6 @@ define('pages/accountsImport', [
 
   return accountsImportPage
 })
+
+// ES6 export
+export default accountsImportPage

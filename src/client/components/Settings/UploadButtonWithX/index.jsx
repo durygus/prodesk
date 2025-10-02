@@ -16,7 +16,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import $ from 'jquery'
-import UIkit from 'uikit'
+const UIkit = require('uikit')
 import helpers from 'lib/helpers'
 
 class UploadButtonWithX extends React.Component {

@@ -27,7 +27,7 @@ import api from 'api/index'
 import Button from 'components/Button'
 import SettingSubItem from 'components/Settings/SettingSubItem'
 import ButtonGroup from 'components/ButtonGroup'
-import EditPriorityPartial from './editPriorityPartial'
+import EditPriorityPartial from './editPriorityPartial.jsx'
 
 class TicketTypeBody extends React.Component {
   constructor (props) {

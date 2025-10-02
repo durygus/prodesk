@@ -12,7 +12,14 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-define('modules/ajaxify', ['jquery', 'lodash', 'modules/helpers', 'history'], function ($, _, helpers) {
+// ES6 imports
+import $ from 'jquery'
+import _ from 'lodash'
+import helpers from 'modules/helpers'
+const History = require('history')
+
+// Main ajaxify object
+function initAjaxify() {
   $(window).on('statechangecomplete', function () {
     // Remove Rogue Tethers
     $('body > .side-nav-sub.tether-element').each(function () {
@@ -52,7 +59,8 @@ define('modules/ajaxify', ['jquery', 'lodash', 'modules/helpers', 'history'], fu
 
   // Check to see if History.js is enabled for our Browser
   if (!History.enabled) {
-    return false
+    console.warn('History.js is not enabled, ajaxify will not work')
+    return
   }
 
   // Wait for Document
@@ -266,4 +274,15 @@ define('modules/ajaxify', ['jquery', 'lodash', 'modules/helpers', 'history'], fu
       }) // end ajax
     }) // end onStateChange
   }) // end onDomLoad
-})
+} // end initAjaxify
+
+// Initialize ajaxify
+initAjaxify()
+
+// ES6 export
+export default {
+  init: function() {
+    // Initialize ajaxify functionality
+    console.log('Ajaxify initialized')
+  }
+}

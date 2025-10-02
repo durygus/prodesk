@@ -18,6 +18,7 @@ import winston from '../logger/index.js'
 import semver from 'semver'
 import dayjs from 'dayjs'
 import pkg from '../../package.json' with { type: 'json' }
+const version = pkg.version
 import SettingsSchema from '../models/setting.js'
 import userSchema from '../models/user.js'
 import roleSchema from '../models/role.js'

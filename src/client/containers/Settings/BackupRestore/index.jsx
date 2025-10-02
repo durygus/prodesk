@@ -29,7 +29,7 @@ import Log from '../../../logger'
 import { BACKUP_RESTORE_SHOW_OVERLAY, BACKUP_RESTORE_COMPLETE } from 'serverSocket/socketEventConsts'
 
 import $ from 'jquery'
-import UIKit from 'uikit'
+const UIKit = require('uikit')
 import axios from 'axios'
 import helpers from 'lib/helpers'
 

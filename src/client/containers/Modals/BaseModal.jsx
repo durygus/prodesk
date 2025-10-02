@@ -16,7 +16,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import $ from 'jquery'
-import UIKit from 'uikit'
+const UIKit = require('uikit')
 
 import { hideModal, clearModal } from 'actions/common'
 

@@ -2113,8 +2113,6 @@ apiTickets.getOverdue = function (req, res) {
     }
 
     const ticketSchemaModel = ticketSchema
-    const departmentSchema = departmentSchemaModule
-    const groupSchema = groupSchemaModule
 
     async.waterfall(
       [

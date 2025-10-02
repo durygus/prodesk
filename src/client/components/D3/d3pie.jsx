@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { shuffle, map, zipObject } from 'lodash'
 
-import * as d3 from 'vendor/d3/d3.min'
+import * as d3 from 'd3'
 import 'd3pie'
 import * as c3 from 'c3'
 

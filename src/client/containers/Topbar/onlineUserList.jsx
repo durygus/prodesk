@@ -14,7 +14,16 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+// Настраиваем dayjs для работы с timezone
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+// Совместимость с moment
+const moment = dayjs
 import { observer } from 'mobx-react'
 import { observable, entries, makeObservable, configure } from 'mobx'
 import { isUndefined } from 'lodash'
@@ -24,7 +33,7 @@ import { startConversation } from 'lib2/chat'
 
 import OffCanvas from 'components/OffCanvas'
 
-import UIkit from 'uikit'
+const UIkit = require('uikit')
 
 @observer
 class OnlineUserListPartial extends React.Component {

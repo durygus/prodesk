@@ -630,9 +630,11 @@ function addedDefaultPrioritiesToTicketTypes (callback) {
   )
 }
 
-function mailTemplates (callback) {
-  const newTicket = newTicketModule
-  const passwordReset = passwordResetModule
+async function mailTemplates (callback) {
+  const newTicketModule = await import('./json/mailer-new-ticket.json', { with: { type: 'json' } })
+  const passwordResetModule = await import('./json/mailer-password-reset.json', { with: { type: 'json' } })
+  const newTicket = newTicketModule.default
+  const passwordReset = passwordResetModule.default
   var templateSchemaModel = templateSchema
   async.parallel(
     [
@@ -800,7 +802,7 @@ settingsDefaults.init = function (callback) {
         return normalizeTags(done)
       },
       function (done) {
-        return mailTemplates(done)
+        mailTemplates(done).catch(done)
       },
       function (done) {
         return elasticSearchConfToDB(done)

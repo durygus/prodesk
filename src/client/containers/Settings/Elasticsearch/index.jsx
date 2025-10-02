@@ -26,7 +26,7 @@ import EnableSwitch from 'components/Settings/EnableSwitch'
 import Log from '../../../logger'
 import axios from 'axios'
 import helpers from 'lib/helpers'
-import UIKit from 'uikit'
+const UIKit = require('uikit')
 
 @observer
 class ElasticsearchSettingsContainer extends React.Component {

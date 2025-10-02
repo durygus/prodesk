@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{data.common.csrfToken}}" />
     <link rel="icon" href="{{data.common.favicon}}" />
-    <link rel="stylesheet" href="/css/normalize.min.css"/>
+    <link rel="preload" href="/css/normalize.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link rel="preload" href="/css/plugins.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link rel="preload" href="/css/app.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
 
     {{#block 'css'}}
 
@@ -21,6 +23,15 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/vendor.js"></script>
+    <script>
+        // Fallback for browsers that don't support preload
+        if (!('relList' in document.createElement('link'))) {
+            var links = document.querySelectorAll('link[rel="preload"][as="style"]');
+            for (var i = 0; i < links.length; i++) {
+                links[i].rel = 'stylesheet';
+            }
+        }
+    </script>
 <!--    <script src="/js/truRequire.js"></script>-->
 </head>
 <body>

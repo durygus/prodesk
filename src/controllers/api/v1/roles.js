@@ -24,6 +24,8 @@ import emitter from '../../../emitter/index.js'
 var rolesV1 = {}
 
 rolesV1.get = function (req, res) {
+  const roleSchema = roleSchemaModule
+  const roleOrderSchema = roleOrderSchemaModule
 
   var roles = []
   var roleOrder = {}
@@ -31,7 +33,7 @@ rolesV1.get = function (req, res) {
   async.parallel(
     [
       function (done) {
-        roleSchmea.find({}, function (err, r) {
+        roleSchema.find({}, function (err, r) {
           if (err) return done(err)
 
           roles = r
@@ -62,7 +64,7 @@ rolesV1.create = function (req, res) {
   if (!name) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
   const roleSchema = roleSchemaModule
-  const roleOrder = roleOrderSchema
+  const roleOrder = roleOrderSchemaModule
 
   async.waterfall(
     [
@@ -136,7 +138,7 @@ rolesV1.delete = function (req, res) {
         roleSchema.deleteOne({ _id: _id }, done)
       },
       function (done) {
-        roleOrderSchema.getOrder(function (err, ro) {
+        roleOrderSchemaModule.getOrder(function (err, ro) {
           if (err) return done(err)
 
           ro.removeFromOrder(_id, done)

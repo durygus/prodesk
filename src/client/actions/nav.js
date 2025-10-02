@@ -13,7 +13,7 @@
  */
 
 import { createAction } from 'redux-actions'
-import { NAV_CHANGE } from './types'
+import { NAV_CHANGE } from './types.js'
 
 export const updateNavChange = createAction(NAV_CHANGE.ACTION, values => ({
   activeItem: values.activeItem,

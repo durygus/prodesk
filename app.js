@@ -253,6 +253,7 @@ async function dbCallback (err, db) {
     return start()
   }
 
+  // В Docker режиме проверяем флаг installed
   if (isDocker) {
     const s = await import('./src/models/setting.js')
     s.default.getSettingByName('installed', function (err, installed) {
@@ -265,7 +266,25 @@ async function dbCallback (err, db) {
       }
     })
   } else {
-    return launchServer(db)
+    // В нативном режиме тоже проверяем флаг installed, если есть config.yml
+    if (configExists) {
+      const s = await import('./src/models/setting.js')
+      s.default.getSettingByName('installed', function (err, installed) {
+        if (err) {
+          // Если ошибка при проверке, запускаем установку
+          return launchInstallServer()
+        }
+
+        if (!installed || !installed.value) {
+          return launchInstallServer()
+        } else {
+          return launchServer(db)
+        }
+      })
+    } else {
+      // Если нет config.yml, сразу запускаем установку
+      return launchInstallServer()
+    }
   }
 }
 

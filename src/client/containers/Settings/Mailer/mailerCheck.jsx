@@ -23,7 +23,7 @@ import SettingItem from 'components/Settings/SettingItem'
 import EnableSwitch from 'components/Settings/EnableSwitch'
 import SingleSelect from 'components/SingleSelect'
 
-import UIKit from 'uikit'
+const UIKit = require('uikit')
 import axios from 'axios'
 import helpers from 'lib/helpers'
 

@@ -21,8 +21,8 @@ import $ from 'jquery'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import toMarkdown from 'tomarkdown'
-import Easymde from 'easymde'
+const toMarkdown = require('tomarkdown')
+const Easymde = require('easymde')
 
 import 'inlineAttachment'
 import 'inputInlineAttachment'

@@ -16,7 +16,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import $ from 'jquery'
-import UIkit from 'uikit'
+const UIkit = require('uikit')
 
 class Menu extends React.Component {
   constructor (props) {

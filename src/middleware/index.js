@@ -29,7 +29,6 @@ import flash from 'connect-flash'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
-import MongoStore from 'connect-mongo'
 import middlewareModule from './middleware.js'
 import csrf from '../dependencies/csrf-td/index.js'
 import settingsUtil from '../settings/settingsUtil.js'
@@ -100,21 +99,27 @@ export default function (app, db, callback) {
   async.waterfall(
     [
       function (next) {
-        const sessionStore = MongoStore.create({
-          client: db.connection.getClient(),
-          autoReconnect: true
-        })
-        app.use(
-          session({
-            secret: sessionSecret,
-            cookie,
-            store: sessionStore,
-            saveUninitialized: false,
-            resave: false
+        import('connect-mongodb-session').then(({ default: connectMongoDBSession }) => {
+          const MongoStore = connectMongoDBSession(session)
+          const sessionStore = new MongoStore({
+            uri: nconf.get('mongo:uri'),
+            collection: 'sessions',
+            autoReconnect: true
           })
-        )
+          app.use(
+            session({
+              secret: sessionSecret,
+              cookie,
+              store: sessionStore,
+              saveUninitialized: false,
+              resave: false
+            })
+          )
 
-        next(null, sessionStore)
+          if (next) next(null, sessionStore)
+        }).catch(err => {
+          if (next) next(err)
+        })
       },
       function (store, next) {
         getPassportConfig().then(passport => {
@@ -162,7 +167,9 @@ export default function (app, db, callback) {
         )
 
           // Uncomment to enable plugins
-          return next(null, store)
+          if (next) next(null, store)
+        }).catch(err => {
+          if (next) next(err)
         })
         // global.plugins = [];
         // var dive = require('dive');

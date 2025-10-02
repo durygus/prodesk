@@ -14,32 +14,48 @@
 
 'use strict'
 
-define([
-  'jquery',
-  'underscore',
-  'lodash',
-  'moment',
-  'uikit',
-  'countup',
-  'waves',
-  'selectize',
-  'snackbar',
-  'jscookie',
-  'tether',
-  'formvalidator',
-  'async',
-  'easypiechart',
-  'chosen',
-  'velocity',
-  'peity',
-  'multiselect',
-  'moment_timezone',
-  'waypoints'
-], function ($, _, __, moment, UIkit, CountUp, Waves, Selectize, Snackbar, Cookies, Tether) {
-  var helpers = {}
-  var easingSwiftOut = [0.4, 0, 0.2, 1]
+// ES6 imports
+import $ from 'jquery'
+import _ from 'underscore'
+import __ from 'lodash'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import calendar from 'dayjs/plugin/calendar'
+// Импортируем vendor библиотеки как ES6 модули
+import UIkit from 'uikit'
+import { CountUp } from 'countup.js'
+const Waves = require('waves')
+import Selectize from 'selectize'
+import Snackbar from 'snackbar'
+import Cookies from 'js-cookie'
+import Tether from 'tether'
+import FormValidator from 'form-validator'
+import async from 'async'
+const EasyPieChart = require('easypiechart')
+const Chosen = require('chosen-js')
+import Velocity from 'velocity-animate'
+const Peity = require('peity')
+const MultiSelect = require('multiselect')
+const Waypoints = require('waypoints')
 
-  helpers.loaded = false
+// Настраиваем dayjs плагины
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(relativeTime)
+dayjs.extend(calendar)
+
+// Main helpers object
+const helpers = {}
+const easingSwiftOut = [0.4, 0, 0.2, 1]
+
+// Инициализируем Velocity как плагин jQuery
+if (typeof $ !== 'undefined' && typeof Velocity !== 'undefined') {
+  $.fn.velocity = Velocity
+}
+
+helpers.loaded = false
   helpers.init = function (reload) {
     const self = this
     if (reload) self.loaded = false
@@ -1039,7 +1055,7 @@ define([
       $.formUtils.addValidator({
         name: 'shortDate',
         validatorFunction: function (value) {
-          return moment(value, helpers.getShortDateFormat(), true).isValid()
+          return dayjs(value, helpers.getShortDateFormat(), true).isValid()
         },
         errorMessage: 'Invalid Date (' + helpers.getShortDateFormat() + ')',
         errorMessageKey: 'invalidShortDate'
@@ -1048,11 +1064,12 @@ define([
   }
 
   helpers.formvalidator = function () {
-    $.validate({
-      errorElementClass: 'uk-form-danger',
-      errorMessageClass: 'uk-form-danger'
-      // ignore: ':hidden:not([class~=selectized]),:hidden > .selectized,.selectize-control .selectize-input input'
-    })
+    if (typeof FormValidator !== 'undefined' && FormValidator.validate) {
+      FormValidator.validate({
+        errorElementClass: 'uk-form-danger',
+        errorMessageClass: 'uk-form-danger'
+      })
+    }
   }
 
   helpers.bindKeys = function () {
@@ -1492,17 +1509,7 @@ define([
   }
 
   helpers.getCalendarDate = function (date) {
-    moment.updateLocale('en', {
-      calendar: {
-        sameDay: '[Today at] LT',
-        lastDay: '[Yesterday at] LT',
-        nextDay: '[Tomorrow at] LT',
-        lastWeek: '[Last] ddd [at] LT',
-        nextWeek: 'ddd [at] LT',
-        sameElse: helpers.getShortDateFormat()
-      }
-    })
-    return moment
+    return dayjs
       .utc(date)
       .tz(this.getTimezone())
       .calendar()
@@ -1546,12 +1553,12 @@ define([
     const timezone = this.getTimezone()
 
     if (isUTC)
-      return moment(date)
+      return dayjs(date)
         .utc(true)
         .tz(timezone)
         .format(format)
 
-    return moment(date)
+    return dayjs(date)
       .tz(timezone)
       .format(format)
   }
@@ -2207,5 +2214,5 @@ define([
     }
   }
 
-  return helpers
-})
+// ES6 export
+export default helpers

@@ -12,6 +12,10 @@
 import async from 'async'
 import path from 'path'
 import _ from 'lodash'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 import winston from '../logger/index.js'
 import ticketSchema from '../models/ticket.js'
 import groupSchema from '../models/group.js'

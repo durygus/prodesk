@@ -15,16 +15,16 @@
 import _ from 'lodash'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import sass from 'sass'
+import * as sass from 'sass'
 import settingUtil from '../settings/settingsUtil.js'
 import fs from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-var buildsass = {}
+const buildsass = {}
 
-var sassOptionsDefaults = {
+const sassOptionsDefaults = {
   indentedSyntax: true,
   includePaths: [path.join(__dirname, '../../src/sass')],
   outputStyle: 'compressed'
@@ -61,7 +61,7 @@ function dynamicSass (entry, vars, success, error) {
 }
 
 function save (result) {
-  var themeCss = path.join(__dirname, '../../public/css/app.min.css')
+  const themeCss = path.join(__dirname, '../../public/css/app.min.css')
   fs.writeFileSync(themeCss, result)
 }
 
@@ -78,7 +78,12 @@ buildsass.buildDefault = function (callback) {
 }
 
 buildsass.build = function (callback) {
+  let callbackCalled = false
+
   settingUtil.getSettings(function (err, s) {
+    if (callbackCalled) return
+    callbackCalled = true
+
     if (!err && s) {
       var settings = s.data.settings
 

@@ -13,18 +13,18 @@
  */
 
 import { all } from 'redux-saga/effects'
-import CommonSaga from './common'
-import DashboardSaga from './dashboard'
-import SettingsSaga from './settings'
-import TicketSaga from './tickets'
-import AccountSaga from './accounts'
-import GroupSaga from './groups'
-import TeamSaga from './teams'
-import DepartmentSaga from './departments'
-import NoticeSage from './notices'
-import SearchSaga from './search'
-import MessagesSaga from './messages'
-import ReportsSaga from './reports'
+import CommonSaga from './common/index.js'
+import DashboardSaga from './dashboard/index.js'
+import SettingsSaga from './settings/index.js'
+import TicketSaga from './tickets/index.js'
+import AccountSaga from './accounts/index.js'
+import GroupSaga from './groups/index.js'
+import TeamSaga from './teams/index.js'
+import DepartmentSaga from './departments/index.js'
+import NoticeSage from './notices/index.js'
+import SearchSaga from './search/index.js'
+import MessagesSaga from './messages/index.js'
+import ReportsSaga from './reports/index.js'
 
 export default function * IndexSagas () {
   yield all([

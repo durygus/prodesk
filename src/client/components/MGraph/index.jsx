@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
-import d3 from 'd3'
-import MG from 'metricsgraphics'
+import * as d3 from 'd3'
+const MG = require('metricsgraphics')
 
 const noDataDiv = <div className='no-data-available-text'>No Data Available</div>
 

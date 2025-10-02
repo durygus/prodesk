@@ -34,7 +34,8 @@ import DepartmentSchema from '../models/department.js'
 import { fork } from 'child_process'
 import fs from 'fs'
 import YAML from 'yaml'
-import pm2 from 'pm2'
+// PM2 only needed in production
+let pm2 = null
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -166,11 +167,14 @@ installController.install = function (req, res) {
   const SettingsSchemaModule = SettingsSchema
 
   const data = req.body
+  
+  // Debug: Log the incoming data
+  winston.debug('Install data received:', JSON.stringify(data, null, 2))
 
   // Mongo
   const host = data['mongo[host]']
   const port = data['mongo[port]']
-  const database = data['mongo[database]']
+  const databaseName = data['mongo[database]']
   const username = data['mongo[username]']
   const password = data['mongo[password]']
 
@@ -195,16 +199,16 @@ installController.install = function (req, res) {
   
   // Handle empty username/password case
   if (!username || username.trim() === '') {
-    conuri = 'mongodb://' + host + ':' + port + '/' + database
+    conuri = 'mongodb://' + host + ':' + port + '/' + databaseName
   } else {
-    conuri = 'mongodb://' + username + ':' + dbPassword + '@' + host + ':' + port + '/' + database
+    conuri = 'mongodb://' + username + ':' + dbPassword + '@' + host + ':' + port + '/' + databaseName
   }
   
   if (port === '---') {
     if (!username || username.trim() === '') {
-      conuri = 'mongodb+srv://' + host + '/' + database
+      conuri = 'mongodb+srv://' + host + '/' + databaseName
     } else {
-      conuri = 'mongodb+srv://' + username + ':' + dbPassword + '@' + host + '/' + database
+      conuri = 'mongodb+srv://' + username + ':' + dbPassword + '@' + host + '/' + databaseName
     }
   }
 
@@ -496,7 +500,7 @@ installController.install = function (req, res) {
         )
       },
       function (next) {
-        if (!process.env.TRUDESK_DOCKER) return next()
+        // Создаем флаг установки в любом режиме (Docker и нативный)
         const S = SettingsSchemaModule
         const installed = new S({
           name: 'installed',
@@ -509,6 +513,7 @@ installController.install = function (req, res) {
             return next('DB Error: ' + err.message)
           }
 
+          winston.info('Installed flag saved successfully!')
           return next()
         })
       },
@@ -526,7 +531,7 @@ installController.install = function (req, res) {
             port: port,
             username: username,
             password: password,
-            database: database,
+            database: databaseName,
             shard: port === '---'
           },
           tokens: {
@@ -565,30 +570,21 @@ installController.restart = function (req, res) {
     return
   }
 
-  // В development режиме (без PM2) просто уведомляем пользователя
-  if (process.env.NODE_ENV === 'development') {
-    res.json({ 
-      success: true, 
-      message: 'Installation completed! Please manually restart the server: npm run start' 
-    })
-    return
-  }
-
-  // Production режим с PM2
-  const pm2Module = pm2
-  pm2Module.connect(function (err) {
+  // Обычная логика с PM2 для не-Docker окружения
+  const pm2 = require('pm2')
+  pm2.connect(function (err) {
     if (err) {
       winston.error(err)
       res.status(400).send(err)
       return
     }
-    pm2Module.restart('trudesk', function (err) {
+    pm2.restart('trudesk', function (err) {
       if (err) {
         res.status(400).send(err)
         return winston.error(err)
       }
 
-      pm2Module.disconnect()
+      pm2.disconnect()
       res.send()
     })
   })

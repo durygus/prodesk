@@ -15,7 +15,7 @@
 import { handleActions } from 'redux-actions'
 import { SHOW_MODAL, HIDE_MODAL, CLEAR_MODAL } from 'actions/types'
 
-import UIKit from 'uikit'
+const UIKit = require('uikit')
 
 const initialState = {
   modalType: null,

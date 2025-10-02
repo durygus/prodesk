@@ -12,7 +12,12 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-define('pages/logs', ['jquery', 'modules/socket', 'history'], function ($, socket) {
+// ES6 imports
+import $ from 'jquery'
+import socket from 'modules/socket'
+import History from 'history'
+
+// Main logsPage object
   var logsPage = {}
 
   logsPage.init = function (callback) {
@@ -31,3 +36,6 @@ define('pages/logs', ['jquery', 'modules/socket', 'history'], function ($, socke
 
   return logsPage
 })
+
+// ES6 export
+export default logsPage

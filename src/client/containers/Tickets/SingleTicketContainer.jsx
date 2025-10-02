@@ -57,8 +57,17 @@ import TruTabWrapper from 'components/TruTabs/TruTabWrapper'
 import axios from 'axios'
 import helpers from 'lib/helpers'
 import Log from '../../logger'
-import UIkit from 'uikit'
-import moment from 'moment'
+const UIkit = require('uikit')
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+// Настраиваем dayjs для работы с timezone
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+// Совместимость с moment
+const moment = dayjs
 import SpinLoader from 'components/SpinLoader'
 
 const fetchTicket = parent => {

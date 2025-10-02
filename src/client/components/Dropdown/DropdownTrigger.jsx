@@ -15,7 +15,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import UIkit from 'uikit'
+const UIkit = require('uikit')
 
 class DropdownTrigger extends React.Component {
   constructor (props) {

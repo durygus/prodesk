@@ -22,7 +22,7 @@ import Button from 'components/Button'
 import BaseModal from 'containers/Modals/BaseModal'
 
 import helpers from 'lib/helpers'
-import Cookies from 'jscookie'
+const Cookies = require('jscookie')
 
 class NoticeAlertModal extends React.Component {
   onConfirmClick (e) {

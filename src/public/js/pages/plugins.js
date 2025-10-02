@@ -12,7 +12,13 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-define('pages/plugins', ['jquery', 'modules/helpers', 'tether', 'history'], function ($, helpers, Tether) {
+// ES6 imports
+import $ from 'jquery'
+import helpers from 'modules/helpers'
+import Tether from 'tether'
+import History from 'history'
+
+// Main pluginsPage object
   var pluginsPage = {}
 
   pluginsPage.init = function (callback) {
@@ -52,3 +58,6 @@ define('pages/plugins', ['jquery', 'modules/helpers', 'tether', 'history'], func
 
   return pluginsPage
 })
+
+// ES6 export
+export default pluginsPage

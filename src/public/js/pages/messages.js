@@ -12,16 +12,17 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-define('pages/messages', [
-  'jquery',
-  'underscore',
-  'uikit',
-  'moment',
-  'modules/helpers',
-  'modules/socket',
-  'history',
-  'isinview'
-], function ($, _, UIKit, moment, helpers) {
+// ES6 imports
+import $ from 'jquery'
+import _ from 'underscore'
+import UIkit from 'uikit'
+import dayjs from 'dayjs'
+import helpers from 'modules/helpers'
+import socket from 'modules/socket'
+import History from 'history'
+import 'isinview'
+
+// Main messagesPage object
   const messagesPage = {}
 
   messagesPage.init = function (callback) {
@@ -378,3 +379,6 @@ define('pages/messages', [
 
   return messagesPage
 })
+
+// ES6 export
+export default messagesPage
