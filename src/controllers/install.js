@@ -75,6 +75,23 @@ installController.elastictest = function (req, res) {
 
 installController.mongotest = function (req, res) {
   const data = req.body
+  
+  // Логируем полученные данные
+  console.log('MongoDB test request data:', data);
+  console.log('Host:', data.host, 'Port:', data.port, 'Database:', data.database);
+  
+  // Validate required fields
+  if (!data.host || !data.port || !data.database) {
+    console.log('Validation failed - missing required fields');
+    return res.status(400).json({ 
+      success: false, 
+      error: { 
+        code: 'ERR_INVALID_URL', 
+        input: 'mongodb://' + (data.host || 'undefined') + ':' + (data.port || 'undefined') + '/' + (data.database || 'undefined')
+      } 
+    })
+  }
+  
   const dbPassword = encodeURIComponent(data.password || '')
   let CONNECTION_URI
   
@@ -560,7 +577,7 @@ installController.install = function (req, res) {
   )
 }
 
-installController.restart = function (req, res) {
+installController.restart = async function (req, res) {
   // В Docker окружении используем process.exit() для полного перезапуска контейнера
   if (process.env.TRUDESK_DOCKER) {
     res.json({ success: true, message: 'Restarting server...' })
@@ -571,7 +588,7 @@ installController.restart = function (req, res) {
   }
 
   // Обычная логика с PM2 для не-Docker окружения
-  const pm2 = require('pm2')
+  const pm2 = await import('pm2')
   pm2.connect(function (err) {
     if (err) {
       winston.error(err)

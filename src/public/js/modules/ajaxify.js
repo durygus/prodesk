@@ -16,7 +16,7 @@
 import $ from 'jquery'
 import _ from 'lodash'
 import helpers from 'modules/helpers'
-const History = require('history')
+import * as History from 'history'
 
 // Main ajaxify object
 function initAjaxify() {

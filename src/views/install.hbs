@@ -209,8 +209,8 @@
     </style>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/vendor.js"></script>
-    <script src="/js/truRequire.js"></script>
+    <script type="module" src="/js/vendor.js"></script>
+    <!-- truRequire.js больше не нужен - используем глобальные переменные -->
 </head>
 <body>
 <svg version="1.1" id="logosvg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -421,17 +421,39 @@
 </div>
 
 <script type="text/javascript">
-    window.truRequire(['jquery', 'snackbar', 'helpers'], function(loadedModules) {
-        var $ = loadedModules[0];
-        window.Snackbar = loadedModules[1];
-        var helpers = loadedModules[2];
+    // Ждем загрузки глобальных переменных
+    function waitForGlobals() {
+        if (window.$ && window.jQuery && window.$.fn) {
+            console.log('Глобальные переменные загружены');
+            initApp();
+        } else {
+            console.log('Ждем загрузки глобальных переменных...');
+            setTimeout(waitForGlobals, 100);
+        }
+    }
+    
+    function initApp() {
+        var $ = window.$ || window.jQuery;
+        var Snackbar = window.Snackbar;
+        var helpers = window.helpers;
+        
+        // Убеждаемся, что $.fn определен
+        if (!$ || !$.fn) {
+            console.error('jQuery не загружен правильно');
+            return;
+        }
 
         $(document).ready(function() {
             helpers.init();
             var $slides = $('.slides > .slide');
+            console.log('$slides тип:', typeof $slides, 'isArray:', Array.isArray($slides), 'isNodeList:', $slides instanceof NodeList);
             var totalSlides = 0;
             var activeSlide = 0;
+            
+            console.log('Найдено слайдов:', $slides.length);
+            
             $slides.each(function(idx) {
+                console.log('Обрабатываем слайд', idx, this);
                 $(this).addClass('slide-' + idx);
                 if (idx === 0)
                     $(this).addClass('activeSlide');
@@ -440,17 +462,29 @@
 
                 totalSlides++;
             });
+            
+            console.log('Всего слайдов:', totalSlides);
 
             $('button[data-next]').click(function() {
+                console.log('Кнопка нажата!', this);
                 if (isDoubleClicked($(this))) return;
                 var nextSlideIdx = activeSlide + 1;
-                var nextSlide = $('.slide-' + nextSlideIdx);
+                var nextSlide = $slides.eq(nextSlideIdx);
+                console.log('Следующий слайд:', nextSlideIdx, nextSlide.length);
+                console.log('nextSlide элемент:', nextSlide);
                 if (nextSlide.length > 0) {
-                    $(this).parents('.slide').fadeOut(300, function() {
-                        nextSlide.css({display: 'none'}).removeClass('hide');
-                        $(this).addClass('hide').removeClass('activeSlide');
+                    console.log('Переходим к следующему слайду!');
+                    var $currentSlide = $('.activeSlide');
+                    console.log('Текущий слайд:', $currentSlide);
+                    console.log('Следующий слайд:', nextSlide);
+                    
+                    $currentSlide.fadeOut(300, function() {
+                        console.log('fadeOut завершен для текущего слайда');
+                        $currentSlide.addClass('hide').removeClass('activeSlide');
+                        nextSlide.removeClass('hide').addClass('activeSlide');
+                        console.log('Классы обновлены, запускаем fadeIn');
                         nextSlide.fadeIn(300, function() {
-                            nextSlide.addClass('activeSlide');
+                            console.log('fadeIn завершен для следующего слайда');
                         });
                     });
                     activeSlide++;
@@ -460,13 +494,21 @@
             var mongoConnection = {{#if isDocker}}{
                 host: 'mongo',
                 port: '27017',
-                username: '',
-                password: '',
+                username: 'trudesk',
+                password: '#TruDesk1$',
                 database: 'herzen'
-            }{{else}}undefined{{/if}};
+            }{{else}}{
+                host: 'localhost',
+                port: '27017',
+                username: 'trudesk',
+                password: '#TruDesk1$',
+                database: 'trudesk'
+            }{{/if}};
             var elasticConnection = {{#if isDocker}}{
                 enable: false
-            }{{else}}undefined{{/if}};
+            }{{else}}{
+                enable: false
+            }{{/if}};
             var adminAccount = undefined;
 
             $('a#btn-skip-elastic').click(function(e) {
@@ -592,6 +634,8 @@
                 var $connectBtn = $(this);
                 $connectBtn.prop('disabled', true).text('Trying to connect...');
                 var mongoFormData = $('form#mongoConnection').serializeObject();
+                console.log('MongoDB form data:', mongoFormData);
+                console.log('Form elements:', $('form#mongoConnection')[0].elements);
                 $.ajax({
                     method: 'POST',
                     url: '/install/mongotest',
@@ -611,13 +655,37 @@
                         console.error(e);
                     },
                     success: function(data) {
+                        console.log('MongoDB test response:', data);
+                        console.log('typeof data:', typeof data);
+                        
+                        // Парсим JSON если приходит строка
+                        if (typeof data === 'string') {
+                            try {
+                                data = JSON.parse(data);
+                                console.log('Parsed JSON data:', data);
+                            } catch (e) {
+                                console.error('JSON parse error:', e);
+                                window.Snackbar.show({
+                                    text: 'Invalid response from server.',
+                                    actionTextColor: 'red'
+                                });
+                                $connectBtn.prop('disabled', false).text('Test Connection!');
+                                return;
+                            }
+                        }
+                        
+                        console.log('data.success:', data.success);
+                        console.log('typeof data.success:', typeof data.success);
+                        
                         if (!data.success) {
+                            console.log('MongoDB test failed - data.success is falsy');
                             window.Snackbar.show({
                                 text: 'Couldn\'t connect; make sure connection is correct.',
                                 actionTextColor: 'red'
                             });
                             $connectBtn.prop('disabled', false).text('Test Connection!');
                         } else {
+                            console.log('MongoDB test successful!');
                             mongoConnection = {
                                 host: mongoFormData['mongo-server'],
                                 port: mongoFormData['mongo-port'],
@@ -766,9 +834,21 @@
 
             $('button#restartTrudesk').click(function() {
                 var $restartSlide = $('#restartSlide');
-                $restartSlide.find('h2').html('Restarting...');
-                $restartSlide.find('p').css('text-align', 'center').html('I\'m restarting now... Give me about 10seconds!');
-                $restartSlide.find('button').hide();
+                // Получаем первый элемент из массива
+                var restartElement = $restartSlide[0];
+                if (restartElement) {
+                    // Используем нативные DOM методы
+                    var h2 = restartElement.querySelector('h2');
+                    var p = restartElement.querySelector('p');
+                    var button = restartElement.querySelector('button');
+                    
+                    if (h2) h2.innerHTML = 'Restarting...';
+                    if (p) {
+                        p.style.textAlign = 'center';
+                        p.innerHTML = 'I\'m restarting now... Give me about 10seconds!';
+                    }
+                    if (button) button.style.display = 'none';
+                }
 
                 setTimeout(function() {
                     window.location.reload();
@@ -832,13 +912,19 @@
             }
 
             function isDoubleClicked(element) {
+                console.log('Проверяем двойной клик для элемента:', element);
                 //if already clicked return TRUE to indicate this click is not allowed
-                if (element.data("isclicked")) return true;
+                if (element.data("isclicked")) {
+                    console.log('Элемент уже был нажат, блокируем');
+                    return true;
+                }
 
                 //mark as clicked for 1 second
                 element.data("isclicked", true);
+                console.log('Отмечаем элемент как нажатый');
                 setTimeout(function () {
                     element.removeData("isclicked");
+                    console.log('Снимаем отметку о нажатии');
                 }, 1000);
 
                 //return FALSE to indicate this click was allowed
@@ -858,14 +944,17 @@
                             v = o.value;
 
                     obj[n] = obj[n] === undefined ? v
-                            : $.isArray( obj[n] ) ? obj[n].concat( v )
+                            : Array.isArray( obj[n] ) ? obj[n].concat( v )
                                     : [ obj[n], v ];
                 });
 
                 return obj;
             };
         });
-    });
+    }
+    
+    // Запускаем ожидание глобальных переменных
+    waitForGlobals();
 </script>
 </body>
 </html>

@@ -164,8 +164,8 @@
         }
     </style>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/vendor.js"></script>
-    <script src="/js/truRequire.js"></script>
+    <script type="module" src="/js/vendor.js"></script>
+    <!-- truRequire заменен на глобальные переменные -->
 </head>
 <body>
 <div class="alert-message {{#if flash}} {{else}} hide {{/if}} {{#if flash.success}} green {{/if}}">
@@ -217,9 +217,20 @@
 </div>
 
 <script type="text/javascript">
-    window.truRequire(['jquery', 'helpers'], function(loadedModules) {
-        var $ = loadedModules[0];
-        var helpers = loadedModules[1];
+    // Ждем загрузки глобальных переменных
+    function waitForGlobals() {
+        if (window.$ && window.jQuery && window.$.fn) {
+            console.log('Глобальные переменные загружены в login');
+            initApp();
+        } else {
+            console.log('Ждем загрузки глобальных переменных в login...');
+            setTimeout(waitForGlobals, 100);
+        }
+    }
+    
+    function initApp() {
+        var $ = window.$ || window.jQuery;
+        var helpers = window.helpers;
         helpers.UI.inputs();
         helpers.UI.waves();
 
@@ -286,7 +297,10 @@
                 $('#login-username').focus();
             }, 700);
         });
-    });
+    }
+    
+    // Запускаем ожидание глобальных переменных
+    waitForGlobals();
 </script>
 </body>
 </html>

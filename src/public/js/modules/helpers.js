@@ -15,7 +15,7 @@
 'use strict'
 
 // ES6 imports
-import $ from 'jquery'
+// import $ from 'jquery' // Используем window.$ из vendor.js
 import _ from 'underscore'
 import __ from 'lodash'
 import dayjs from 'dayjs'
@@ -26,19 +26,19 @@ import calendar from 'dayjs/plugin/calendar'
 // Импортируем vendor библиотеки как ES6 модули
 import UIkit from 'uikit'
 import { CountUp } from 'countup.js'
-const Waves = require('waves')
+import Waves from 'waves'
 import Selectize from 'selectize'
 import Snackbar from 'snackbar'
 import Cookies from 'js-cookie'
 import Tether from 'tether'
-import FormValidator from 'form-validator'
+// import FormValidator from 'form-validator' // Закомментировано из-за проблем с jsdom
 import async from 'async'
-const EasyPieChart = require('easypiechart')
-const Chosen = require('chosen-js')
-import Velocity from 'velocity-animate'
-const Peity = require('peity')
-const MultiSelect = require('multiselect')
-const Waypoints = require('waypoints')
+import EasyPieChart from 'easypiechart'
+import * as Chosen from 'chosen-js'
+import * as Velocity from 'velocity-animate'
+import * as Peity from 'peity'
+import * as MultiSelect from 'multiselect'
+import * as Waypoints from 'waypoints'
 
 // Настраиваем dayjs плагины
 dayjs.extend(utc)
@@ -1064,12 +1064,13 @@ helpers.loaded = false
   }
 
   helpers.formvalidator = function () {
-    if (typeof FormValidator !== 'undefined' && FormValidator.validate) {
-      FormValidator.validate({
-        errorElementClass: 'uk-form-danger',
-        errorMessageClass: 'uk-form-danger'
-      })
-    }
+    // Закомментировано из-за проблем с jsdom
+    // if (typeof FormValidator !== 'undefined' && FormValidator.validate) {
+    //   FormValidator.validate({
+    //     errorElementClass: 'uk-form-danger',
+    //     errorMessageClass: 'uk-form-danger'
+    //   })
+    // }
   }
 
   helpers.bindKeys = function () {

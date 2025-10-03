@@ -1,88 +1,65 @@
-// Vendor entry point for Vite
-// Импортируем основные библиотеки, которые использовались в webpack
+// Vendor entry point for Vite - Упрощенная версия
+// Только необходимые импорты без проблемных модулей
 
-// Core libraries
-import $ from 'jquery'
-import _ from 'underscore'
+// Vanilla JS утилиты вместо jQuery
+import { $, jQuery, Cookies } from './utils/vanilla-utils.js'
+
+// СРАЗУ устанавливаем глобальные переменные для совместимости
+window.$ = $
+window.jQuery = jQuery
+window.Cookies = Cookies
+
+// Устанавливаем fn для jQuery
+window.jQuery.fn = jQuery.fn
+window.$.fn = jQuery.fn
+
+console.log('Глобальные переменные установлены в vendor.js:', {
+  '$': typeof window.$,
+  'jQuery': typeof window.jQuery,
+  '$.fn': typeof window.$.fn
+});
+
+// Простые импорты без плагинов
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import duration from 'dayjs/plugin/duration'
-import handlebars from 'handlebars'
 
-// Настраиваем dayjs
-dayjs.extend(utc)
-dayjs.extend(timezone)
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
+// Устанавливаем остальные глобальные переменные
+window._ = window._ || {} // Заглушка для Underscore
+window.Handlebars = window.Handlebars || {} // Заглушка для Handlebars
 
 // Совместимость с существующим кодом
 window.moment = dayjs
 window.dayjs = dayjs
-window.$ = $
-window.jQuery = $
-window._ = _
-window.Handlebars = handlebars
+
+// Helpers (заглушка для совместимости)
+window.helpers = {
+  init: function() {
+    console.log('Helpers initialized');
+  },
+  UI: {
+    inputs: {
+      // Заглушка для UI.inputs
+      init: function() {
+        console.log('UI.inputs initialized');
+      }
+    }
+  }
+}
+
+// Snackbar (заглушка для совместимости)
+window.Snackbar = {
+  show: function(options) {
+    console.log('Snackbar.show:', options);
+    // Простое уведомление в консоль
+    if (options.text) {
+      console.log('📢 ' + options.text);
+    }
+  }
+}
 
 // Modernizr (оставляем как vendor файл)
 import './vendor/modernizr/modernizr.js'
 
-// jQuery plugins
-import './vendor/jquery/jquery.easing.js'
-import './vendor/jquery/jquery.scrollTo.min.js'
-import './plugins/jquery.custom.js'
-
-// DataTables
-import './vendor/datatables/jquery.dataTables.js'
-import './vendor/datatables/dataTables.responsive.js'
-import './vendor/datatables/dataTables.grouping.js'
-import './vendor/datatables/dataTables.ipaddress.js'
-
 // UI Libraries
-import './vendor/uikit/js/uikit_combined.min.js'
-import './vendor/chosen/chosen.jquery.min.js'
-import './vendor/pace/pace.min.js'
+import UIkit from 'uikit'
 
-// Utility libraries
-import './vendor/async/async.js'
-import './vendor/jscookie/js.cookie.js'
-import './vendor/history/jquery.history.js'
-
-// Charts and visualization
-import * as d3 from 'd3'
-import * as c3 from 'c3'
-
-// Совместимость с существующим кодом
-window.d3 = d3
-window.c3 = c3
-import './vendor/metricsgraphics/metricsgraphics.min.js'
-import './vendor/d3pie/d3pie.min.js'
-import './vendor/peity/jquery.peity.min.js'
-import './vendor/countup/countUp.min.js'
-
-// Form and input libraries
-import './vendor/selectize/selectize.js'
-import './vendor/multiselect/js/jquery.multi-select.js'
-import './vendor/formvalidator/jquery.form-validator.js'
-import './vendor/simplecolorpicker/jquery.simplecolorpicker.js'
-
-// Other utilities
-import './vendor/velocity/velocity.min.js'
-import './vendor/waves/waves.js'
-import './vendor/waypoints/jquery.waypoints.js'
-import './vendor/qrcode/jquery.qrcode.min.js'
-import './vendor/tether/tether.min.js'
-import './vendor/shepherd/js/shepherd.min.js'
-import './vendor/easymde/dist/easymde.min.js'
-import './vendor/grapesjs/grapes.min.js'
-
-// Custom plugins
-import './plugins/autogrow.js'
-import './plugins/jquery.steps.js'
-import './plugins/jquery.actual.js'
-import './plugins/jquery.isinview.js'
-import './plugins/jquery.documentsize.js'
-import './plugins/snackbar.js'
-
-console.log('Vendor libraries loaded via Vite');
+console.log('Vendor libraries loaded via Vite - v3.5 (Simplified)');

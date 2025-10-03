@@ -20,7 +20,7 @@ if (typeof global !== 'undefined') {
 }
 
 // ES6 imports
-import $ from 'jquery'
+// import $ from 'jquery' // Убрано - используем Vanilla JS из vendor.js
 import helpers from 'modules/helpers.js'
 import async from 'async'
 import SessionService from 'singleton/sessionSingleton.js'
@@ -28,13 +28,9 @@ import SettingsService from 'singleton/settingsSingleton.js'
 import _ from 'lodash'
 import UIkit from 'uikit'
 import ajaxify from 'modules/ajaxify.js'
-const pace = require('pace')
+import * as pace from 'pace'
 
-// Убеждаемся, что jQuery доступен глобально
-if (typeof window !== 'undefined') {
-  window.$ = $
-  window.jQuery = $
-}
+// jQuery уже доступен глобально из vendor.js (Vanilla JS реализация)
 
 $(document).ready(function () {
   // Call the Session service before bootstrapping.

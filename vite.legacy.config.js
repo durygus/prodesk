@@ -1,8 +1,82 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
+// Плагин для замены jsdom на заглушку
+const replaceJsdomPlugin = () => ({
+  name: 'replace-jsdom',
+  resolveId(id) {
+    if (id === 'jsdom') {
+      return '\0virtual:jsdom'
+    }
+  },
+  load(id) {
+    if (id === '\0virtual:jsdom') {
+      return 'export default {};'
+    }
+  },
+  transform(code, id) {
+    if (code.includes('import"jsdom"') || code.includes("import 'jsdom'")) {
+      return code.replace(/import\s*["']jsdom["']/g, '// import "jsdom" // Заменено на заглушку')
+    }
+  }
+})
+
+// Плагин для замены require('jquery') на правильную ссылку в UMD файлах
+const replaceRequireJqueryPlugin = () => ({
+  name: 'replace-require-jquery',
+  transform(code, id) {
+    // Обрабатываем только vendor файлы
+    if (!id.includes('/vendor/') && !id.includes('/plugins/')) {
+      return null
+    }
+    
+    // Заменяем require('jquery') на window.jQuery в UMD паттернах
+    if (code.includes("require('jquery')")) {
+      return code.replace(/require\('jquery'\)/g, 'window.jQuery')
+    }
+    
+    return null
+  }
+})
+
+// Плагин для замены всех require() на window.jQuery в UMD файлах
+const replaceAllRequirePlugin = () => ({
+  name: 'replace-all-require',
+  transform(code, id) {
+    // Обрабатываем только vendor файлы
+    if (!id.includes('/vendor/') && !id.includes('/plugins/')) {
+      return null
+    }
+    
+    // Заменяем все require() на window.jQuery в UMD паттернах
+    if (code.includes('require(')) {
+      return code.replace(/require\([^)]+\)/g, 'window.jQuery')
+    }
+    
+    return null
+  }
+})
+
+// Плагин для принудительной установки глобальных переменных jQuery
+const globalJqueryPlugin = () => ({
+  name: 'global-jquery',
+  generateBundle(options, bundle) {
+    // Добавляем установку глобальных переменных в начало каждого JS файла
+    for (const fileName in bundle) {
+      const chunk = bundle[fileName]
+      if (chunk.type === 'chunk' && chunk.code) {
+        // Добавляем установку глобальных переменных в начало файла
+        chunk.code = `window.$ = window.$ || (typeof $ !== 'undefined' ? $ : null);
+window.jQuery = window.jQuery || window.$ || (typeof jQuery !== 'undefined' ? jQuery : null);
+${chunk.code}`
+      }
+    }
+  }
+})
+
 // Конфигурация для legacy кода
 export default defineConfig({
+  plugins: [replaceJsdomPlugin(), replaceRequireJqueryPlugin(), replaceAllRequirePlugin(), globalJqueryPlugin()],
   
   resolve: {
     alias: {
@@ -21,7 +95,10 @@ export default defineConfig({
       'api': resolve(__dirname, 'src/client/api'),
       'lib': resolve(__dirname, 'src/client/lib'),
       'lib2': resolve(__dirname, 'src/client/lib'),
+      'client': resolve(__dirname, 'src/client'),
       'serverSocket': resolve(__dirname, 'src/socketio'),
+      'fs': resolve(__dirname, 'src/public/js/vendor/fs-stub.js'), // Заглушка для fs
+      'fs-extra': resolve(__dirname, 'src/public/js/vendor/fs-stub.js'), // Заглушка для fs-extra
       
       // Специальные алиасы для совместимости
       'lib/helpers': resolve(__dirname, 'src/public/js/modules/helpers.js'),
@@ -63,7 +140,7 @@ export default defineConfig({
       // Графики и визуализация - используем npm пакеты
       'd3': 'd3',
       'c3': 'c3',
-      'metricsgraphics': 'metrics-graphics',
+      'metricsgraphics': resolve(__dirname, 'src/public/js/vendor/metricsgraphics/metricsgraphics.js'),
       'd3pie': resolve(__dirname, 'src/public/js/vendor/d3pie/d3pie.min.js'),
       'peity': 'peity',
       'countup': 'countup.js',
@@ -102,7 +179,14 @@ export default defineConfig({
   
   define: {
     global: 'globalThis',
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    'jsdom': '{}', // Добавлено для замены jsdom
+    'window.$': 'window.$',
+    'window.jQuery': 'window.jQuery'
+  },
+
+  optimizeDeps: {
+    exclude: ['jsdom']
   },
   
   // Настройки для разработки
@@ -113,11 +197,12 @@ export default defineConfig({
   
   // Настройки для сборки
   build: {
+    outDir: 'public',
+    emptyOutDir: true,
     rollupOptions: {
       input: {
-        'app': resolve(__dirname, 'src/public/js/app.js'),
-        'vendor': resolve(__dirname, 'src/public/js/vendor.js'),
-        'truRequire': resolve(__dirname, 'src/public/js/truRequire.js')
+        vendor: resolve(__dirname, 'src/public/js/vendor.js'),
+        app: resolve(__dirname, 'src/public/js/app.js')
       },
       output: {
         dir: 'public/js',
@@ -126,7 +211,7 @@ export default defineConfig({
         inlineDynamicImports: false
       }
     },
-    minify: 'esbuild',
+    minify: false,
     sourcemap: true,
     target: 'es2015'
   }
