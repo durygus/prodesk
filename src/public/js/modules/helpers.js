@@ -1058,33 +1058,33 @@ helpers.loaded = false
   }
 
   helpers.UI.cardOverlay = function () {
-    var $truCard = $('.tru-card')
+    var truCards = document.querySelectorAll('.tru-card')
 
     // replace toggler icon (x) when overlay is active
-    $truCard.each(function () {
-      var $this = $(this)
-      if ($this.hasClass('tru-card-overlay-active')) {
-        $this.find('.tru-card-overlay-toggler').html('close')
+    truCards.forEach(function (card) {
+      if (card.classList.contains('tru-card-overlay-active')) {
+        var toggler = card.querySelector('.tru-card-overlay-toggler')
+        if (toggler) {
+          toggler.innerHTML = 'close'
+        }
       }
     })
 
     // toggle card overlay
-    $truCard.on('click', '.tru-card-overlay-toggler', function (e) {
-      e.preventDefault()
-      if (
-        !$(this)
-          .closest('.tru-card')
-          .hasClass('tru-card-overlay-active')
-      ) {
-        $(this)
-          .html('close')
-          .closest('.tru-card')
-          .addClass('tru-card-overlay-active')
-      } else {
-        $(this)
-          .html('more_vert')
-          .closest('.tru-card')
-          .removeClass('tru-card-overlay-active')
+    truCards.forEach(function (card) {
+      var toggler = card.querySelector('.tru-card-overlay-toggler')
+      if (toggler) {
+        toggler.addEventListener('click', function (e) {
+          e.preventDefault()
+          var parentCard = this.closest('.tru-card')
+          if (!parentCard.classList.contains('tru-card-overlay-active')) {
+            this.innerHTML = 'close'
+            parentCard.classList.add('tru-card-overlay-active')
+          } else {
+            this.innerHTML = 'more_vert'
+            parentCard.classList.remove('tru-card-overlay-active')
+          }
+        })
       }
     })
   }

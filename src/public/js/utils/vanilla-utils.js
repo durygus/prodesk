@@ -935,7 +935,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Real-time validation on blur
   document.addEventListener('blur', function(e) {
     const field = e.target;
-    if (field.hasAttribute('data-validation')) {
+    if (field && field.nodeType === Node.ELEMENT_NODE && field.hasAttribute('data-validation')) {
       const result = TrudeskValidation.validateField(field);
       if (result.valid) {
         TrudeskValidation.showFieldSuccess(field);
