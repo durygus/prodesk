@@ -57,9 +57,9 @@ import History from 'history'
   }
 
   accountsImportPage.wizardCSV = function () {
-    var $wizardCsv = $('#wizard_csv')
+    var wizardCsv = document.querySelector('#wizard_csv')
 
-    if ($wizardCsv.length) {
+    if (wizardCsv) {
       $wizardCsv.steps({
         headerTag: 'h3',
         bodyTag: 'section',
@@ -77,7 +77,7 @@ import History from 'history'
             .attr('disabled', true)
 
           setTimeout(function () {
-            $(window).resize()
+            window.dispatchEvent(new Event('resize'))
           }, 100)
         },
         onStepChanging: function (event, currentIndex, newIndex) {
@@ -205,7 +205,7 @@ import History from 'history'
             .attr('disabled', true)
 
           setTimeout(function () {
-            $(window).resize()
+            window.dispatchEvent(new Event('resize'))
           }, 100)
         },
         onStepChanging: function (event, currentIndex, newIndex) {
@@ -332,7 +332,7 @@ import History from 'history'
           $wizardLdap.find('.button_next > a').html("Connect  <i class='material-icons'>&#xE315;</i>")
 
           setTimeout(function () {
-            $(window).resize()
+            window.dispatchEvent(new Event('resize'))
           }, 100)
         },
         onStepChanging: function (event, currentIndex, newIndex) {
@@ -468,17 +468,28 @@ import History from 'history'
   }
 
   function disableUIElements () {
-    // $(window).on('beforeunload', function() {
+    // window.addEventListener('beforeunload', function() {
     //     return 'Are you sure? We are still importing users.';
     // });
 
-    $('.sidebar').css({ width: 0 })
-    $('.side-nav-bottom-panel').css({ width: 0 })
-    $('#page-content').css('margin-left', 0)
-    $('.top-menu').css({ display: 'none' })
-    $('.js-wizard-select-wrapper').css({ display: 'none' })
-    $('.js-wizard-cancel').each(function () {
-      $(this).css({ display: 'none' })
+    var sidebar = document.querySelector('.sidebar')
+    if (sidebar) sidebar.style.width = '0'
+    
+    var sideNavPanel = document.querySelector('.side-nav-bottom-panel')
+    if (sideNavPanel) sideNavPanel.style.width = '0'
+    
+    var pageContent = document.querySelector('#page-content')
+    if (pageContent) pageContent.style.marginLeft = '0'
+    
+    var topMenu = document.querySelector('.top-menu')
+    if (topMenu) topMenu.style.display = 'none'
+    
+    var wizardSelectWrapper = document.querySelector('.js-wizard-select-wrapper')
+    if (wizardSelectWrapper) wizardSelectWrapper.style.display = 'none'
+    
+    var wizardCancelElements = document.querySelectorAll('.js-wizard-cancel')
+    wizardCancelElements.forEach(function (element) {
+      element.style.display = 'none'
     })
   }
 

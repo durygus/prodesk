@@ -30,20 +30,20 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
     socket.removeAllListeners('updateUsers1')
     socket.on('updateUsers1', function (data) {
       var html = ''
-      var onlineList = $('.online-list-wrapper').find('ul.online-list')
+      var onlineList = document.querySelector('.online-list-wrapper ul.online-list')
       var username = loggedInAccount.username
       var isUserRole = loggedInAccount.role === 'user'
       var filteredData = _.filter(data, function (item) {
         return item.user.username !== username
       })
-      var activeNow = $('.active-now')
+      var activeNow = document.querySelector('.active-now')
       if (_.size(filteredData) < 1) {
-        activeNow.hide()
+        if (activeNow) activeNow.style.display = 'none'
       } else {
-        activeNow.show()
+        if (activeNow) activeNow.style.display = 'block'
       }
 
-      onlineList.html('')
+      if (onlineList) onlineList.innerHTML = ''
       var activeCount = 0
       _.each(filteredData, function (v) {
         var onlineUser = v.user

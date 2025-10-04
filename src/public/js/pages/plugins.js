@@ -42,7 +42,7 @@ import History from 'history'
         }
       }
 
-      if ($('.plugin-tether').length > 0) {
+      if (document.querySelector('.plugin-tether')) {
         // eslint-disable-next-line
         new Tether({
           element: '.plugin-tether',

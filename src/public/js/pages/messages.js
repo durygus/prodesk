@@ -37,11 +37,12 @@ import 'isinview'
       let $loading = false
       // $inview             = null,
       const $recentMessages = {}
-      const $convoId = $('#message-content[data-conversation-id]').attr('data-conversation-id')
+      const convoId = document.querySelector('#message-content[data-conversation-id]')?.getAttribute('data-conversation-id')
       const $loggedInAccountId = window.trudeskSessionService.getUser()._id
 
       setTimeout(function () {
-        $('script#preloader').remove()
+        var preloader = document.querySelector('script#preloader')
+        if (preloader) preloader.remove()
       }, 1000)
 
       // Setup Context Menu
