@@ -494,7 +494,9 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
     })
 
     // Ajaxify Any ticket links
-    $('body').ajaxify()
+    if (typeof ajaxifyElement === 'function') {
+      ajaxifyElement(document.body)
+    }
   }
 
   chatClient.sendChatMessage = function (cid, toUserId, message, complete) {
@@ -539,10 +541,8 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
   }
 
   chatClient.openChatWindow = function (user, complete) {
-    var isOnMessagesPage =
-      $('#__page')
-        .text()
-        .toLowerCase() === 'messages'
+    var pageElement = document.querySelector('#__page')
+    var isOnMessagesPage = pageElement && pageElement.textContent.toLowerCase() === 'messages'
     if (isOnMessagesPage) {
       if (_.isFunction(complete)) {
         return complete()
@@ -564,11 +564,14 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
       var username = loggedInAccount.username
       if (user.username === username) return true
 
-      var cWindow = $('.chat-box-position').find('.chat-box[data-chat-userid="' + user._id + '"]')
-      if (cWindow.length > 0) {
-        // loadChatMessages($('.chat-box-position').find('.chat-box[data-chat-userid="' + user._id + '"]'), convo.messages);
-        cWindow.find('textarea').focus()
-        helpers.scrollToBottom(cWindow.find('.chat-box-messages'))
+      var chatBoxPosition = document.querySelector('.chat-box-position')
+      var cWindow = chatBoxPosition ? chatBoxPosition.querySelector('.chat-box[data-chat-userid="' + user._id + '"]') : null
+      if (cWindow) {
+        // loadChatMessages(cWindow, convo.messages);
+        var textarea = cWindow.querySelector('textarea')
+        if (textarea) textarea.focus()
+        var messages = cWindow.querySelector('.chat-box-messages')
+        if (messages) helpers.scrollToBottom(messages)
         return true
       }
 
@@ -616,13 +619,20 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
       html += '</div>'
       html += '</div>'
 
-      $('.chat-box-wrapper').append(html)
-      $('.chat-box[data-chat-userid="' + user._id + '"] textarea').focus()
-      loadChatMessages($('.chat-box-position').find('.chat-box[data-chat-userid="' + user._id + '"]'), convo.messages)
-      helpers.hideAllpDropDowns()
-      helpers.setupScrollers('.chat-box[data-chat-userid="' + user._id + '"] > div.scrollable')
-      bindChatWindowActions(convo._id)
-      helpers.scrollToBottom($('.chat-box[data-chat-userid="' + user._id + '"]').find('.chat-box-messages'))
+      var chatBoxWrapper = document.querySelector('.chat-box-wrapper')
+      if (chatBoxWrapper) chatBoxWrapper.insertAdjacentHTML('beforeend', html)
+      
+      var newChatBox = document.querySelector('.chat-box[data-chat-userid="' + user._id + '"]')
+      if (newChatBox) {
+        var textarea = newChatBox.querySelector('textarea')
+        if (textarea) textarea.focus()
+        loadChatMessages(newChatBox, convo.messages)
+        helpers.hideAllpDropDowns()
+        helpers.setupScrollers('.chat-box[data-chat-userid="' + user._id + '"] > div.scrollable')
+        bindChatWindowActions(convo._id)
+        var messages = newChatBox.querySelector('.chat-box-messages')
+        if (messages) helpers.scrollToBottom(messages)
+      }
 
       socket.emit('saveChatWindow', {
         userId: loggedInAccountId,
@@ -650,30 +660,28 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
   }
 
   function updateOnlineBubbles (usersOnline) {
-    $('span[data-user-status-id]').each(function () {
-      $(this)
-        .removeClass('user-online user-idle')
-        .addClass('user-offline')
+    var statusElements = document.querySelectorAll('span[data-user-status-id]')
+    statusElements.forEach(function (element) {
+      element.classList.remove('user-online', 'user-idle')
+      element.classList.add('user-offline')
     })
 
     var onlineUserList = usersOnline.sortedUserList
     var idleUserList = usersOnline.sortedIdleList
 
     _.each(onlineUserList, function (v) {
-      var $bubble = $('span[data-user-status-id="' + v.user._id + '"]')
-      $bubble.each(function () {
-        var self = $(this)
-
-        self.removeClass('user-offline user-idle').addClass('user-online')
+      var bubbles = document.querySelectorAll('span[data-user-status-id="' + v.user._id + '"]')
+      bubbles.forEach(function (bubble) {
+        bubble.classList.remove('user-offline', 'user-idle')
+        bubble.classList.add('user-online')
       })
     })
 
     _.each(idleUserList, function (v) {
-      var $bubble = $('span[data-user-status-id="' + v.user._id + '"]')
-      $bubble.each(function () {
-        var self = $(this)
-
-        self.removeClass('user-offline user-online').addClass('user-idle')
+      var bubbles = document.querySelectorAll('span[data-user-status-id="' + v.user._id + '"]')
+      bubbles.forEach(function (bubble) {
+        bubble.classList.remove('user-offline', 'user-online')
+        bubble.classList.add('user-idle')
       })
     })
   }
