@@ -860,12 +860,29 @@ helpers.loaded = false
   }
 
   helpers.UI.waves = function () {
-    Waves.attach('.md-btn-wave,.md-fab-wave', ['waves-button'])
-    Waves.attach('.md-btn-wave-light,.md-fab-wave-light', ['waves-button', 'waves-light'])
-    Waves.attach('.wave-box', ['waves-float'])
-    Waves.init({
-      delay: 300
-    })
+    // Check if Waves is available
+    if (typeof Waves !== 'undefined' && Waves.attach) {
+      Waves.attach('.md-btn-wave,.md-fab-wave', ['waves-button'])
+      Waves.attach('.md-btn-wave-light,.md-fab-wave-light', ['waves-button', 'waves-light'])
+      Waves.attach('.wave-box', ['waves-float'])
+      Waves.init({
+        delay: 300
+      })
+    } else {
+      // Fallback: add wave effect manually
+      var waveElements = document.querySelectorAll('.md-btn-wave, .md-fab-wave, .md-btn-wave-light, .md-fab-wave-light, .wave-box')
+      waveElements.forEach(function (element) {
+        element.addEventListener('click', function (e) {
+          var ripple = document.createElement('span')
+          ripple.classList.add('waves-ripple')
+          this.appendChild(ripple)
+          
+          setTimeout(function () {
+            ripple.remove()
+          }, 300)
+        })
+      })
+    }
   }
 
   helpers.UI.selectize = function (parent) {
