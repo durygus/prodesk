@@ -85,6 +85,7 @@ export default defineConfig({
       'pages': resolve(__dirname, 'src/public/js/pages'),
       'singleton': resolve(__dirname, 'src/public/js/singleton'),
       'vendor': resolve(__dirname, 'src/public/js/vendor'),
+      'utils': resolve(__dirname, 'src/public/js/utils'),
       
       // React компоненты
       'components': resolve(__dirname, 'src/client/components'),
