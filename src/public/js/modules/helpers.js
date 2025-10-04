@@ -586,72 +586,83 @@ helpers.loaded = false
   }
 
   helpers.UI.inputs = function (parent) {
-    var $mdInput = typeof parent === 'undefined' ? $('.md-input') : $(parent).find('.md-input')
-    $mdInput.each(function () {
-      if (!$(this).closest('.md-input-wrapper').length) {
-        var $this = $(this)
-
-        if ($this.prev('label').length) {
-          $this
-            .prev('label')
-            .andSelf()
-            .wrapAll('<div class="md-input-wrapper"/>')
-        } else if ($this.siblings('[data-uk-form-password]').length) {
-          $this
-            .siblings('[data-uk-form-password]')
-            .andSelf()
-            .wrapAll('<div class="md-input-wrapper"/>')
+    var mdInputs = typeof parent === 'undefined' ? 
+      document.querySelectorAll('.md-input') : 
+      (parent ? parent.querySelectorAll('.md-input') : [])
+    
+    mdInputs.forEach(function (input) {
+      if (!input.closest('.md-input-wrapper')) {
+        var label = input.previousElementSibling
+        if (label && label.tagName === 'LABEL') {
+          var wrapper = document.createElement('div')
+          wrapper.className = 'md-input-wrapper'
+          label.parentNode.insertBefore(wrapper, label)
+          wrapper.appendChild(label)
+          wrapper.appendChild(input)
         } else {
-          $this.wrap('<div class="md-input-wrapper"/>')
+          var wrapper = document.createElement('div')
+          wrapper.className = 'md-input-wrapper'
+          input.parentNode.insertBefore(wrapper, input)
+          wrapper.appendChild(input)
         }
 
-        $this.closest('.md-input-wrapper').append('<span class="md-input-bar"/>')
+        var wrapper = input.closest('.md-input-wrapper')
+        var bar = document.createElement('span')
+        bar.className = 'md-input-bar'
+        wrapper.appendChild(bar)
 
-        updateInput($this)
+        updateInput(input)
       }
-      $('body')
-        .on('focus', '.md-input', function () {
-          $(this)
-            .closest('.md-input-wrapper')
-            .addClass('md-input-focus')
-        })
-        .on('blur', '.md-input', function () {
-          $(this)
-            .closest('.md-input-wrapper')
-            .removeClass('md-input-focus')
-          if (!$(this).hasClass('label-fixed')) {
-            if ($(this).val() !== '') {
-              $(this)
-                .closest('.md-input-wrapper')
-                .addClass('md-input-filled')
+    })
+
+    // Add event listeners for focus/blur
+    document.addEventListener('focus', function (e) {
+      if (e.target.classList.contains('md-input')) {
+        var wrapper = e.target.closest('.md-input-wrapper')
+        if (wrapper) {
+          wrapper.classList.add('md-input-focus')
+        }
+      }
+    }, true)
+
+    document.addEventListener('blur', function (e) {
+      if (e.target.classList.contains('md-input')) {
+        var wrapper = e.target.closest('.md-input-wrapper')
+        if (wrapper) {
+          wrapper.classList.remove('md-input-focus')
+          if (!e.target.classList.contains('label-fixed')) {
+            if (e.target.value !== '') {
+              wrapper.classList.add('md-input-filled')
             } else {
-              $(this)
-                .closest('.md-input-wrapper')
-                .removeClass('md-input-filled')
+              wrapper.classList.remove('md-input-filled')
             }
           }
-        })
-        .on('change', '.md-input', function () {
-          updateInput($(this))
-        })
+        }
+      }
+    }, true)
 
-      $('.search-input')
-        .focus(function () {
-          $(this)
-            .parent()
-            .addClass('focus')
-        })
-        .blur(function () {
-          $(this)
-            .parent()
-            .removeClass('focus')
-        })
+    document.addEventListener('change', function (e) {
+      if (e.target.classList.contains('md-input')) {
+        updateInput(e.target)
+      }
+    }, true)
+
+    // Search input events
+    var searchInputs = document.querySelectorAll('.search-input')
+    searchInputs.forEach(function (input) {
+      input.addEventListener('focus', function () {
+        this.parentNode.classList.add('focus')
+      })
+      input.addEventListener('blur', function () {
+        this.parentNode.classList.remove('focus')
+      })
     })
   }
 
   helpers.UI.reRenderInputs = function () {
-    $('.md-input').each(function () {
-      updateInput($(this))
+    var mdInputs = document.querySelectorAll('.md-input')
+    mdInputs.forEach(function (input) {
+      updateInput(input)
     })
   }
 
@@ -1052,25 +1063,21 @@ helpers.loaded = false
   }
 
   helpers.UI.multiSelect = function (options) {
-    $('.multiselect').each(function () {
-      var self = $(this)
-      self.multiSelect(options)
+    var multiselects = document.querySelectorAll('.multiselect')
+    multiselects.forEach(function (element) {
+      if (typeof element.multiSelect === 'function') {
+        element.multiSelect(options)
+      }
     })
   }
 
   helpers.UI.cardShow = function () {
-    $('.tru-card-intro').each(function () {
-      var self = $(this)
-      self.velocity(
-        {
-          scale: 0.99999999,
-          opacity: 1
-        },
-        {
-          duration: 400,
-          easing: easingSwiftOut
-        }
-      )
+    var cards = document.querySelectorAll('.tru-card-intro')
+    cards.forEach(function (card) {
+      // Simple CSS animation instead of Velocity.js
+      card.style.transform = 'scale(0.99999999)'
+      card.style.opacity = '1'
+      card.style.transition = 'all 400ms ease-out'
     })
   }
 
@@ -1141,8 +1148,10 @@ helpers.loaded = false
   }
 
   helpers.UI.refreshTicketGrid = function () {
-    var $aRefreshTicketGrid = $('a#refreshTicketGrid')
-    if ($aRefreshTicketGrid.length() > 0) $aRefreshTicketGrid.trigger('click')
+    var refreshButton = document.querySelector('a#refreshTicketGrid')
+    if (refreshButton) {
+      refreshButton.click()
+    }
   }
 
   helpers.closeNotificationsWindow = function () {
@@ -1150,48 +1159,50 @@ helpers.loaded = false
   }
 
   helpers.showFlash = function (message, error, sticky) {
-    var flash = $('.flash-message')
-    if (flash.length < 1) return true
+    var flash = document.querySelector('.flash-message')
+    if (!flash) return true
 
     var e = !!error
     var s = !!sticky
 
     var flashTO
-    var flashText = flash.find('.flash-text')
-    flashText.html(message)
+    var flashText = flash.querySelector('.flash-text')
+    if (flashText) {
+      flashText.innerHTML = message
 
-    if (e) {
-      flashText.css('background', '#de4d4d')
-    } else {
-      flashText.css('background', '#29b955')
-    }
-
-    if (s) {
-      flash.off('mouseout')
-      flash.off('mouseover')
-    }
-
-    if (!s) {
-      flash.mouseout(function () {
-        flashTO = setTimeout(flashTimeout, 2000)
-      })
-
-      flash.mouseover(function () {
-        clearTimeout(flashTO)
-      })
-    }
-
-    var isShown = flashText.is(':visible')
-    if (isShown) return true
-
-    flashText.css('top', '-50px')
-    flash.show()
-    if (flashTO) clearTimeout(flashTO)
-    flashText.stop().animate({ top: '0' }, 500, function () {
-      if (!s) {
-        flashTO = setTimeout(flashTimeout, 2000)
+      if (e) {
+        flashText.style.background = '#de4d4d'
+      } else {
+        flashText.style.background = '#29b955'
       }
-    })
+
+      if (!s) {
+        flash.addEventListener('mouseout', function () {
+          flashTO = setTimeout(flashTimeout, 2000)
+        })
+
+        flash.addEventListener('mouseover', function () {
+          clearTimeout(flashTO)
+        })
+      }
+
+      var isShown = flashText.offsetParent !== null
+      if (isShown) return true
+
+      flashText.style.top = '-50px'
+      flash.style.display = 'block'
+      if (flashTO) clearTimeout(flashTO)
+      
+      // Simple animation
+      flashText.style.transition = 'top 500ms ease-out'
+      flashText.style.top = '0'
+      
+      setTimeout(function () {
+        if (!s) {
+          flashTO = setTimeout(flashTimeout, 2000)
+        }
+      }, 500)
+    }
   }
 
   helpers.clearFlash = function () {
@@ -1199,11 +1210,18 @@ helpers.loaded = false
   }
 
   function flashTimeout () {
-    var flashText = $('.flash-message').find('.flash-text')
-    if (flashText.length < 1) return
-    flashText.stop().animate({ top: '-50px' }, 500, function () {
-      $('.flash-message').hide()
-    })
+    var flashText = document.querySelector('.flash-message .flash-text')
+    if (!flashText) return
+    
+    flashText.style.transition = 'top 500ms ease-out'
+    flashText.style.top = '-50px'
+    
+    setTimeout(function () {
+      var flash = document.querySelector('.flash-message')
+      if (flash) {
+        flash.style.display = 'none'
+      }
+    }, 500)
   }
 
   helpers.registerFormValidators = function () {
@@ -1225,44 +1243,51 @@ helpers.loaded = false
   }
 
   helpers.bindKeys = function () {
-    var ticketIssue = $('#createTicketForm').find('textarea#issue')
-    if (ticketIssue.length > 0) {
-      ticketIssue.off('keydown')
-      ticketIssue.on('keydown', function (e) {
-        var keyCode = e.which ? e.which : e.keyCode
-        if (keyCode === 10 || (keyCode === 13 && e.ctrlKey)) {
-          $('#saveTicketBtn').trigger('click')
-        }
-      })
-    }
-
-    var keyBindEnter = $('*[data-keyBindSubmit]')
-    if (keyBindEnter.length > 0) {
-      $.each(keyBindEnter, function (k, val) {
-        var item = $(val)
-        if (item.length < 1) return
-        item.off('keydown')
-        var actionItem = item.attr('data-keyBindSubmit')
-        if (actionItem.length > 0) {
-          var itemObj = $(actionItem)
-          if (itemObj.length > 0) {
-            item.on('keydown', function (e) {
-              var keyCode = e.which ? e.which : e.keyCode
-              if (keyCode === 10 || (keyCode === 13 && e.ctrlKey)) {
-                itemObj.trigger('click')
-              }
-            })
+    var createTicketForm = document.querySelector('#createTicketForm')
+    if (createTicketForm) {
+      var ticketIssue = createTicketForm.querySelector('textarea#issue')
+      if (ticketIssue) {
+        ticketIssue.removeEventListener('keydown', onTicketIssueKeyDown)
+        ticketIssue.addEventListener('keydown', onTicketIssueKeyDown)
+        
+        function onTicketIssueKeyDown(e) {
+          var keyCode = e.which ? e.which : e.keyCode
+          if (keyCode === 10 || (keyCode === 13 && e.ctrlKey)) {
+            var saveBtn = document.querySelector('#saveTicketBtn')
+            if (saveBtn) {
+              saveBtn.click()
+            }
           }
         }
-      })
+      }
     }
+
+    var keyBindElements = document.querySelectorAll('*[data-keyBindSubmit]')
+    keyBindElements.forEach(function (item) {
+      var actionItemSelector = item.getAttribute('data-keyBindSubmit')
+      if (actionItemSelector) {
+        var actionItem = document.querySelector(actionItemSelector)
+        if (actionItem) {
+          item.removeEventListener('keydown', onKeyBindKeyDown)
+          item.addEventListener('keydown', onKeyBindKeyDown)
+          
+          function onKeyBindKeyDown(e) {
+            var keyCode = e.which ? e.which : e.keyCode
+            if (keyCode === 10 || (keyCode === 13 && e.ctrlKey)) {
+              actionItem.click()
+            }
+          }
+        }
+      }
+    })
   }
 
   helpers.onWindowResize = function () {
     var self = this
     return _.debounce(function () {
-      $('body > .side-nav-sub.tether-element').each(function () {
-        $(this).remove()
+      var tetherElements = document.querySelectorAll('body > .side-nav-sub.tether-element')
+      tetherElements.forEach(function (element) {
+        element.remove()
       })
 
       self.UI.tetherUpdate()
@@ -2389,3 +2414,4 @@ helpers.loaded = false
 
 // ES6 export
 export default helpers
+
