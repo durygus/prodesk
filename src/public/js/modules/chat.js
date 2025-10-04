@@ -136,28 +136,28 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
       let chatBox, chatMessage, chatMessageList, scroller, selector
 
       if (type === 's') {
-        chatBox = $('.chat-box[data-chat-userid="' + to + '"]')
+        chatBox = document.querySelector('.chat-box[data-chat-userid="' + to + '"]')
         chatMessage = createChatMessageDiv(data.message.body)
-        chatMessageList = chatBox.find('.chat-message-list:first')
-        scroller = chatBox.find('.chat-box-messages')
-        chatMessageList.append(chatMessage)
-        helpers.scrollToBottom(scroller)
+        chatMessageList = chatBox ? chatBox.querySelector('.chat-message-list') : null
+        scroller = chatBox ? chatBox.querySelector('.chat-box-messages') : null
+        if (chatMessageList) chatMessageList.appendChild(chatMessage)
+        if (scroller) helpers.scrollToBottom(scroller)
         helpers.UI.playSound('sendChatMessage')
       } else if (type === 'r') {
         selector = '.chat-box[data-chat-userid="' + from + '"]'
-        chatBox = $(selector)
-        if (chatBox.length < 1) {
+        chatBox = document.querySelector(selector)
+        if (!chatBox) {
           chatClient.openChatWindow(data.fromUser, function () {
-            chatBox = $(selector)
-            scroller = chatBox.find('.chat-box-messages')
-            helpers.scrollToBottom(scroller)
+            chatBox = document.querySelector(selector)
+            scroller = chatBox ? chatBox.querySelector('.chat-box-messages') : null
+            if (scroller) helpers.scrollToBottom(scroller)
           })
         } else {
           chatMessage = createChatMessageFromUser(data.fromUser, data.message.body)
-          chatMessageList = chatBox.find('.chat-message-list:first')
-          chatMessageList.append(chatMessage)
-          scroller = chatBox.find('.chat-box-messages')
-          helpers.scrollToBottom(scroller)
+          chatMessageList = chatBox.querySelector('.chat-message-list')
+          if (chatMessageList) chatMessageList.appendChild(chatMessage)
+          scroller = chatBox.querySelector('.chat-box-messages')
+          if (scroller) helpers.scrollToBottom(scroller)
         }
 
         helpers.UI.playSound('receivedChatMessage')
@@ -166,28 +166,36 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
       $.event.trigger('$trudesk:chat:message', data)
 
       // Ajaxify Any ticket links
-      $('body').ajaxify()
+      if (typeof ajaxifyElement === 'function') {
+        ajaxifyElement(document.body)
+      }
     })
 
     socket.removeAllListeners('$trudesk:messages:ui:user_typing')
     socket.on('$trudesk:messages:ui:user_typing', function (data) {
-      $.event.trigger('$trudesk:chat:typing', data)
-      var chatBox = $('div[data-conversation-id="' + data.cid + '"]')
-      var isTypingDiv = chatBox.find('.user-is-typing-wrapper')
-      isTypingDiv.removeClass('hide')
-      var scroller = chatBox.find('.chat-box-messages')
-      if (scroller.length > 0) {
-        // Only scroll if the scroller is on bottom
-        if (scroller.scrollTop() + window.innerHeight >= scroller[0].scrollHeight) {
-          helpers.scrollToBottom(scroller)
+      // Trigger custom event
+      var event = new CustomEvent('$trudesk:chat:typing', { detail: data })
+      window.dispatchEvent(event)
+      
+      var chatBox = document.querySelector('div[data-conversation-id="' + data.cid + '"]')
+      if (chatBox) {
+        var isTypingDiv = chatBox.querySelector('.user-is-typing-wrapper')
+        if (isTypingDiv) isTypingDiv.classList.remove('hide')
+      }
+      if (chatBox) {
+        var scroller = chatBox.querySelector('.chat-box-messages')
+        if (scroller) {
+          // Only scroll if the scroller is on bottom
+          if (scroller.scrollTop + window.innerHeight >= scroller.scrollHeight) {
+            helpers.scrollToBottom(scroller)
         }
       }
 
-      scroller = $('#message-content')
-      if (scroller.length > 0) {
+      var messageContentScroller = document.querySelector('#message-content')
+      if (messageContentScroller) {
         // Only scroll if the scroller is on bottom
-        if (scroller.scrollTop() + window.innerHeight >= scroller[0].scrollHeight) {
-          helpers.scrollToBottom(scroller)
+        if (messageContentScroller.scrollTop + window.innerHeight >= messageContentScroller.scrollHeight) {
+          helpers.scrollToBottom(messageContentScroller)
         }
       }
     })
@@ -202,26 +210,32 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
       $.event.trigger('$trudesk:chat:leftchatserver', data)
     })
 
-    $(window).on('$trudesk:chat:stoptyping.chatSystem', function (event, data) {
-      var chatBox = []
+    window.addEventListener('$trudesk:chat:stoptyping', function (event) {
+      var data = event.detail
+      var chatBoxes = []
       var scroller
-      chatBox[0] = $('#message-content[data-conversation-id="' + data.cid + '"]')
-      chatBox[1] = $('.chat-box[data-conversation-id="' + data.cid + '"]')
-      for (var i = 0; i < chatBox.length; i++) {
-        chatBox[i].find('.user-is-typing-wrapper').addClass('hide')
-        scroller = chatBox[i].find('.chat-box-messages')
-        if (scroller.length > 0) {
-          if (scroller.scrollTop() === scroller[0].scrollHeight) {
-            helpers.scrollToBottom(scroller)
+      chatBoxes[0] = document.querySelector('#message-content[data-conversation-id="' + data.cid + '"]')
+      chatBoxes[1] = document.querySelector('.chat-box[data-conversation-id="' + data.cid + '"]')
+      for (var i = 0; i < chatBoxes.length; i++) {
+        if (chatBoxes[i]) {
+          var isTypingDiv = chatBoxes[i].querySelector('.user-is-typing-wrapper')
+          if (isTypingDiv) isTypingDiv.classList.add('hide')
+        }
+        if (chatBoxes[i]) {
+          scroller = chatBoxes[i].querySelector('.chat-box-messages')
+          if (scroller) {
+            if (scroller.scrollTop === scroller.scrollHeight) {
+              helpers.scrollToBottom(scroller)
+            }
           }
         }
       }
 
-      scroller = $('#message-content')
-      if (scroller.length > 0) {
+      var messageContentScroller = document.querySelector('#message-content')
+      if (messageContentScroller) {
         // Only scroll if the scroller is on bottom
-        if (scroller.scrollTop() === scroller[0].scrollHeight) {
-          helpers.scrollToBottom(scroller)
+        if (messageContentScroller.scrollTop === messageContentScroller.scrollHeight) {
+          helpers.scrollToBottom(messageContentScroller)
         }
       }
     })
