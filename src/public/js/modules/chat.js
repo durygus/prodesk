@@ -63,22 +63,26 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
         html += '</a>'
         html += '</li>'
 
-        var allUserList = $('ul.user-list')
-        var userStatus = allUserList.find('li[data-user-id="' + onlineUser._id + '"]').find('.online-status-offline')
-        userStatus.removeClass('online-status-offline').addClass('online-status')
-        userStatus.text('')
+        var allUserList = document.querySelector('ul.user-list')
+        if (allUserList) {
+          var userStatus = allUserList.querySelector('li[data-user-id="' + onlineUser._id + '"] .online-status-offline')
+          if (userStatus) {
+            userStatus.classList.remove('online-status-offline')
+            userStatus.classList.add('online-status')
+          }
+        }
         activeCount++
       })
 
-      onlineList.append(html)
+      if (onlineList) onlineList.insertAdjacentHTML('beforeend', html)
 
-      var onlineUserCount = $('.online-user-count')
-      if (onlineUserCount.length > 0) {
+      var onlineUserCount = document.querySelector('.online-user-count')
+      if (onlineUserCount) {
         var size = _.size(filteredData)
-        if (size < 1) onlineUserCount.addClass('hide')
+        if (size < 1) onlineUserCount.classList.add('hide')
         else {
-          onlineUserCount.text(activeCount)
-          onlineUserCount.removeClass('hide')
+          onlineUserCount.textContent = activeCount
+          onlineUserCount.classList.remove('hide')
         }
       }
 
@@ -100,8 +104,8 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
 
     socket.removeAllListeners('spawnChatWindow')
     socket.on('spawnChatWindow', function (data) {
-      var messageContent = $('#message-content[data-conversation-id]')
-      if (messageContent.length > 0) {
+      var messageContent = document.querySelector('#message-content[data-conversation-id]')
+      if (messageContent) {
         var loggedInAccountId = loggedInAccount._id
         startConversation(loggedInAccountId, data._id, function (err, convo) {
           if (err) {
@@ -271,35 +275,40 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
   }
 
   chatClient.bindActions = function () {
-    $(document).ready(function () {
-      $('*[data-action="startChat"]').each(function () {
-        var self = $(this)
-        self.off('click')
-        self.click(function (e) {
-          var userId = self.attr('data-chatUser')
+    document.addEventListener('DOMContentLoaded', function () {
+      var startChatElements = document.querySelectorAll('*[data-action="startChat"]')
+      startChatElements.forEach(function (element) {
+        element.removeEventListener('click', onStartChatClick)
+        element.addEventListener('click', onStartChatClick)
+        
+        function onStartChatClick(e) {
+          var userId = element.getAttribute('data-chatUser')
           socket.emit('spawnChatWindow', userId)
           UIKit.offcanvas.hide()
           e.preventDefault()
-        })
+        }
       })
     })
   }
 
   function bindChatWindowActions (convoId) {
-    var $chatBox = $('.chat-box[data-conversation-id="' + convoId + '"]')
-    if ($chatBox.length < 1) {
+    var chatBox = document.querySelector('.chat-box[data-conversation-id="' + convoId + '"]')
+    if (!chatBox) {
       return false
     }
 
-    var $textarea = $chatBox.find('textarea.textAreaAutogrow')
-    var $chatBoxText = $chatBox.find('.chat-box-text')
-    var $chatCloseButton = $chatBox.find('.chatCloseBtn')
-    var $chatTitleBar = $chatBox.find('.chat-box-title')
+    var textarea = chatBox.querySelector('textarea.textAreaAutogrow')
+    var chatBoxText = chatBox.querySelector('.chat-box-text')
+    var chatCloseButton = chatBox.querySelector('.chatCloseBtn')
+    var chatTitleBar = chatBox.querySelector('.chat-box-title')
 
-    $textarea.off('keyup')
-    $textarea.off('keydown')
-    $textarea.on('keydown', function (e) {
-      if (e.keyCode === 13) {
+    if (textarea) {
+      textarea.removeEventListener('keyup', onTextareaKeyUp)
+      textarea.removeEventListener('keydown', onTextareaKeyDown)
+      textarea.addEventListener('keydown', onTextareaKeyDown)
+      
+      function onTextareaKeyDown(e) {
+        if (e.keyCode === 13) {
         return
       }
 
