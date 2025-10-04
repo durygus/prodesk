@@ -13,7 +13,7 @@
  */
 
 // ES6 imports
-import $ from 'jquery'
+// import $ from 'jquery' // Используем window.$ из vendor.js
 import _ from 'underscore'
 import UIkit from 'uikit'
 import dayjs from 'dayjs'
@@ -26,12 +26,12 @@ import 'isinview'
   const messagesPage = {}
 
   messagesPage.init = function (callback) {
-    $(document).ready(function () {
-      const $messageScroller = $('#message-content.scrollable')
-      const $messagesWrapper = $('#messages')
-      const $scrollspy = $('#conversation-scrollspy')
-      const $spinner = $scrollspy.find('i')
-      const $searchBox = $('.search-box').find('input')
+    document.addEventListener('DOMContentLoaded', function () {
+      const messageScroller = document.querySelector('#message-content.scrollable')
+      const messagesWrapper = document.querySelector('#messages')
+      const scrollspy = document.querySelector('#conversation-scrollspy')
+      const spinner = scrollspy ? scrollspy.querySelector('i') : null
+      const searchBox = document.querySelector('.search-box input')
       let $nextPage = 2
       let $enabled = true
       let $loading = false

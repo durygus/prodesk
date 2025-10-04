@@ -352,11 +352,14 @@ helpers.loaded = false
   }
 
   helpers.UI.tooltipSidebar = function () {
-    $('.sidebar')
-      .find('a[data-uk-tooltip]')
-      .each(function () {
-        $(this).attr('style', 'padding: 0 !important; font-size: 0 !important;')
+    var sidebar = document.querySelector('.sidebar')
+    if (sidebar) {
+      var tooltipLinks = sidebar.querySelectorAll('a[data-uk-tooltip]')
+      tooltipLinks.forEach(function (link) {
+        link.style.padding = '0 !important'
+        link.style.fontSize = '0 !important'
       })
+    }
   }
 
   helpers.UI.setupDataTethers = function () {
@@ -444,9 +447,18 @@ helpers.loaded = false
   }
 
   helpers.UI.setNavItem = function (id) {
-    var $sidebar = $('.sidebar')
-    $sidebar.find('li.active').removeClass('active')
-    $sidebar.find('li[data-nav-id="' + id.toLowerCase() + '"]').addClass('active')
+    var sidebar = document.querySelector('.sidebar')
+    if (sidebar) {
+      var activeItems = sidebar.querySelectorAll('li.active')
+      activeItems.forEach(function (item) {
+        item.classList.remove('active')
+      })
+      
+      var targetItem = sidebar.querySelector('li[data-nav-id="' + id.toLowerCase() + '"]')
+      if (targetItem) {
+        targetItem.classList.add('active')
+      }
+    }
   }
 
   helpers.UI.tetherUpdate = function () {
@@ -456,73 +468,89 @@ helpers.loaded = false
   }
 
   helpers.UI.onlineUserSearch = function () {
-    $(document).off('keyup', '.online-list-search-box input[type="text"]', onSearchKeyUp)
-    $(document).on('keyup', '.online-list-search-box input[type="text"]', onSearchKeyUp)
-
+    var searchInputs = document.querySelectorAll('.online-list-search-box input[type="text"]')
+    
     function onSearchKeyUp () {
-      var $searchBox = $('.online-list-search-box').find('input')
-      var searchTerm = $searchBox.val().toLowerCase()
-
-      $('.user-list li').each(function () {
-        if ($(this).filter('[data-search-term *= ' + searchTerm + ']').length > 0 || searchTerm.length < 1) {
-          $(this).show()
+      var searchBox = document.querySelector('.online-list-search-box input')
+      if (!searchBox) return
+      
+      var searchTerm = searchBox.value.toLowerCase()
+      var userListItems = document.querySelectorAll('.user-list li')
+      
+      userListItems.forEach(function (item) {
+        var searchTermAttr = item.getAttribute('data-search-term')
+        if ((searchTermAttr && searchTermAttr.toLowerCase().includes(searchTerm)) || searchTerm.length < 1) {
+          item.style.display = ''
         } else {
-          $(this).hide()
+          item.style.display = 'none'
         }
       })
     }
+    
+    searchInputs.forEach(function (input) {
+      input.removeEventListener('keyup', onSearchKeyUp)
+      input.addEventListener('keyup', onSearchKeyUp)
+    })
   }
 
   helpers.UI.matchHeight = function () {
-    var $d = $('div[data-match-height]')
-    $d.each(function () {
-      var self = $(this)
-      var target = self.attr('data-match-height')
-
-      var $target = $(target)
-      var $targetHeight = $target.height()
-      self.height($targetHeight)
+    var elements = document.querySelectorAll('div[data-match-height]')
+    elements.forEach(function (element) {
+      var targetSelector = element.getAttribute('data-match-height')
+      var target = document.querySelector(targetSelector)
+      
+      if (target) {
+        var targetHeight = target.offsetHeight
+        element.style.height = targetHeight + 'px'
+      }
     })
   }
 
   helpers.UI.showDisconnectedOverlay = function () {
     setTimeout(function () {
-      var $disconnected = $('.disconnected')
+      var disconnected = document.querySelector('.disconnected')
+      if (!disconnected) return
 
-      if ($disconnected.css('display') === 'block') {
+      var computedStyle = window.getComputedStyle(disconnected)
+      if (computedStyle.display === 'block') {
         return true
       }
 
-      $disconnected.velocity('fadeIn', {
-        duration: 500,
-        easing: easingSwiftOut,
-        begin: function () {
-          $disconnected.css({
-            display: 'block',
-            opacity: 0
-          })
+      disconnected.style.display = 'block'
+      disconnected.style.opacity = '0'
+      
+      // Simple fade in animation
+      var opacity = 0
+      var fadeIn = setInterval(function () {
+        opacity += 0.1
+        disconnected.style.opacity = opacity
+        if (opacity >= 1) {
+          clearInterval(fadeIn)
         }
-      })
+      }, 50)
     }, 500)
   }
 
   helpers.UI.hideDisconnectedOverlay = function () {
-    var $disconnected = $('.disconnected')
+    var disconnected = document.querySelector('.disconnected')
+    if (!disconnected) return
 
-    if ($disconnected.css('display') === 'none') {
+    var computedStyle = window.getComputedStyle(disconnected)
+    if (computedStyle.display === 'none') {
       return true
     }
 
-    $disconnected.velocity('fadeOut', {
-      duration: 500,
-      easing: easingSwiftOut,
-      complete: function () {
-        $disconnected.css({
-          display: 'none',
-          opacity: 0
-        })
+    // Simple fade out animation
+    var opacity = 1
+    var fadeOut = setInterval(function () {
+      opacity -= 0.1
+      disconnected.style.opacity = opacity
+      if (opacity <= 0) {
+        clearInterval(fadeOut)
+        disconnected.style.display = 'none'
+        disconnected.style.opacity = '0'
       }
-    })
+    }, 50)
   }
 
   helpers.UI.showSnackbar = function () {
@@ -671,48 +699,70 @@ helpers.loaded = false
   }
 
   helpers.UI.fabToolbar = function () {
-    var $fabToolbar = $('.md-fab-toolbar')
+    var fabToolbarElement = document.querySelector('.md-fab-toolbar')
 
-    if ($fabToolbar) {
-      $fabToolbar.children('i').on('click', function (e) {
-        e.preventDefault()
+    if (fabToolbarElement) {
+      var iconElement = fabToolbarElement.querySelector('i')
+      if (iconElement) {
+        iconElement.addEventListener('click', function (e) {
+          e.preventDefault()
 
-        var toolbarItems = $fabToolbar.children('.md-fab-toolbar-actions').children().length
+          var actionsElement = fabToolbarElement.querySelector('.md-fab-toolbar-actions')
+          var toolbarItems = actionsElement ? actionsElement.children.length : 0
 
-        $fabToolbar.addClass('md-fab-animated')
+          fabToolbarElement.classList.add('md-fab-animated')
 
-        var fabPadding = !$fabToolbar.hasClass('md-fab-small') ? 16 : 24
+          var fabPadding = !fabToolbarElement.classList.contains('md-fab-small') ? 16 : 24
+          var fabSize = !fabToolbarElement.classList.contains('md-fab-small') ? 64 : 44
 
-        var fabSize = !$fabToolbar.hasClass('md-fab-small') ? 64 : 44
+          setTimeout(function () {
+            fabToolbarElement.style.width = (toolbarItems * fabSize + fabPadding) + 'px'
+          }, 140)
 
-        setTimeout(function () {
-          $fabToolbar.width(toolbarItems * fabSize + fabPadding)
-        }, 140)
+          setTimeout(function () {
+            fabToolbarElement.classList.add('md-fab-active')
+          }, 420)
+        })
+      }
 
-        setTimeout(function () {
-          $fabToolbar.addClass('md-fab-active')
-        }, 420)
-      })
+      var pageContent = document.querySelector('.page-content')
+      if (pageContent) {
+        pageContent.addEventListener('scroll', function (e) {
+          if (fabToolbarElement.classList.contains('md-fab-active')) {
+            if (!fabToolbarElement.contains(e.target)) {
+              fabToolbarElement.style.height = ''
+              fabToolbarElement.style.width = ''
+              fabToolbarElement.classList.remove('md-fab-active')
 
-      $('.page-content').on('scroll', function (e) {
-        if ($fabToolbar.hasClass('md-fab-active')) {
-          if (!$(e.target).closest($fabToolbar).length) {
-            $fabToolbar.css({ height: '', width: '' }).removeClass('md-fab-active')
+              setTimeout(function () {
+                fabToolbarElement.classList.remove('md-fab-animated')
+              }, 140)
+            }
+          }
+        })
+      }
+
+      document.addEventListener('click', function (e) {
+        if (fabToolbarElement.classList.contains('md-fab-active')) {
+          if (!fabToolbarElement.contains(e.target)) {
+            fabToolbarElement.style.width = ''
+            fabToolbarElement.classList.remove('md-fab-active')
 
             setTimeout(function () {
-              $fabToolbar.removeClass('md-fab-animated')
+              fabToolbarElement.classList.remove('md-fab-animated')
             }, 140)
           }
         }
       })
 
-      $(document).on('click scroll', function (e) {
-        if ($fabToolbar.hasClass('md-fab-active')) {
-          if (!$(e.target).closest($fabToolbar).length) {
-            $fabToolbar.css('width', '').removeClass('md-fab-active')
+      document.addEventListener('scroll', function (e) {
+        if (fabToolbarElement.classList.contains('md-fab-active')) {
+          if (!fabToolbarElement.contains(e.target)) {
+            fabToolbarElement.style.width = ''
+            fabToolbarElement.classList.remove('md-fab-active')
 
             setTimeout(function () {
-              $fabToolbar.removeClass('md-fab-animated')
+              fabToolbarElement.classList.remove('md-fab-animated')
             }, 140)
           }
         }
@@ -721,56 +771,87 @@ helpers.loaded = false
   }
 
   helpers.UI.fabSheet = function () {
-    var $fabSheet = $('.md-fab-sheet')
+    var fabSheetElement = document.querySelector('.md-fab-sheet')
 
-    if ($fabSheet) {
-      $fabSheet.children('i').on('click', function (e) {
-        e.preventDefault()
+    if (fabSheetElement) {
+      var iconElement = fabSheetElement.querySelector('i')
+      if (iconElement) {
+        iconElement.addEventListener('click', function (e) {
+          e.preventDefault()
 
-        var sheetItems = $fabSheet.children('.md-fab-sheet-actions').children('a').length
-        $fabSheet.addClass('md-fab-animated')
+          var actionsElement = fabSheetElement.querySelector('.md-fab-sheet-actions')
+          var sheetItems = actionsElement ? actionsElement.querySelectorAll('a').length : 0
+          fabSheetElement.classList.add('md-fab-animated')
 
-        setTimeout(function () {
-          $fabSheet.width('240px').height(sheetItems * 40 + 8)
-        }, 140)
+          setTimeout(function () {
+            fabSheetElement.style.width = '240px'
+            fabSheetElement.style.height = (sheetItems * 40 + 8) + 'px'
+          }, 140)
 
-        setTimeout(function () {
-          $fabSheet.addClass('md-fab-active')
-        }, 280)
-      })
+          setTimeout(function () {
+            fabSheetElement.classList.add('md-fab-active')
+          }, 280)
+        })
+      }
 
-      $fabSheet
-        .children('.md-fab-sheet-actions')
-        .children('a')
-        .on('click', function () {
-          if ($fabSheet.hasClass('md-fab-active')) {
-            $fabSheet.css({ height: '', width: '' }).removeClass('md-fab-active')
+      var actionsElement = fabSheetElement.querySelector('.md-fab-sheet-actions')
+      if (actionsElement) {
+        var actionLinks = actionsElement.querySelectorAll('a')
+        actionLinks.forEach(function (link) {
+          link.addEventListener('click', function () {
+            if (fabSheetElement.classList.contains('md-fab-active')) {
+              fabSheetElement.style.height = ''
+              fabSheetElement.style.width = ''
+              fabSheetElement.classList.remove('md-fab-active')
 
-            setTimeout(function () {
-              $fabSheet.removeClass('md-fab-animated')
-            }, 140)
+              setTimeout(function () {
+                fabSheetElement.classList.remove('md-fab-animated')
+              }, 140)
+            }
+          })
+        })
+      }
+
+      var pageContent = document.querySelector('.page-content')
+      if (pageContent) {
+        pageContent.addEventListener('scroll', function (e) {
+          if (fabSheetElement.classList.contains('md-fab-active')) {
+            if (!fabSheetElement.contains(e.target)) {
+              fabSheetElement.style.height = ''
+              fabSheetElement.style.width = ''
+              fabSheetElement.classList.remove('md-fab-active')
+
+              setTimeout(function () {
+                fabSheetElement.classList.remove('md-fab-animated')
+              }, 140)
+            }
           }
         })
+      }
 
-      $('.page-content').on('scroll', function (e) {
-        if ($fabSheet.hasClass('md-fab-active')) {
-          if (!$(e.target).closest($fabSheet).length) {
-            $fabSheet.css({ height: '', width: '' }).removeClass('md-fab-active')
+      document.addEventListener('click', function (e) {
+        if (fabSheetElement.classList.contains('md-fab-active')) {
+          if (!fabSheetElement.contains(e.target)) {
+            fabSheetElement.style.height = ''
+            fabSheetElement.style.width = ''
+            fabSheetElement.classList.remove('md-fab-active')
 
             setTimeout(function () {
-              $fabSheet.removeClass('md-fab-animated')
+              fabSheetElement.classList.remove('md-fab-animated')
             }, 140)
           }
         }
       })
 
-      $(document).on('click scroll', function (e) {
-        if ($fabSheet.hasClass('md-fab-active')) {
-          if (!$(e.target).closest($fabSheet).length) {
-            $fabSheet.css({ height: '', width: '' }).removeClass('md-fab-active')
+      document.addEventListener('scroll', function (e) {
+        if (fabSheetElement.classList.contains('md-fab-active')) {
+          if (!fabSheetElement.contains(e.target)) {
+            fabSheetElement.style.height = ''
+            fabSheetElement.style.width = ''
+            fabSheetElement.classList.remove('md-fab-active')
 
             setTimeout(function () {
-              $fabSheet.removeClass('md-fab-animated')
+              fabSheetElement.classList.remove('md-fab-animated')
             }, 140)
           }
         }
@@ -1178,8 +1259,17 @@ helpers.loaded = false
   }
 
   helpers.setupScrollers = function () {
-    $('.scrollable').css({ 'overflow-y': 'auto', 'overflow-x': 'hidden' })
-    $('.scrollable-dark').css({ 'overflow-y': 'auto', 'overflow-x': 'hidden' })
+    var scrollableElements = document.querySelectorAll('.scrollable')
+    scrollableElements.forEach(function (element) {
+      element.style.overflowY = 'auto'
+      element.style.overflowX = 'hidden'
+    })
+    
+    var scrollableDarkElements = document.querySelectorAll('.scrollable-dark')
+    scrollableDarkElements.forEach(function (element) {
+      element.style.overflowY = 'auto'
+      element.style.overflowX = 'hidden'
+    })
   }
 
   helpers.scrollToBottom = function (jqueryObject, animate) {
@@ -1212,23 +1302,22 @@ helpers.loaded = false
   }
 
   helpers.resizeFullHeight = function () {
-    var ele = $('.full-height')
-    $.each(ele, function () {
-      var self = $(this)
-      ele.ready(function () {
-        var h = $(window).height()
-        if (self.css('borderTopStyle') === 'solid') {
-          h = h - 1
-        }
+    var elements = document.querySelectorAll('.full-height')
+    elements.forEach(function (element) {
+      var h = window.innerHeight
+      var computedStyle = window.getComputedStyle(element)
+      
+      if (computedStyle.borderTopStyle === 'solid') {
+        h = h - 1
+      }
 
-        var dataOffset = self.attr('data-offset')
-        if (!_.isUndefined(dataOffset)) {
-          h = h - dataOffset
-        }
+      var dataOffset = element.getAttribute('data-offset')
+      if (dataOffset) {
+        h = h - parseInt(dataOffset)
+      }
 
-        // self.css('overflow', 'hidden');
-        self.height(h - self.offset().top)
-      })
+      var rect = element.getBoundingClientRect()
+      element.style.height = (h - rect.top) + 'px'
     })
   }
 
@@ -1266,57 +1355,61 @@ helpers.loaded = false
   }
 
   helpers.hideAllpDropDowns = function () {
-    $('.p-dropdown').each(function () {
-      const $drop = $(this)
-      if ($drop.hasClass('pDropOpen')) $drop.removeClass('pDropOpen')
+    var dropdowns = document.querySelectorAll('.p-dropdown')
+    dropdowns.forEach(function (dropdown) {
+      if (dropdown.classList.contains('pDropOpen')) {
+        dropdown.classList.remove('pDropOpen')
+      }
     })
   }
 
   helpers.hideAllUiKitDropdowns = function () {
-    var dropdowns = $('.uk-dropdown')
-    dropdowns.each(function () {
-      var thisDropdown = $(this)
-      thisDropdown.removeClass('uk-dropdown-shown')
+    var dropdowns = document.querySelectorAll('.uk-dropdown')
+    dropdowns.forEach(function (dropdown) {
+      dropdown.classList.remove('uk-dropdown-shown')
 
       setTimeout(function () {
-        thisDropdown.removeClass('uk-dropdown-active')
-        thisDropdown
-          .parents('*[data-uk-dropdown]')
-          .removeClass('uk-open')
-          .attr('aria-expanded', false)
+        dropdown.classList.remove('uk-dropdown-active')
+        var parent = dropdown.closest('*[data-uk-dropdown]')
+        if (parent) {
+          parent.classList.remove('uk-open')
+          parent.setAttribute('aria-expanded', 'false')
+        }
       }, 280)
     })
   }
 
   helpers.pToolTip = function () {
-    $(document).ready(function () {
-      var pToolTip = $('span[data-ptooltip]')
-      pToolTip.each(function () {
-        var title = $(this).attr('data-title')
-        var type = $(this).attr('data-ptooltip-type')
+    document.addEventListener('DOMContentLoaded', function () {
+      var pToolTipElements = document.querySelectorAll('span[data-ptooltip]')
+      
+      pToolTipElements.forEach(function (element) {
+        var title = element.getAttribute('data-title')
+        var type = element.getAttribute('data-ptooltip-type')
         var html =
           "<div class='ptooltip-box-wrap' data-ptooltip-id='" +
-          $(this).attr('id') +
+          element.getAttribute('id') +
           "'><div class='ptooltip-box'><span>" +
           title +
           '</span>'
-        if (type.toLowerCase() === 'service') {
-          var status = $(this).attr('data-service-status')
+        
+        if (type && type.toLowerCase() === 'service') {
+          var status = element.getAttribute('data-service-status')
           var color = '#fff'
-          if (status.toLowerCase() === 'starting' || status.toLowerCase() === 'stopping') {
+          if (status && status.toLowerCase() === 'starting' || status && status.toLowerCase() === 'stopping') {
             color = '#e77c3c'
           }
-          if (status.toLowerCase() === 'running') {
+          if (status && status.toLowerCase() === 'running') {
             color = '#29b955'
           }
-          if (status.toLowerCase() === 'stopped') {
+          if (status && status.toLowerCase() === 'stopped') {
             color = '#e54242'
           }
 
           html += "<span>Status: <span style='color: " + color + ";'>" + status + '</span>'
-        } else if (type.toLowerCase() === 'dailyticket') {
-          var n = $(this).attr('data-new-count')
-          var c = $(this).attr('data-closed-count')
+        } else if (type && type.toLowerCase() === 'dailyticket') {
+          var n = element.getAttribute('data-new-count')
+          var c = element.getAttribute('data-closed-count')
 
           html +=
             "<span><span style='color: #e74c3c'>" +
@@ -1327,22 +1420,31 @@ helpers.loaded = false
         }
 
         html += '</div></div>'
-        var k = $('<div></div>').css({ position: 'relative' })
-        k.append(html)
+        var k = document.createElement('div')
+        k.style.position = 'relative'
+        k.innerHTML = html
 
-        $(this).append(k)
+        element.appendChild(k)
       })
 
-      pToolTip.hover(
-        function () {
-          var id = $(this).attr('id')
-          $('div.ptooltip-box-wrap[data-ptooltip-id="' + id + '"]').show()
-        },
-        function () {
-          var id = $(this).attr('id')
-          $('div.ptooltip-box-wrap[data-ptooltip-id="' + id + '"]').hide()
-        }
-      )
+      // Add hover event listeners
+      pToolTipElements.forEach(function (element) {
+        element.addEventListener('mouseenter', function () {
+          var id = this.getAttribute('id')
+          var tooltip = document.querySelector('div.ptooltip-box-wrap[data-ptooltip-id="' + id + '"]')
+          if (tooltip) {
+            tooltip.style.display = 'block'
+          }
+        })
+        
+        element.addEventListener('mouseleave', function () {
+          var id = this.getAttribute('id')
+          var tooltip = document.querySelector('div.ptooltip-box-wrap[data-ptooltip-id="' + id + '"]')
+          if (tooltip) {
+            tooltip.style.display = 'none'
+          }
+        })
+      })
     })
   }
 

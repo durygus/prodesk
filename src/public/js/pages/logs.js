@@ -13,7 +13,7 @@
  */
 
 // ES6 imports
-import $ from 'jquery'
+// import $ from 'jquery' // Используем window.$ из vendor.js
 import socket from 'modules/socket'
 import History from 'history'
 
@@ -21,11 +21,11 @@ import History from 'history'
   var logsPage = {}
 
   logsPage.init = function (callback) {
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
       socket.ui.fetchServerLogs()
-      var $sLogs = $('#serverlogs')
-      if ($sLogs.length > 0) {
-        $sLogs.scrollTop(99999999999999 * 999999999999999)
+      var sLogs = document.querySelector('#serverlogs')
+      if (sLogs) {
+        sLogs.scrollTop = 99999999999999 * 999999999999999
       }
 
       if (typeof callback === 'function') {

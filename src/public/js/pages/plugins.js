@@ -13,7 +13,7 @@
  */
 
 // ES6 imports
-import $ from 'jquery'
+// import $ from 'jquery' // Используем window.$ из vendor.js
 import helpers from 'modules/helpers'
 import Tether from 'tether'
 import History from 'history'
@@ -22,22 +22,25 @@ import History from 'history'
   var pluginsPage = {}
 
   pluginsPage.init = function (callback) {
-    $(document).ready(function () {
-      var $searchPluginList = $('#search_plugin_list')
-      $searchPluginList.off('keyup')
-      $searchPluginList.on('keyup', function () {
-        var value = this.value.toLowerCase()
-        $('table#plugin_list_table')
-          .find('tbody')
-          .find('tr')
-          .each(function () {
-            var id = $(this)
-              .find('td')
-              .text()
-              .toLowerCase()
-            $(this).toggle(id.indexOf(value) !== -1)
-          })
-      })
+    document.addEventListener('DOMContentLoaded', function () {
+      var searchPluginList = document.querySelector('#search_plugin_list')
+      if (searchPluginList) {
+        searchPluginList.removeEventListener('keyup', onKeyUp)
+        searchPluginList.addEventListener('keyup', onKeyUp)
+        
+        function onKeyUp() {
+          var value = this.value.toLowerCase()
+          var table = document.querySelector('table#plugin_list_table tbody')
+          if (table) {
+            var rows = table.querySelectorAll('tr')
+            rows.forEach(function (row) {
+              var firstCell = row.querySelector('td')
+              var id = firstCell ? firstCell.textContent.toLowerCase() : ''
+              row.style.display = id.indexOf(value) !== -1 ? '' : 'none'
+            })
+          }
+        }
+      }
 
       if ($('.plugin-tether').length > 0) {
         // eslint-disable-next-line

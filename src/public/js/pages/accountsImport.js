@@ -13,23 +13,23 @@
  */
 
 // ES6 imports
-import $ from 'jquery'
+// import $ from 'jquery' // Используем window.$ из vendor.js
 import _ from 'underscore'
 import helpers from 'modules/helpers.js'
 import velocity from 'velocity'
 import UIkit from 'uikit'
 import socket from 'modules/socket.js'
-import 'jquery_steps'
-import 'jquery_actual'
+// import 'jquery_steps' // Используем window.$ из vendor.js
+// import 'jquery_actual' // Используем window.$ из vendor.js
 import History from 'history'
 
 // Main accountsImportPage object
   var accountsImportPage = {}
   var state = {}
   accountsImportPage.init = function (callback) {
-    $(document).ready(function () {
-      var testPage = $('#page-content').find('.accountsImport')
-      if (testPage.length < 1) {
+    document.addEventListener('DOMContentLoaded', function () {
+      var testPage = document.querySelector('#page-content .accountsImport')
+      if (!testPage) {
         if (typeof callback === 'function') {
           return callback()
         }

@@ -13,18 +13,18 @@
  */
 
 // ES6 imports
-import $ from 'jquery'
 import _ from 'lodash'
 import helpers from 'modules/helpers'
 import * as History from 'history'
 
 // Main ajaxify object
 function initAjaxify() {
-  $(window).on('statechangecomplete', function () {
+  window.addEventListener('statechangecomplete', function () {
     // Remove Rogue Tethers
-    $('body > .side-nav-sub.tether-element').each(function () {
-      $(this).remove()
-    })
+    const tetherElements = document.querySelectorAll('body > .side-nav-sub.tether-element');
+    tetherElements.forEach(element => {
+      element.remove();
+    });
 
     helpers.init(true)
     helpers.hideAllUiKitDropdowns()
@@ -36,25 +36,23 @@ function initAjaxify() {
     window.react.redux.store.dispatch({
       type: 'NAV_CHANGE',
       payload: {
-        activeItem: $('#__sidebar_route').text(),
-        activeSubItem: $('#__sidebar_sub_route').text(),
+        activeItem: document.getElementById('__sidebar_route')?.textContent || '',
+        activeSubItem: document.getElementById('__sidebar_sub_route')?.textContent || '',
         sessionUser: window.trudeskSessionService.getUser()
       }
     })
 
-    // Load UI Animations Load
-    // helpers.UI.cardShow()
-
     const event = _.debounce(function () {
-      $.event.trigger('trudesk:ready')
+      // Trigger custom event
+      const trudeskReadyEvent = new CustomEvent('trudesk:ready');
+      window.dispatchEvent(trudeskReadyEvent);
     }, 100)
 
     event()
   })
 
-  // Prepare our constiables
+  // Prepare our variables
   const History = window.History
-
   const document = window.document
 
   // Check to see if History.js is enabled for our Browser
@@ -64,225 +62,188 @@ function initAjaxify() {
   }
 
   // Wait for Document
-  $(function () {
-    // Prepare constiables
-    const contentSelector = '.wrapper > .ajaxyContent:first'
-    let $content = $(contentSelector).filter(':first')
-    const contentNode = $content.get(0)
-    const completedEventName = 'statechangecomplete'
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      // Prepare variables
+      const contentSelector = '.wrapper > .ajaxyContent'
+      const contentElements = document.querySelectorAll(contentSelector);
+      const contentNode = contentElements[0] || null;
+      const completedEventName = 'statechangecomplete'
 
-    const $window = $(window)
-    const $body = $(document.body)
-    const rootUrl = History.getRootUrl()
+      const rootUrl = History.getRootUrl()
 
-    const scrollOptions = {
-      duration: 800,
-      easing: 'swing'
-    }
+      // HTML Helper
+      const documentHtml = function (html) {
+        // Prepare
+        const result = String(html)
+          .replace(/<!DOCTYPE[^>]*>/i, '')
+          .replace(/<(html|head|body|title|meta|script)([\s>])/gi, '<div class="document-$1"$2')
+          .replace(/<\/(html|head|body|title|meta|script)>/gi, '</div>')
 
-    // Ensure Content
-    if ($content.length === 0) {
-      $content = $body
-    }
+        // Return trimmed result
+        return result.trim()
+      }
 
-    // Internal Helper
-    $.expr[':'].internal = function (obj) {
-      // Prepare
-      const $this = $(obj)
-      const url = $this.attr('href') || ''
-      const isInternalLink = url.substring(0, rootUrl.length) === rootUrl || url.indexOf(':') === -1
+      // Internal link checker
+      const isInternalLink = function (url) {
+        return url.substring(0, rootUrl.length) === rootUrl || url.indexOf(':') === -1
+      }
 
-      // Ignore or Keep
-      return isInternalLink
-    }
+      // Ajaxify Helper
+      const ajaxifyElement = function (element) {
+        const links = element.querySelectorAll('a:not(.no-ajaxy):not(.ajaxify-bound):not(.search-choice-close)')
+        
+        links.forEach(function (link) {
+          const url = link.getAttribute('href') || ''
+          if (isInternalLink(url)) {
+            link.classList.add('ajaxify-bound')
+            
+            link.addEventListener('click', function (event) {
+              const title = link.getAttribute('title') || null
 
-    // HTML Helper
-    const documentHtml = function (html) {
-      // Prepare
-      const result = String(html)
-        .replace(/<!DOCTYPE[^>]*>/i, '')
-        .replace(/<(html|head|body|title|meta|script)([\s>])/gi, '<div class="document-$1"$2')
-        .replace(/<\/(html|head|body|title|meta|script)>/gi, '</div>')
+              // Continue as normal for cmd clicks etc
+              if (event.which === 2 || event.metaKey) return true
 
-      // Return
-      return $.trim(result)
-    }
-
-    // Ajaxify Helper
-    $.fn.ajaxify = function () {
-      // Prepare
-      const $this = $(this)
-
-      // Ajaxify
-      $this
-        .find('a:internal:not(.no-ajaxy):not(.ajaxify-bound):not(.search-choice-close)')
-        .addClass('ajaxify-bound')
-        .on('click', function (event) {
-          // Prepare
-          const $this = $(this)
-
-          const url = $this.attr('href')
-
-          const title = $this.attr('title') || null
-
-          // Continue as normal for cmd clicks etc
-          if (event.which === 2 || event.metaKey) return true
-
-          // Ajaxify this link
-          History.pushState(null, title, url)
-          event.preventDefault()
-          return false
+              // Ajaxify this link
+              History.pushState(null, title, url)
+              event.preventDefault()
+              return false
+            })
+          }
         })
+      }
 
-      // Chain
-      return $this
-    }
+      // Initialize ajaxify on body
+      ajaxifyElement(document.body)
 
-    // Ajaxify our Internal Links
-    $body.ajaxify()
+      // Hook into State Changes
+      window.addEventListener('statechange', function () {
+        // Prepare variables
+        const State = History.getState()
+        const url = State.url
+        const relativeUrl = url.replace(rootUrl, '')
 
-    // Hook into State Changes
-    $window.bind('statechange', function () {
-      // Prepare constiables
-      const State = History.getState()
-      const url = State.url
-      const relativeUrl = url.replace(rootUrl, '')
+        // Set Loading
+        document.body.classList.add('loading')
 
-      // Set Loading
-      $body.addClass('loading')
+        // Ajax Request the Traditional Page
+        fetch(url)
+          .then(response => response.text())
+          .then(data => {
+            // Prepare
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = documentHtml(data)
+            
+            const dataBody = tempDiv.querySelector('.document-body')
+            const dataContent = dataBody ? dataBody.querySelector(contentSelector) : null
 
-      // Start Fade Out
-      // Animating to opacity to 0 still keeps the element's height intact
-      // Which prevents that annoying pop bang issue when loading in new content
-      // $content.animate({opacity:0},100);
+            const scripts = dataContent ? dataContent.querySelectorAll('.document-script') : []
 
-      // Ajax Request the Traditional Page
-
-      $.ajax({
-        url: url,
-        success: function (data) {
-          // Prepare
-          const $data = $(documentHtml(data))
-          const $dataBody = $data.find('.document-body:first')
-          const $dataContent = $dataBody.find(contentSelector).filter(':first')
-
-          const $scripts = $dataContent.find('.document-script')
-          if ($scripts.length) {
-            $scripts.detach()
-          }
-
-          // Fetch the content
-          const contentHtml = $dataContent.html()
-          if (!contentHtml) {
-            document.location.href = url
-            return false
-          }
-
-          // This fixes showing the overflow on scrollers when removing them before page load
-          $('#page-content').animate({ opacity: 0 }, 0, function () {
-            // Memory Leak Fix- Remove events before destroying content;
-            let $oldContent = $('#page-content')
-            $oldContent.find('*').off('click click.chosen mouseup mousemove mousedown change')
-
-            // Manually Unload React components from renders
-            if (document.getElementById('dashboard-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('dashboard-container'))
-            if (document.getElementById('tickets-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('tickets-container'))
-            if (document.getElementById('single-ticket-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('single-ticket-container'))
-            if (document.getElementById('settings-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('settings-container'))
-            if (document.getElementById('profile-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('profile-container'))
-            if (document.getElementById('accounts-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('accounts-container'))
-            if (document.getElementById('accounts-import-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('accounts-import-container'))
-            if (document.getElementById('groups-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('groups-container'))
-            if (document.getElementById('teams-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('teams-container'))
-            if (document.getElementById('departments-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('departments-container'))
-            if (document.getElementById('notices-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('notices-container'))
-            if (document.getElementById('messages-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('messages-container'))
-            if (document.getElementById('reports-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('reports-container'))
-            if (document.getElementById('about-container'))
-              window.react.dom.unmountComponentAtNode(document.getElementById('about-container'))
-
-            // if (document.getElementById('modal-wrapper'))
-            //   window.react.dom.unmountComponentAtNode(document.getElementById('modal-wrapper'))
-
-            // Update the content
-            $content.stop(true, true)
-            $oldContent.find('*').remove()
-            $oldContent = null
-
-            $content
-              .html(contentHtml)
-              .ajaxify()
-              .css('opacity', 1)
-              .show() /* you could fade in here if you'd like */
-
-            // Update the title
-            document.title = $data.find('.document-title:first').text()
-            try {
-              document.getElementsByTagName('title')[0].innerHTML = document.title
-                .replace('<', '&lt;')
-                .replace('>', '&gt;')
-                .replace(' & ', ' &amp; ')
-            } catch (Exception) {
-              // Should be an empty block
-              console.log('[AJAXIFY] ERROR: SHOULD HAVE NOT HAPPENED!')
+            // Fetch the content
+            const contentHtml = dataContent ? dataContent.innerHTML : ''
+            if (!contentHtml) {
+              document.location.href = url
+              return false
             }
 
-            // Add the scripts
-            $scripts.each(function () {
-              const $script = $(this)
-              const scriptText = $script.text()
-              const scriptNode = document.createElement('script')
-              if ($script.attr('src')) {
-                if (!$script[0].async) scriptNode.async = false
-                scriptNode.src = $script.attr('src')
+            // This fixes showing the overflow on scrollers when removing them before page load
+            const pageContent = document.getElementById('page-content')
+            if (pageContent) {
+              pageContent.style.opacity = '0'
+              
+              // Memory Leak Fix- Remove events before destroying content;
+              const allElements = pageContent.querySelectorAll('*')
+              allElements.forEach(function (el) {
+                // Remove all event listeners by cloning the element
+                const newEl = el.cloneNode(true)
+                el.parentNode.replaceChild(newEl, el)
+              })
+
+              // Manually Unload React components from renders
+              const containers = [
+                'dashboard-container', 'tickets-container', 'single-ticket-container',
+                'settings-container', 'profile-container', 'accounts-container',
+                'accounts-import-container', 'groups-container', 'teams-container',
+                'departments-container', 'notices-container', 'messages-container',
+                'reports-container', 'about-container'
+              ]
+
+              containers.forEach(function (containerId) {
+                const container = document.getElementById(containerId)
+                if (container && window.react && window.react.dom) {
+                  window.react.dom.unmountComponentAtNode(container)
+                }
+              })
+
+              // Update the content
+              pageContent.innerHTML = contentHtml
+              pageContent.style.opacity = '1'
+              pageContent.style.display = 'block'
+
+              // Re-ajaxify the new content
+              ajaxifyElement(pageContent)
+
+              // Update the title
+              const titleElement = tempDiv.querySelector('.document-title')
+              if (titleElement) {
+                document.title = titleElement.textContent
+                try {
+                  const titleTag = document.getElementsByTagName('title')[0]
+                  if (titleTag) {
+                    titleTag.innerHTML = document.title
+                      .replace('<', '&lt;')
+                      .replace('>', '&gt;')
+                      .replace(' & ', ' &amp; ')
+                  }
+                } catch (Exception) {
+                  console.log('[AJAXIFY] ERROR: SHOULD HAVE NOT HAPPENED!')
+                }
               }
-              scriptNode.appendChild(document.createTextNode(scriptText))
-              contentNode.appendChild(scriptNode)
-            })
 
-            // Complete the change
-            if ($body.ScrollTo || false)
-              $body.ScrollTo(scrollOptions) /* http://balupton.com/projects/jquery-scrollto */
-            $body.removeClass('loading')
-            $window.trigger(completedEventName)
+              // Add the scripts
+              scripts.forEach(function (script) {
+                const scriptText = script.textContent
+                const scriptNode = document.createElement('script')
+                const src = script.getAttribute('src')
+                if (src) {
+                  scriptNode.async = false
+                  scriptNode.src = src
+                }
+                scriptNode.appendChild(document.createTextNode(scriptText))
+                if (contentNode) {
+                  contentNode.appendChild(scriptNode)
+                }
+              })
 
-            // Inform Google Analytics of the change
-            if (typeof window._gaq !== 'undefined') {
-              window._gaq.push(['_trackPageview', relativeUrl])
+              // Complete the change
+              document.body.classList.remove('loading')
+              window.dispatchEvent(new CustomEvent(completedEventName))
+
+              // Inform Google Analytics of the change
+              if (typeof window._gaq !== 'undefined') {
+                window._gaq.push(['_trackPageview', relativeUrl])
+              }
             }
           })
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          document.location.href = url
-          console.log('[trudesk:ajaxify:Load] - Error Loading Document!!!')
-          console.error(errorThrown)
-          return false
-        }
-      }) // end ajax
-    }) // end onStateChange
-  }) // end onDomLoad
-} // end initAjaxify
-
-// Initialize ajaxify
-initAjaxify()
+          .catch(error => {
+            document.location.href = url
+            console.log('[trudesk:ajaxify:Load] - Error Loading Document!!!')
+            console.error(error)
+            return false
+          })
+      })
+    })
+  } else {
+    // Document already loaded - initialize immediately
+    initAjaxify()
+  }
+}
 
 // ES6 export
 export default {
   init: function() {
     // Initialize ajaxify functionality
+    initAjaxify()
     console.log('Ajaxify initialized')
   }
 }
