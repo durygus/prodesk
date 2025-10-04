@@ -323,92 +323,92 @@ define('modules/chat', ['jquery', 'underscore', 'moment', 'modules/helpers', 'ui
       
       function onTextareaKeyDown(e) {
         if (e.keyCode === 13) {
-        return
+          return
+        }
+
+        var chatBox = e.target.closest('.chat-box')
+        var cid = chatBox ? chatBox.getAttribute('data-conversation-id') : null
+        var user = chatBox ? chatBox.getAttribute('data-chat-userid') : null
+
+        if (!cid || !user) {
+          console.log('Invalid Conversation ID or User ID')
+          return
+        }
+
+        chatClient.startTyping(cid, user)
       }
 
-      var self = $(this)
-      var cid = self
-        .parent()
-        .parent()
-        .attr('data-conversation-id')
-      var user = self
-        .parent()
-        .parent()
-        .attr('data-chat-userid')
+    if (textarea && typeof textarea.autogrow === 'function') {
+      textarea.autogrow({
+        postGrowCallback: chatBoxTextAreaGrowCallback,
+        enterPressed: function (self, v) {
+          var chatBox = self.closest('.chat-box')
+          var messages = chatBox ? chatBox.querySelector('.chat-box-messages') : null
+          var cid = chatBox ? chatBox.getAttribute('data-conversation-id') : null
+          var userId = chatBox ? chatBox.getAttribute('data-chat-userid') : null
+          if (messages) helpers.scrollToBottom(messages)
+          if (v.length < 1) return
 
-      if (cid === undefined || user === undefined) {
-        console.log('Invalid Conversation ID or User ID')
-        return
+          // Send Message
+          chatClient.sendChatMessage(cid, userId, v, function () {
+            clearTimeout(typingTimeout[cid])
+            stopTyping(cid, userId)
+          })
+        }
+      })
+    }
+
+    if (chatBoxText) {
+      chatBoxText.removeEventListener('click', onChatBoxTextClick)
+      chatBoxText.addEventListener('click', onChatBoxTextClick)
+      
+      function onChatBoxTextClick(e) {
+        var textarea = e.currentTarget.querySelector('textarea')
+        if (textarea && document.activeElement === textarea) {
+          e.stopPropagation()
+          return false
+        }
+
+        if (textarea) {
+          textarea.focus()
+          var val = textarea.value
+          textarea.value = ''
+          textarea.value = val
+        }
       }
+    }
 
-      chatClient.startTyping(cid, user)
-    })
+    if (chatCloseButton) {
+      chatCloseButton.removeEventListener('click', onChatCloseClick)
+      chatCloseButton.addEventListener('click', onChatCloseClick)
+      
+      function onChatCloseClick(e) {
+        e.preventDefault()
+        var chatBoxPosition = e.currentTarget.closest('.chat-box[data-chat-userid]')
+        if (chatBoxPosition && chatBoxPosition.parentNode) {
+          chatBoxPosition.parentNode.removeChild(chatBoxPosition)
+        }
 
-    $textarea.autogrow({
-      postGrowCallback: chatBoxTextAreaGrowCallback,
-      enterPressed: function (self, v) {
-        var messages = self.parent().siblings('.chat-box-messages')
-        var cid = self
-          .parent()
-          .parent()
-          .attr('data-conversation-id')
-        var userId = self.parents('.chat-box').attr('data-chat-userid')
-        helpers.scrollToBottom(messages)
-        if (v.length < 1) return
-
-        // Send Message
-        chatClient.sendChatMessage(cid, userId, v, function () {
-          clearTimeout(typingTimeout[cid])
-          stopTyping(cid, userId)
+        var loggedInAccountId = loggedInAccount._id
+        var cid = e.currentTarget.closest('.chat-box[data-conversation-id]').getAttribute('data-conversation-id')
+        socket.emit('saveChatWindow', {
+          userId: loggedInAccountId,
+          convoId: cid,
+          remove: true
         })
       }
-    })
+    }
 
-    $chatBoxText.off('click')
-    $chatBoxText.click(function (e) {
-      if (
-        $(this)
-          .children('textarea')
-          .is(':focus')
-      ) {
-        e.stopPropagation()
-        return false
-      }
-
-      $(this)
-        .children('textarea')
-        .focus()
-      var val = $(this)
-        .children('textarea')
-        .val()
-      $(this)
-        .children('textarea')
-        .val('')
-        .val(val)
-    })
-
-    $chatCloseButton.off('click')
-    $chatCloseButton.click(function (e) {
-      e.preventDefault()
-      $(this)
-        .parents('.chat-box[data-chat-userid]')
-        .parent()
-        .remove()
-
-      var $loggedInAccountId = loggedInAccount._id
-      var cid = $chatCloseButton.parents('.chat-box[data-conversation-id]').attr('data-conversation-id')
-      socket.emit('saveChatWindow', {
-        userId: $loggedInAccountId,
-        convoId: cid,
-        remove: true
-      })
-    })
-
-    $chatTitleBar.off('click')
-    $chatTitleBar.click(function () {
-      var p = $(this).parents('.chat-box-position')
-      if (p.css('top') === '-280px') {
-        p.animate(
+    if (chatTitleBar) {
+      chatTitleBar.removeEventListener('click', onChatTitleBarClick)
+      chatTitleBar.addEventListener('click', onChatTitleBarClick)
+      
+      function onChatTitleBarClick() {
+        var p = this.closest('.chat-box-position')
+        if (p && p.style.top === '-280px') {
+          // Simple animation using CSS transitions
+          p.style.transition = 'top 0.3s ease'
+          p.style.top = '0px'
           {
             top: -29
           },
