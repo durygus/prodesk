@@ -211,6 +211,13 @@ ssh $SERVER "
 # Запускаем Herzen Core автоматически
 echo -e "${YELLOW}🚀 Запускаем Herzen Core...${NC}"
 ssh $SERVER "
+  cd $DEPLOY_PATH
+  
+  # Сначала запускаем контейнеры напрямую для проверки
+  echo 'Запускаем Docker контейнеры...'
+  echo '$SUDO_PASSWORD' | sudo -S docker-compose -f docker-compose.prod.yml up -d
+  
+  # Затем запускаем systemd сервис
   echo '$SUDO_PASSWORD' | sudo -S systemctl start herzen
   echo '$SUDO_PASSWORD' | sudo -S systemctl enable herzen
   echo 'Herzen Core запущен'
