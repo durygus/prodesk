@@ -183,6 +183,13 @@ EOF"
 # Создаем systemd сервис для управления
 echo -e "${YELLOW}🔧 Создаем systemd сервис...${NC}"
 ssh $SERVER "
+  # Проверяем пароль sudo еще раз
+  echo 'Проверяем пароль sudo для systemd...'
+  if ! echo '$SUDO_PASSWORD' | sudo -S -v; then
+    echo 'Ошибка: неправильный пароль sudo'
+    exit 1
+  fi
+  
   echo '$SUDO_PASSWORD' | sudo -S tee /etc/systemd/system/herzen.service > /dev/null << 'EOF'
 [Unit]
 Description=Herzen Core - Central Service for Ticket Management
@@ -204,6 +211,8 @@ EOF"
 # Перезагружаем systemd
 echo -e "${YELLOW}🔄 Перезагружаем systemd...${NC}"
 ssh $SERVER "
+  # Продлеваем время действия sudo
+  echo '$SUDO_PASSWORD' | sudo -S -v
   echo '$SUDO_PASSWORD' | sudo -S systemctl daemon-reload
   echo 'Systemd перезагружен'
 "
@@ -212,6 +221,9 @@ ssh $SERVER "
 echo -e "${YELLOW}🚀 Запускаем Herzen Core...${NC}"
 ssh $SERVER "
   cd $DEPLOY_PATH
+  
+  # Продлеваем время действия sudo
+  echo '$SUDO_PASSWORD' | sudo -S -v
   
   # Проверяем, что пользователь в группе docker
   echo 'Проверяем группу docker...'
