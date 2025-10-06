@@ -151,6 +151,10 @@ execute_remote "Удаление старой директории" "
 "
 
 execute_remote "Клонирование репозитория" "
+  echo 'Создаем директорию для клонирования...'
+  echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH
+  echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH
+  
   echo 'Клонируем репозиторий...'
   git clone https://github.com/durygus/prodesk.git $DEPLOY_PATH
   echo 'Клонирование завершено'
