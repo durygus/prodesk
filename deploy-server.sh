@@ -128,7 +128,7 @@ version: '3.8'
 services:
   # MongoDB
   mongo:
-    image: mongo:6.0
+    image: mongo:4.4
     container_name: herzen-mongo
     restart: unless-stopped
     environment:
