@@ -101,7 +101,7 @@ ssh $SERVER "
   # Создаем директорию для клонирования
   echo 'Создаем директорию для клонирования...'
   echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH
-  echo '$SUDO_PASSWORD' | sudo -S chown $(whoami):$(whoami) $DEPLOY_PATH
+  echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH
   
   # Клонируем репозиторий
   echo 'Клонируем репозиторий...'
@@ -212,6 +212,15 @@ ssh $SERVER "
 echo -e "${YELLOW}🚀 Запускаем Herzen Core...${NC}"
 ssh $SERVER "
   cd $DEPLOY_PATH
+  
+  # Проверяем, что пользователь в группе docker
+  echo 'Проверяем группу docker...'
+  if ! groups \$(whoami) | grep -q docker; then
+    echo 'Добавляем пользователя в группу docker...'
+    echo '$SUDO_PASSWORD' | sudo -S usermod -aG docker \$(whoami)
+    echo 'Перелогиниваемся для применения группы...'
+    newgrp docker
+  fi
   
   # Сначала запускаем контейнеры напрямую для проверки
   echo 'Запускаем Docker контейнеры...'
