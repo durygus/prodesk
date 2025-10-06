@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Параметры
 SERVER=${1:-"user@your-server.com"}
-DEPLOY_PATH=${2:-"/opt/herzen"}
+DEPLOY_PATH=${2:-"/opt/herzen/core"}
 APP_NAME="herzen"
 
 echo -e "${GREEN}🚀 Развертываем Herzen Core на Ubuntu сервере${NC}"
@@ -85,13 +85,41 @@ ssh $SERVER "
 # Клонируем Git репозиторий на сервере
 echo -e "${YELLOW}📦 Клонируем Git репозиторий на сервере...${NC}"
 ssh $SERVER "
+  # Проверяем, что Git установлен
+  if ! command -v git &> /dev/null; then
+    echo 'Git не установлен, устанавливаем...'
+    echo '$SUDO_PASSWORD' | sudo -S DEBIAN_FRONTEND=noninteractive apt install -y git
+  fi
+  
   # Удаляем директорию если существует
   rm -rf $DEPLOY_PATH
   
-  # Клонируем репозиторий
-  git clone https://github.com/durygus/prodesk.git $DEPLOY_PATH
+  # Создаем родительскую директорию если не существует
+  echo '$SUDO_PASSWORD' | sudo -S mkdir -p $(dirname $DEPLOY_PATH)
+  echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $(dirname $DEPLOY_PATH)
   
-  echo 'Git репозиторий клонирован успешно'
+  # Проверяем подключение к GitHub
+  echo 'Проверяем подключение к GitHub...'
+  if ! curl -s --connect-timeout 10 https://github.com > /dev/null; then
+    echo 'Ошибка: нет подключения к GitHub'
+    exit 1
+  fi
+  
+  # Клонируем репозиторий
+  echo 'Клонируем репозиторий...'
+  if ! git clone https://github.com/durygus/prodesk.git $DEPLOY_PATH; then
+    echo 'Ошибка при клонировании репозитория'
+    exit 1
+  fi
+  
+  # Проверяем, что клонирование прошло успешно
+  if [ -d \"$DEPLOY_PATH\" ] && [ -f \"$DEPLOY_PATH/package.json\" ]; then
+    echo 'Git репозиторий клонирован успешно'
+    ls -la $DEPLOY_PATH
+  else
+    echo 'Ошибка: репозиторий не клонирован или файлы отсутствуют'
+    exit 1
+  fi
 "
 
 # Создаем production docker-compose файл на сервере
