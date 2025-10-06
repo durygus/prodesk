@@ -84,8 +84,8 @@ ssh $SERVER "
     echo '$SUDO_PASSWORD' | sudo -S DEBIAN_FRONTEND=noninteractive apt install -y git
   fi
   
-  # Удаляем директорию если существует
-  rm -rf $DEPLOY_PATH
+  # Удаляем директорию если существует с правами sudo
+  echo '$SUDO_PASSWORD' | sudo -S rm -rf $DEPLOY_PATH
   
   # Создаем родительскую директорию если не существует
   echo '$SUDO_PASSWORD' | sudo -S mkdir -p $(dirname $DEPLOY_PATH)
