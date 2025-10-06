@@ -88,6 +88,11 @@ ssh $SERVER "
   # Удаляем директорию если существует
   rm -rf $DEPLOY_PATH
   
+  # Создаем директорию для клонирования
+  echo 'Создаем директорию для клонирования...'
+  echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH
+  echo '$SUDO_PASSWORD' | sudo -S chown $(whoami):$(whoami) $DEPLOY_PATH
+  
   # Клонируем репозиторий
   git clone https://github.com/durygus/prodesk.git $DEPLOY_PATH
   
