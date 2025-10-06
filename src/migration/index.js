@@ -368,7 +368,7 @@ migrations.run = function (callback) {
         })
       },
       function (next) {
-        if (semver.satisfies(semver.coerce(databaseVersion).version, '<1.0.11')) {
+        if (databaseVersion && semver.satisfies(semver.coerce(databaseVersion).version, '<1.0.11')) {
           async.parallel(
             [
               function (done) {
@@ -385,7 +385,7 @@ migrations.run = function (callback) {
         }
       },
       function (next) {
-        if (semver.satisfies(semver.coerce(databaseVersion).version, '<1.2.8')) {
+        if (databaseVersion && semver.satisfies(semver.coerce(databaseVersion).version, '<1.2.8')) {
           performBackup(databaseVersion, function (err) {
             if (err) return next(err)
 
