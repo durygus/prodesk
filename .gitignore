@@ -71,8 +71,22 @@ stats\.json
 dist/
 *.heapsnapshot
 
-# Herzen Core - данные включены в Git для синхронизации
-# data/mongo/ - MongoDB данные
-# data/app/ - данные приложения
-# logs/ - логи приложения
-# public/uploads/ - загруженные файлы
+# Herzen Core - исключения для данных и логов
+data/
+logs/
+*.log
+*.lock
+
+# MongoDB файлы
+*.wt
+*.turtle
+*diagnostic.data*
+*WiredTiger*
+*_mdb_catalog*
+*sizeStorer*
+*journal*
+*mongod.lock*
+
+# Временные файлы
+*.tmp
+*.temp
