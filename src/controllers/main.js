@@ -24,9 +24,9 @@ const RateLimiterMemory = require('rate-limiter-flexible').RateLimiterMemory
 
 const limiterSlowBruteByIP = new RateLimiterMemory({
   keyPrefix: 'login_fail_ip_per_day',
-  points: 15,
+  points: 100,
   duration: 60 * 60 * 24,
-  blockDuration: 60 * 60
+  blockDuration: 30 * 60
 })
 
 const mainController = {}

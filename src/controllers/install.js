@@ -95,11 +95,16 @@ installController.existingdb = function (req, res) {
   const data = req.body
 
   // Mongo
-  const host = data.host
+  let host = data.host
   const port = data.port
   const database = data.database
   const username = data.username
   const password = data.password
+  
+  // В Docker режиме используем имя сервиса вместо localhost
+  if (process.env.TRUDESK_DOCKER && host === 'localhost') {
+    host = 'mongo'
+  }
 
   // Write Configfile
   const fs = require('fs')
@@ -144,11 +149,16 @@ installController.install = function (req, res) {
   const data = req.body
 
   // Mongo
-  const host = data['mongo[host]']
+  let host = data['mongo[host]']
   const port = data['mongo[port]']
   const database = data['mongo[database]']
   const username = data['mongo[username]']
   const password = data['mongo[password]']
+  
+  // В Docker режиме используем имя сервиса вместо localhost
+  if (process.env.TRUDESK_DOCKER && host === 'localhost') {
+    host = 'mongo'
+  }
 
   // ElasticSearch
   let eEnabled = data['elastic[enable]']
