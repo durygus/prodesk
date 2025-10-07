@@ -16,13 +16,14 @@ NC='\033[0m' # No Color
 SERVER=${SERVER:-"durygus@188.130.234.42"}
 SERVER_PROJECT_PATH="/opt/herzen/core"
 LOCAL_DATA_PATH="./data"
+LOCAL_MONGO_PATH="./data/mongodb"
 
 case "${1:-help}" in
   to-server)
     echo -e "${GREEN}📤 Синхронизируем данные с локальной машины на сервер...${NC}"
     
     # Создаем директории на сервере
-    ssh $SERVER "mkdir -p $SERVER_PROJECT_PATH/data/mongo $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads"
+    ssh $SERVER "mkdir -p $SERVER_PROJECT_PATH/data/mongodb $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads"
     
     # Останавливаем MongoDB для безопасной синхронизации
     echo -e "${YELLOW}⏸️  Останавливаем MongoDB для безопасной синхронизации...${NC}"
@@ -33,13 +34,13 @@ case "${1:-help}" in
     
     # Универсальное решение: используем временный Docker контейнер для управления правами
     echo -e "${BLUE}🔧 Очищаем папку MongoDB через Docker...${NC}"
-    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true; chown 1000:1000 /data; chmod 755 /data'"
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongodb:/data alpine sh -c 'rm -rf /data/* /data/.* 2>/dev/null || true; chown 1000:1000 /data; chmod 755 /data'"
     
-    rsync -avz --delete $LOCAL_DATA_PATH/mongo/ $SERVER:$SERVER_PROJECT_PATH/data/mongo/
+    rsync -avz --delete $LOCAL_MONGO_PATH/ $SERVER:$SERVER_PROJECT_PATH/data/mongodb/
     
     # Устанавливаем правильные права для MongoDB через Docker контейнер
     echo -e "${BLUE}🔧 Устанавливаем права MongoDB через Docker...${NC}"
-    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chown -R 999:999 /data'" 2>/dev/null || true
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongodb:/data alpine sh -c 'chown -R 999:999 /data'" 2>/dev/null || true
     
     # Запускаем MongoDB обратно
     echo -e "${YELLOW}▶️  Запускаем MongoDB...${NC}"
@@ -68,7 +69,7 @@ case "${1:-help}" in
     echo -e "${GREEN}📥 Синхронизируем данные с сервера на локальную машину...${NC}"
     
     # Создаем локальные директории
-    mkdir -p $LOCAL_DATA_PATH/mongo $LOCAL_DATA_PATH/app logs public/uploads
+    mkdir -p $LOCAL_MONGO_PATH $LOCAL_DATA_PATH/app logs public/uploads
     
     # Останавливаем MongoDB на сервере для безопасного чтения
     echo -e "${YELLOW}⏸️  Останавливаем MongoDB на сервере для безопасного чтения...${NC}"
@@ -79,16 +80,16 @@ case "${1:-help}" in
     
     # Универсальное решение: делаем файлы читаемыми через Docker
     echo -e "${BLUE}🔧 Делаем файлы читаемыми через Docker...${NC}"
-    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chmod -R 644 /data/*; chmod 755 /data/*/'" 2>/dev/null || true
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongodb:/data alpine sh -c 'chmod -R 644 /data/*; chmod 755 /data/*/'" 2>/dev/null || true
     
     # Создаём локальную папку если не существует
-    mkdir -p $LOCAL_DATA_PATH/mongo/
+    mkdir -p $LOCAL_MONGO_PATH/
     
-    rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/data/mongo/ $LOCAL_DATA_PATH/mongo/
+    rsync -avz --delete $SERVER:$SERVER_PROJECT_PATH/data/mongodb/ $LOCAL_MONGO_PATH/
     
     # Возвращаем правильные права для MongoDB через Docker
     echo -e "${BLUE}🔧 Возвращаем права MongoDB через Docker...${NC}"
-    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongo:/data alpine sh -c 'chown -R 999:999 /data'" 2>/dev/null || true
+    ssh $SERVER "cd $SERVER_PROJECT_PATH && docker run --rm -v \$(pwd)/data/mongodb:/data alpine sh -c 'chown -R 999:999 /data'" 2>/dev/null || true
     
     # Запускаем MongoDB на сервере обратно
     echo -e "${YELLOW}▶️  Запускаем MongoDB на сервере...${NC}"

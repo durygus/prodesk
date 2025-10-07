@@ -15,7 +15,7 @@
 const async = require('async')
 const mongoose = require('mongoose')
 const winston = require('winston')
-const bcrypt = require('bcrypt')
+const crypto = require('crypto')
 const _ = require('lodash')
 const Chance = require('chance')
 const utils = require('../helpers/utils')
@@ -110,15 +110,13 @@ userSchema.pre('save', function (next) {
 
   if (user.password.toString().length > 255) user.password = utils.applyMaxTextLength(user.password)
 
-  bcrypt.genSalt(SALT_FACTOR, function (err, salt) {
+  // Используем нативный Node.js crypto.scrypt вместо bcrypt
+  const salt = crypto.randomBytes(16).toString('hex')
+  crypto.scrypt(user.password, salt, 64, (err, derivedKey) => {
     if (err) return next(err)
-
-    bcrypt.hash(user.password, salt, function (err, hash) {
-      if (err) return next(err)
-
-      user.password = hash
-      return next()
-    })
+    
+    user.password = salt + ':' + derivedKey.toString('hex')
+    return next()
   })
 })
 
@@ -263,7 +261,27 @@ userSchema.methods.softDelete = function (callback) {
 }
 
 userSchema.statics.validate = function (password, dbPass) {
-  return bcrypt.compareSync(password, dbPass)
+  // Проверяем, является ли это старым bcrypt хешем
+  if (dbPass.startsWith('$2')) {
+    // Это bcrypt хеш, используем fallback для совместимости
+    try {
+      const bcrypt = require('bcrypt')
+      return bcrypt.compareSync(password, dbPass)
+    } catch (err) {
+      return false
+    }
+  }
+  
+  // Это новый scrypt хеш в формате salt:hash
+  const [salt, hash] = dbPass.split(':')
+  if (!salt || !hash) return false
+  
+  try {
+    const derivedKey = crypto.scryptSync(password, salt, 64)
+    return derivedKey.toString('hex') === hash
+  } catch (err) {
+    return false
+  }
 }
 
 /**

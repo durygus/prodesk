@@ -97,6 +97,11 @@ ssh $SERVER "
   git clone https://github.com/durygus/prodesk.git $DEPLOY_PATH
   
   echo 'Git репозиторий клонирован успешно'
+  
+  # Создаем необходимые директории
+  echo 'Создаем директории для данных...'
+  mkdir -p data/mongodb data/app logs public/uploads
+  echo 'Директории созданы'
 "
 
 # Создаем production docker-compose файл на сервере
@@ -107,15 +112,11 @@ version: '3.8'
 services:
   # MongoDB
   mongo:
-    image: mongo:6.0
+    image: mongo:4.4
     container_name: herzen-mongo
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: herzen123
-      MONGO_INITDB_DATABASE: herzen
     volumes:
-      - mongo_data:/data/db
+      - ./data/mongodb:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - herzen-network
@@ -149,7 +150,6 @@ services:
       - herzen-network
 
 volumes:
-  mongo_data:
   herzen_data:
   herzen_logs:
   herzen_uploads:
