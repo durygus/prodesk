@@ -55,6 +55,7 @@ if (nconf.get('config')) {
 // Make sure we convert the .json file to .yml
 checkForOldConfig()
 
+// Проверяем наличие config.yml
 const configExists = fs.existsSync(configFile)
 
 function launchInstallServer () {
@@ -109,6 +110,8 @@ function checkForOldConfig () {
 function start () {
   if (!isDocker) loadConfig()
   if (isDocker) {
+    // Загружаем config.yml в Docker режиме тоже
+    loadConfig()
     // Load some defaults for JWT token that is missing when using docker
     const jwt = process.env.TRUDESK_JWTSECRET
     nconf.defaults({
