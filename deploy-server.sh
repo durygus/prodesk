@@ -93,8 +93,9 @@ ssh $SERVER "
     echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/data /tmp/herzen-backup/ 2>/dev/null || true
     echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/logs /tmp/herzen-backup/ 2>/dev/null || true
     echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/public/uploads /tmp/herzen-backup/ 2>/dev/null || true
-    # Удаляем всю директорию (код + данные) с правами sudo
-    echo '$SUDO_PASSWORD' | sudo -S rm -rf $DEPLOY_PATH
+    # Удаляем всю директорию (код + данные) через Docker
+    cd $(dirname $DEPLOY_PATH)
+    docker run --rm -v \$(pwd):/data alpine sh -c 'rm -rf /data/$(basename $DEPLOY_PATH)'
     echo 'Код удален, данные сохранены'
   fi
   
