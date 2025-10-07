@@ -7,7 +7,7 @@ services:
     container_name: herzen-mongo
     restart: unless-stopped
     volumes:
-      - mongo_data:/data/db
+      - ./data/mongodb:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
       - "27017:27017"
@@ -24,6 +24,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8118
+      TRUDESK_DOCKER: true
       TD_MONGODB_SERVER: mongo
       TD_MONGODB_PORT: 27017
       TD_MONGODB_DATABASE: herzen
@@ -38,7 +39,6 @@ services:
 
 
 volumes:
-  mongo_data:
   herzen_data:
   herzen_logs:
   herzen_uploads:

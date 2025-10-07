@@ -103,6 +103,11 @@ ssh $SERVER "
   echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH
   echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH
   
+  # Создаем директорию для клонирования
+  echo 'Создаем директорию для клонирования...'
+  echo '$SUDO_PASSWORD' | sudo -S mkdir -p $DEPLOY_PATH
+  echo '$SUDO_PASSWORD' | sudo -S chown \$(whoami):\$(whoami) $DEPLOY_PATH
+  
   # Клонируем репозиторий
   echo 'Клонируем репозиторий...'
   if ! git clone https://github.com/durygus/prodesk.git $DEPLOY_PATH; then
@@ -118,6 +123,11 @@ ssh $SERVER "
     echo 'Ошибка: репозиторий не клонирован или файлы отсутствуют'
     exit 1
   fi
+  
+  # Создаем необходимые директории
+  echo 'Создаем директории для данных...'
+  mkdir -p data/mongodb data/app logs public/uploads
+  echo 'Директории созданы'
 "
 
 # Создаем production docker-compose файл на сервере
@@ -131,12 +141,8 @@ services:
     image: mongo:4.4
     container_name: herzen-mongo
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: herzen123
-      MONGO_INITDB_DATABASE: herzen
     volumes:
-      - mongo_data:/data/db
+      - ./data/mongodb:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - herzen-network
@@ -174,7 +180,6 @@ services:
       - herzen-network
 
 volumes:
-  mongo_data:
   herzen_data:
   herzen_logs:
   herzen_uploads:
