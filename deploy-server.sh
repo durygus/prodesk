@@ -147,70 +147,9 @@ ssh $SERVER "
   fi
 "
 
-# Создаем production docker-compose файл на сервере
-echo -e "${YELLOW}⚙️ Создаем production конфигурацию...${NC}"
-ssh $SERVER "cd $DEPLOY_PATH && cat > docker-compose.prod.yml << 'EOF'
-version: '3.8'
-
-services:
-  # MongoDB
-  mongo:
-    image: mongo:4.4
-    container_name: herzen-mongo
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: herzen
-      MONGO_INITDB_ROOT_PASSWORD: Herzen345
-      MONGO_INITDB_DATABASE: herzen
-    volumes:
-      - ./data/mongodb:/data/db
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    networks:
-      - herzen-network
-
-  # Redis
-  redis:
-    image: redis:7-alpine
-    container_name: herzen-redis
-    restart: unless-stopped
-    networks:
-      - herzen-network
-
-  # Herzen Core приложение
-  herzen-core:
-    build: .
-    container_name: herzen-core
-    restart: unless-stopped
-    depends_on:
-      - mongo
-      - redis
-    environment:
-      NODE_ENV: production
-      PORT: 8118
-      TRUDESK_DOCKER: true
-      TD_MONGODB_SERVER: mongo
-      TD_MONGODB_PORT: 27017
-      TD_MONGODB_DATABASE: herzen
-      TD_MONGODB_USERNAME: herzen
-      TD_MONGODB_PASSWORD: Herzen345
-    ports:
-      - \"80:8118\"
-    volumes:
-      - herzen_data:/app/data
-      - herzen_logs:/app/logs
-      - herzen_uploads:/app/public/uploads
-    networks:
-      - herzen-network
-
-volumes:
-  herzen_data:
-  herzen_logs:
-  herzen_uploads:
-
-networks:
-  herzen-network:
-    driver: bridge
-EOF"
+# Проверяем что docker-compose.yml существует
+echo -e "${YELLOW}⚙️ Проверяем конфигурацию Docker...${NC}"
+ssh $SERVER "cd $DEPLOY_PATH && ls -la docker-compose.yml"
 
 # Создаем systemd сервис для управления
 echo -e "${YELLOW}🔧 Создаем systemd сервис...${NC}"
@@ -232,8 +171,8 @@ After=docker.service
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=$DEPLOY_PATH
-ExecStart=/usr/local/bin/docker-compose -f docker-compose.prod.yml up -d
-ExecStop=/usr/local/bin/docker-compose -f docker-compose.prod.yml down
+ExecStart=/usr/local/bin/docker-compose up -d
+ExecStop=/usr/local/bin/docker-compose down
 TimeoutStartSec=0
 
 [Install]
@@ -268,7 +207,7 @@ ssh $SERVER "
   
   # Сначала запускаем контейнеры напрямую для проверки
   echo 'Запускаем Docker контейнеры...'
-  echo '$SUDO_PASSWORD' | sudo -S docker-compose -f docker-compose.prod.yml up -d
+  echo '$SUDO_PASSWORD' | sudo -S docker-compose up -d
   
   # Затем запускаем systemd сервис
   echo '$SUDO_PASSWORD' | sudo -S systemctl start herzen
@@ -282,7 +221,7 @@ sleep 30
 
 # Проверяем статус
 echo -e "${YELLOW}🔍 Проверяем статус сервисов...${NC}"
-ssh $SERVER "cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml ps"
+ssh $SERVER "cd $DEPLOY_PATH && docker-compose ps"
 
 echo -e "${GREEN}✅ Развертывание и запуск завершены!${NC}"
 echo ""
@@ -295,12 +234,12 @@ echo "• Проверить статус:"
 echo "  ssh $SERVER 'sudo systemctl status herzen'"
 echo ""
 echo "• Просмотреть логи:"
-echo "  ssh $SERVER 'cd $DEPLOY_PATH && docker-compose -f docker-compose.prod.yml logs -f'"
+echo "  ssh $SERVER 'cd $DEPLOY_PATH && docker-compose logs -f'"
 echo ""
 echo "• Перезапустить:"
 echo "  ssh $SERVER 'sudo systemctl restart herzen'"
 echo ""
 echo "• Обновить код:"
-echo "  ssh $SERVER 'cd $DEPLOY_PATH && git pull && docker-compose -f docker-compose.prod.yml up -d'"
+echo "  ssh $SERVER 'cd $DEPLOY_PATH && git pull && docker-compose up -d'"
 echo ""
 echo -e "${GREEN}🎉 Herzen Core успешно развернут и запущен!${NC}"
