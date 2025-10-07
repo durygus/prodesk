@@ -93,7 +93,7 @@ ssh $SERVER "
     echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/data /tmp/herzen-backup/ 2>/dev/null || true
     echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/logs /tmp/herzen-backup/ 2>/dev/null || true
     echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/public/uploads /tmp/herzen-backup/ 2>/dev/null || true
-    # Удаляем всю директорию (код + данные)
+    # Удаляем всю директорию (код + данные) с правами sudo
     echo '$SUDO_PASSWORD' | sudo -S rm -rf $DEPLOY_PATH
     echo 'Код удален, данные сохранены'
   fi
