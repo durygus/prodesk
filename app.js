@@ -71,7 +71,7 @@ function launchInstallServer () {
   })
 }
 
-if (nconf.get('install') || (!configExists && !isDocker)) {
+if (nconf.get('install') || !configExists) {
   launchInstallServer()
 }
 
@@ -117,6 +117,12 @@ function start () {
         expires: 900
       }
     })
+    
+    // В Docker режиме тоже проверяем наличие config.yml
+    if (!configExists) {
+      winston.info('Config file not found in Docker mode, launching install server...')
+      return launchInstallServer()
+    }
   }
 
   const _db = require('./src/database')
@@ -188,6 +194,10 @@ function launchServer (db) {
           })
         },
         function (next) {
+          // Пропускаем миграции в режиме установки
+          if (nconf.get('install') || !configExists) {
+            return next()
+          }
           require('./src/migration').run(next)
         },
         function (next) {
@@ -238,20 +248,7 @@ function dbCallback (err, db) {
     return start()
   }
 
-  if (isDocker) {
-    const s = require('./src/models/setting')
-    s.getSettingByName('installed', function (err, installed) {
-      if (err) return start()
-
-      if (!installed || !installed.value) {
-        return launchInstallServer()
-      } else {
-        return launchServer(db)
-      }
-    })
-  } else {
-    return launchServer(db)
-  }
+  return launchServer(db)
 }
 
-if (!nconf.get('install') && (configExists || isDocker)) start()
+if (!nconf.get('install') && configExists) start()

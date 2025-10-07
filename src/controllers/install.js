@@ -472,7 +472,6 @@ installController.install = function (req, res) {
         )
       },
       function (next) {
-        if (!process.env.TRUDESK_DOCKER) return next()
         const S = require('../models/setting')
         const installed = new S({
           name: 'installed',

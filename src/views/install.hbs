@@ -457,13 +457,7 @@
                 }
             });
 
-            var mongoConnection = {{#if isDocker}}{
-                host: 'mongo',
-                port: '27017',
-                username: '',
-                password: '',
-                database: 'herzen'
-            }{{else}}undefined{{/if}};
+            var mongoConnection = {};
             var elasticConnection = {{#if isDocker}}{
                 enable: false
             }{{else}}undefined{{/if}};
