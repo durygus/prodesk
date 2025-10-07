@@ -23,7 +23,7 @@ case "${1:-help}" in
     echo -e "${GREEN}📤 Синхронизируем данные с локальной машины на сервер...${NC}"
     
     # Создаем директории на сервере
-    ssh $SERVER "mkdir -p $SERVER_PROJECT_PATH/data/mongodb $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads"
+    ssh $SERVER "sudo mkdir -p $SERVER_PROJECT_PATH/data/mongodb $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads && sudo chown -R \$(whoami):\$(whoami) $SERVER_PROJECT_PATH/data $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public"
     
     # Останавливаем MongoDB для безопасной синхронизации
     echo -e "${YELLOW}⏸️  Останавливаем MongoDB для безопасной синхронизации...${NC}"
