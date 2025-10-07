@@ -84,8 +84,19 @@ ssh $SERVER "
     echo '$SUDO_PASSWORD' | sudo -S DEBIAN_FRONTEND=noninteractive apt install -y git
   fi
   
-  # Удаляем директорию если существует с правами sudo
-  echo '$SUDO_PASSWORD' | sudo -S rm -rf $DEPLOY_PATH
+  # Удаляем только код, сохраняем данные
+  if [ -d "$DEPLOY_PATH" ]; then
+    echo 'Сохраняем данные и удаляем только код...'
+    # Создаем временную папку для данных
+    echo '$SUDO_PASSWORD' | sudo -S mkdir -p /tmp/herzen-backup
+    # Копируем данные
+    echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/data /tmp/herzen-backup/ 2>/dev/null || true
+    echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/logs /tmp/herzen-backup/ 2>/dev/null || true
+    echo '$SUDO_PASSWORD' | sudo -S cp -r $DEPLOY_PATH/public/uploads /tmp/herzen-backup/ 2>/dev/null || true
+    # Удаляем только код
+    echo '$SUDO_PASSWORD' | sudo -S rm -rf $DEPLOY_PATH
+    echo 'Код удален, данные сохранены'
+  fi
   
   # Создаем родительскую директорию если не существует
   echo '$SUDO_PASSWORD' | sudo -S mkdir -p $(dirname $DEPLOY_PATH)
@@ -117,6 +128,21 @@ ssh $SERVER "
   else
     echo 'Ошибка: репозиторий не клонирован или файлы отсутствуют'
     exit 1
+  fi
+  
+  # Создаем необходимые директории
+  echo 'Создаем директории для данных...'
+  mkdir -p data/mongodb data/app logs public/uploads
+  echo 'Директории созданы'
+  
+  # Восстанавливаем данные если они были сохранены
+  if [ -d \"/tmp/herzen-backup\" ]; then
+    echo 'Восстанавливаем сохраненные данные...'
+    echo '$SUDO_PASSWORD' | sudo -S cp -r /tmp/herzen-backup/data/* data/ 2>/dev/null || true
+    echo '$SUDO_PASSWORD' | sudo -S cp -r /tmp/herzen-backup/logs/* logs/ 2>/dev/null || true
+    echo '$SUDO_PASSWORD' | sudo -S cp -r /tmp/herzen-backup/uploads/* public/uploads/ 2>/dev/null || true
+    echo '$SUDO_PASSWORD' | sudo -S rm -rf /tmp/herzen-backup
+    echo 'Данные восстановлены'
   fi
 "
 
