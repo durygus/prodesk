@@ -18,12 +18,27 @@ SERVER_PROJECT_PATH="/opt/herzen/core"
 LOCAL_DATA_PATH="./data"
 LOCAL_MONGO_PATH="./data/mongodb"
 
+# Запрашиваем пароль sudo для операций на сервере
+if [[ "$1" == "to-server" || "$1" == "from-server" ]]; then
+  echo -e "${YELLOW}🔐 Введите пароль sudo для пользователя на сервере:${NC}"
+  read -s SUDO_PASSWORD
+  echo ""
+  
+  # Проверяем пароль sudo
+  echo -e "${YELLOW}🔍 Проверяем пароль sudo...${NC}"
+  if ! echo "$SUDO_PASSWORD" | ssh $SERVER "sudo -S echo 'Sudo пароль работает'" 2>/dev/null; then
+    echo -e "${RED}❌ Неверный пароль sudo${NC}"
+    exit 1
+  fi
+  echo -e "${GREEN}✅ Sudo пароль работает корректно${NC}"
+fi
+
 case "${1:-help}" in
   to-server)
     echo -e "${GREEN}📤 Синхронизируем данные с локальной машины на сервер...${NC}"
     
     # Создаем директории на сервере
-    ssh $SERVER "sudo mkdir -p $SERVER_PROJECT_PATH/data/mongodb $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads && sudo chown -R \$(whoami):\$(whoami) $SERVER_PROJECT_PATH/data $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public"
+    ssh $SERVER "echo '$SUDO_PASSWORD' | sudo -S mkdir -p $SERVER_PROJECT_PATH/data/mongodb $SERVER_PROJECT_PATH/data/app $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public/uploads && echo '$SUDO_PASSWORD' | sudo -S chown -R \$(whoami):\$(whoami) $SERVER_PROJECT_PATH/data $SERVER_PROJECT_PATH/logs $SERVER_PROJECT_PATH/public"
     
     # Останавливаем MongoDB для безопасной синхронизации
     echo -e "${YELLOW}⏸️  Останавливаем MongoDB для безопасной синхронизации...${NC}"
