@@ -6,10 +6,6 @@ services:
     image: mongo:4.4
     container_name: herzen-mongo
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: herzen
-      MONGO_INITDB_ROOT_PASSWORD: Herzen345
-      MONGO_INITDB_DATABASE: herzen
     volumes:
       - ./data/mongodb:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
@@ -32,8 +28,6 @@ services:
       TD_MONGODB_SERVER: mongo
       TD_MONGODB_PORT: 27017
       TD_MONGODB_DATABASE: herzen
-      TD_MONGODB_USERNAME: herzen
-      TD_MONGODB_PASSWORD: Herzen345
     ports:
       - "8118:8118"
     volumes:
