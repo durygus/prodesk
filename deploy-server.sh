@@ -140,6 +140,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8118
+      TRUDESK_DOCKER: true
+      TD_MONGODB_SERVER: mongo
+      TD_MONGODB_PORT: 27017
+      TD_MONGODB_DATABASE: herzen
     ports:
       - \"80:8118\"
     volumes:
