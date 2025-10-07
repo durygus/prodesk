@@ -21,7 +21,6 @@ case "${1:-start}" in
     echo -e "${GREEN}✅ Сервисы запущены!${NC}"
     echo -e "${BLUE}📱 Приложение: http://localhost:8118${NC}"
     echo -e "${BLUE}🗄️  MongoDB: localhost:27017${NC}"
-    echo -e "${BLUE}🔴 Redis: localhost:6379${NC}"
     echo -e "${YELLOW}📋 Для просмотра логов: ./dev.sh logs${NC}"
     ;;
   
